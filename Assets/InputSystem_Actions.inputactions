@@ -72,7 +72,7 @@
                     "name": "Next",
                     "type": "Button",
                     "id": "b7230bb6-fc9b-4f52-8b25-f5e19cb2c2ba",
-                    "expectedControlType": "Button",
+                    "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
@@ -81,7 +81,7 @@
                     "name": "Sprint",
                     "type": "Button",
                     "id": "641cd816-40e6-41b4-8c3d-04687c349290",
-                    "expectedControlType": "Button",
+                    "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
@@ -570,13 +570,22 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "TouchPosition",
+                    "name": "TouchInfo",
                     "type": "Value",
-                    "id": "b2fbceca-9ec1-42c8-971b-aaca3b514b8c",
-                    "expectedControlType": "Vector2",
+                    "id": "b6117c45-06b5-487b-8ef0-25e9c9b12240",
+                    "expectedControlType": "Touch",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": true
+                },
+                {
+                    "name": "TouchAction",
+                    "type": "Button",
+                    "id": "f67b3083-c133-4e32-b0d4-55b3a4c64515",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -1000,23 +1009,23 @@
                 },
                 {
                     "name": "",
-                    "id": "89ec75b8-e586-4b7d-9344-24962078085a",
-                    "path": "<Mouse>/position",
+                    "id": "d3dad71b-06a8-4ac8-8e9f-cb87df338ad5",
+                    "path": "<Touchscreen>/primaryTouch",
                     "interactions": "",
                     "processors": "",
-                    "groups": ";Keyboard&Mouse",
-                    "action": "TouchPosition",
+                    "groups": ";Touch",
+                    "action": "TouchInfo",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
                 {
                     "name": "",
-                    "id": "2449e5c8-4212-4524-94b4-cb540b848194",
-                    "path": "<Touchscreen>/position",
+                    "id": "fe7c7f6a-f1f8-4d37-8567-b965b8d8228f",
+                    "path": "<Touchscreen>/Press",
                     "interactions": "",
                     "processors": "",
                     "groups": ";Touch",
-                    "action": "TouchPosition",
+                    "action": "TouchAction",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
