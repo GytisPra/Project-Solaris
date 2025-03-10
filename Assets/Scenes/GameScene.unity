@@ -263,8 +263,9 @@ GameObject:
   - component: {fileID: 519420032}
   - component: {fileID: 519420031}
   - component: {fileID: 519420029}
+  - component: {fileID: 519420033}
   m_Layer: 0
-  m_Name: GameCamera
+  m_Name: PlanetCamera
   m_TagString: MainCamera
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -337,13 +338,33 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 519420028}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: -10}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 2.5, y: 2.5, z: 2.5}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &519420033
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 519420028}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 89ece7ad6f2364b4989c97cde30bdbbf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  inputActionAsset: {fileID: -944628639613478452, guid: 3590b91b4603b465dbb4216d601bff33, type: 3}
+  sensitivity: 10
+  cameraDistance: 12
+  minVerticalAngle: -80
+  maxVerticalAngle: 80
+  planet: {fileID: 684018731}
+  planetCam: {fileID: 519420031}
+  rotationDrag: 0
 --- !u!1 &684018731 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 100000, guid: 1d1efd74961b744cca932e0880b5eb4d, type: 3}
@@ -370,21 +391,6 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 2.000001, y: 1.9903694, z: 2.0000005}
   m_Center: {x: -0.00000017881393, y: -0.000000059604645, z: 0.00000086426735}
---- !u!114 &684018737
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 684018731}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 89ece7ad6f2364b4989c97cde30bdbbf, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  inputActionAsset: {fileID: -944628639613478452, guid: 3590b91b4603b465dbb4216d601bff33, type: 3}
-  smoothSpeed: 5
-  sensitivity: 1.5
 --- !u!1 &711644897
 GameObject:
   m_ObjectHideFlags: 0
@@ -634,7 +640,7 @@ GameObject:
   - component: {fileID: 849906030}
   - component: {fileID: 849906029}
   m_Layer: 0
-  m_Name: GameObject
+  m_Name: MainMenuObject
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -738,9 +744,6 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 100000, guid: 1d1efd74961b744cca932e0880b5eb4d, type: 3}
       insertIndex: -1
       addedObject: {fileID: 684018736}
-    - targetCorrespondingSourceObject: {fileID: 100000, guid: 1d1efd74961b744cca932e0880b5eb4d, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 684018737}
   m_SourcePrefab: {fileID: 100100000, guid: 1d1efd74961b744cca932e0880b5eb4d, type: 3}
 --- !u!1 &1574126613
 GameObject:
@@ -922,9 +925,9 @@ Transform:
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
-  - {fileID: 519420032}
   - {fileID: 1978702513}
   - {fileID: 804912371}
   - {fileID: 1574126616}
   - {fileID: 849906030}
+  - {fileID: 519420032}
   - {fileID: 1337496054}
