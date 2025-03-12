@@ -6,12 +6,14 @@ using TouchPhase = UnityEngine.InputSystem.TouchPhase;
 public class PlanetInteraction : MonoBehaviour
 {
     public InputActionAsset inputActionAsset;
+    public LayerMask layerMask;
 
     // [SerializeField] private float rotationSpeed = 5f;
     // [SerializeField] private GameObject planet;
 
     private InputActionMap uiActionMap;
     private InputAction touch;
+    private InputAction interactionPosition;
     private InputAction click;
     // private Vector3 targetLookAt; // Target position to look at
     // private bool shouldRotate = false;
@@ -26,6 +28,9 @@ public class PlanetInteraction : MonoBehaviour
 
         touch = uiActionMap.FindAction("Touch", true);
         touch.Enable();
+
+        interactionPosition = uiActionMap.FindAction("InteractionPosition", true);
+        interactionPosition.Enable();
     }
 
     private void OnEnable()
@@ -38,29 +43,21 @@ public class PlanetInteraction : MonoBehaviour
         uiActionMap?.Disable();
         click?.Disable();
         touch?.Disable();
-    }
-
-    void Start()
-    {
-
+        interactionPosition?.Disable();
     }
     void Update()
     {
         TouchState touchState = touch.ReadValue<TouchState>();
 
-        if (click.triggered && touchState.phase == TouchPhase.Began)
+        if (click.triggered || touchState.phase == TouchPhase.Began)
         {
-            Ray ray = Camera.main.ScreenPointToRay(touchState.position);
+            Ray ray = Camera.main.ScreenPointToRay(interactionPosition.ReadValue<Vector2>());
 
-            if (Physics.Raycast(ray, out RaycastHit hit))
+            if (Physics.Raycast(ray, out RaycastHit hit, layerMask))
             {
                 Debug.Log("Clicked on: " + hit.collider.gameObject.name);
 
-                if (hit.collider.gameObject.name != gameObject.name)
-                {
-                    hit.collider.gameObject.GetComponent<Renderer>().material.color = Color.black;
-                }
-
+                hit.collider.gameObject.GetComponent<Renderer>().material.color = Color.black;
 
                 // targetLookAt = hit.point;
                 // shouldRotate = true;

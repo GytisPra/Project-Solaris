@@ -46,6 +46,7 @@ public class LoadLevelsOnPlanet : MonoBehaviour
 
         GameObject point = Instantiate(pointPrefab, position, Quaternion.identity);
         point.name = $"Level_{level.ID}";
+        point.layer = 6;
         point.transform.parent = transform;
         point.GetComponent<Renderer>().material.color = pointColor;
 
