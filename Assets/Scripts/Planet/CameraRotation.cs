@@ -21,6 +21,8 @@ public class CameraRotation : MonoBehaviour
     private float rotationVelocityY;
     private InputActionMap uiActionMap;
     private InputAction touch;
+    private InputAction click;
+    private InputAction mouseDelta;
 
     private void Awake()
     {
@@ -29,6 +31,12 @@ public class CameraRotation : MonoBehaviour
 
         touch = uiActionMap.FindAction("Touch", true);
         touch.Enable();
+
+        click = uiActionMap.FindAction("Click", true);
+        click.Enable();
+
+        mouseDelta = uiActionMap.FindAction("MouseDelta", true);
+        mouseDelta.Enable();
     }
 
     private void OnEnable()
@@ -60,9 +68,37 @@ public class CameraRotation : MonoBehaviour
         */
 
         TouchState touchState = touch.ReadValue<TouchState>();
+        Vector2 mouseDeltaDelta = mouseDelta.ReadValue<Vector2>();
 
+        if (click.ReadValue<float>() > 0)
+        {
+            if (mouseDeltaDelta.x != 0)
+            {
+                rotationVelocityY = mouseDeltaDelta.x * Time.deltaTime * sensitivity * 10;
+            }
+            else if (mouseDeltaDelta.x == 0 && rotationDrag > 0 && Mathf.Abs(rotationVelocityY) > 1e-2)
+            {
+                rotationVelocityY = Mathf.Lerp(rotationVelocityY, 0, Time.deltaTime * rotationDrag);
+            }
+            else if (rotationDrag > 0)
+            {
+                rotationVelocityY = 0;
+            }
 
-        if (touchState.isInProgress && touchState.isPrimaryTouch && touchState.phase != TouchPhase.Began) 
+            if (mouseDeltaDelta.y != 0)
+            {
+                rotationVelocityX = -mouseDeltaDelta.y * Time.deltaTime * sensitivity * 10;
+            }
+            else if (mouseDeltaDelta.y == 0 && rotationDrag > 0 && Mathf.Abs(rotationVelocityX) > 1e-2)
+            {
+                rotationVelocityX = Mathf.Lerp(rotationVelocityX, 0, Time.deltaTime * rotationDrag);
+            }
+            else if (rotationDrag > 0)
+            {
+                rotationVelocityX = 0;
+            }
+        }
+        else if (touchState.isInProgress && touchState.isPrimaryTouch && touchState.phase != TouchPhase.Began)
         {
             if (touchState.delta.x != 0)
             {

@@ -46,7 +46,6 @@ public class PlanetInteraction : MonoBehaviour
     }
     void Update()
     {
-
         TouchState touchState = touch.ReadValue<TouchState>();
 
         if (click.triggered && touchState.phase == TouchPhase.Began)
