@@ -595,6 +595,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": true
+                },
+                {
+                    "name": "Pinch",
+                    "type": "Value",
+                    "id": "2fcb9b4b-cfa1-4632-a132-57999f13d7e1",
+                    "expectedControlType": "Vector2",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
                 }
             ],
             "bindings": [
@@ -1013,6 +1022,17 @@
                     "processors": "",
                     "groups": ";Keyboard&Mouse;Touch",
                     "action": "InteractionPosition",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "007afbe7-afd6-42ba-a19c-7b6728e33d37",
+                    "path": "",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Touch",
+                    "action": "Pinch",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

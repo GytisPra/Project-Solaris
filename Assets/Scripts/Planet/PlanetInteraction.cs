@@ -6,17 +6,18 @@ using TouchPhase = UnityEngine.InputSystem.TouchPhase;
 public class PlanetInteraction : MonoBehaviour
 {
     public InputActionAsset inputActionAsset;
+    public Camera solarSystemCamera;
     public LayerMask layerMask;
-
-    // [SerializeField] private float rotationSpeed = 5f;
-    // [SerializeField] private GameObject planet;
+    public PlanetSelectionUIManager planetSelectionUIManager;
 
     private InputActionMap uiActionMap;
     private InputAction touch;
     private InputAction interactionPosition;
     private InputAction click;
-    // private Vector3 targetLookAt; // Target position to look at
-    // private bool shouldRotate = false;
+    private GameObject prevHitObject;
+
+    private CameraRotation cameraRotation;
+    private bool zoomIn = true;
 
     private void Awake()
     {
@@ -31,6 +32,15 @@ public class PlanetInteraction : MonoBehaviour
 
         interactionPosition = uiActionMap.FindAction("InteractionPosition", true);
         interactionPosition.Enable();
+
+        if (solarSystemCamera != null)
+        {
+            cameraRotation = solarSystemCamera.GetComponent<CameraRotation>();
+        }
+        else
+        {
+            Debug.LogError("Solar system camera is not assigned in the Inspector!");
+        }
     }
 
     private void OnEnable()
@@ -51,42 +61,52 @@ public class PlanetInteraction : MonoBehaviour
 
         if (click.triggered || touchState.phase == TouchPhase.Began)
         {
-            Ray ray = Camera.main.ScreenPointToRay(interactionPosition.ReadValue<Vector2>());
+            var interactionLocation = touchState.phase == TouchPhase.Began ?
+                                        touchState.position : interactionPosition.ReadValue<Vector2>();
 
-            if (Physics.Raycast(ray, out RaycastHit hit, layerMask))
+            Ray ray = Camera.main.ScreenPointToRay(interactionLocation);
+
+            if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, layerMask))
             {
+                
+                GameObject hitObject = hit.collider.gameObject;
+
                 Debug.Log("Clicked on: " + hit.collider.gameObject.name);
 
-                hit.collider.gameObject.GetComponent<Renderer>().material.color = Color.black;
+                if (cameraRotation != null && cameraRotation.rotateAround.name != hitObject.name)
+                {
+                    cameraRotation.rotateAround = hitObject;
 
-                // targetLookAt = hit.point;
-                // shouldRotate = true;
+                    Bounds bounds = hit.collider.bounds;
+                    float objectSize = bounds.extents.magnitude;
+
+                    float offset = 30.0f;
+                    cameraRotation.cameraDistance = objectSize + offset;
+                    zoomIn = !zoomIn;
+                    
+                    if (hitObject.TryGetComponent<OrbitRing>(out var orbitRing)) {
+                        orbitRing.SetLineVisibility(false);
+                        if (prevHitObject != null && prevHitObject.TryGetComponent<OrbitRing>(out var prevOrbitRing)) {
+                            prevOrbitRing.SetLineVisibility(true);
+                        }
+                    }
+
+                    if (planetSelectionUIManager != null) {
+                        planetSelectionUIManager.SetPlanetSelectionCanvasActive(false);
+                        planetSelectionUIManager.SetPlanetUICanvasActive(true);
+                    } else {
+                        Debug.LogError("Planet selection UI manager not assigned in inspector!");
+                    }
+
+                    Debug.Log("New rotation target: " + hit.collider.gameObject.name);
+                }
+
+                prevHitObject = hitObject;
             }
             else
             {
                 Debug.Log("Missed!");
             }
         }
-
-        // if (shouldRotate)
-        // {
-        //     RotateCameraToTarget();
-        // }
     }
-
-    // void RotateCameraToTarget()
-    // {
-    //     if (Camera.main != null && planet != null)
-    //     {
-    //         Vector3 directionToTarget = targetLookAt - Camera.main.transform.position;
-    //         Quaternion targetRotation = Quaternion.LookRotation(directionToTarget);
-
-    //         Camera.main.transform.rotation = Quaternion.Slerp(Camera.main.transform.rotation, targetRotation, Time.deltaTime * rotationSpeed);
-
-    //         if (Quaternion.Angle(Camera.main.transform.rotation, targetRotation) < 0.1f)
-    //         {
-    //             shouldRotate = false;
-    //         }
-    //     }
-    // }
 }

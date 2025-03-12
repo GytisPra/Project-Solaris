@@ -6,14 +6,14 @@ using TouchPhase = UnityEngine.InputSystem.TouchPhase;
 public class CameraRotation : MonoBehaviour
 {
     public InputActionAsset inputActionAsset;
-    public bool disableMouseInput;
     public float sensitivity = 5f;
     public float cameraDistance = 200f;
     public float minVerticalAngle = -80f;
     public float maxVerticalAngle = 80f;
+    public GameObject resetToTarget;
+    public float resetCameraDistance;
 
-    [SerializeField] private GameObject planet;
-    [SerializeField] private Camera planetCam;
+    public GameObject rotateAround;
     [SerializeField] private float rotationDrag;
 
     private float rotationY = 0f;
@@ -24,6 +24,8 @@ public class CameraRotation : MonoBehaviour
     private InputAction touch;
     private InputAction click;
     private InputAction mouseDelta;
+
+    
 
     private void Awake()
     {
@@ -55,11 +57,15 @@ public class CameraRotation : MonoBehaviour
 
     void Start()
     {
-        if (planet != null && planetCam != null)
+        if (rotateAround != null)
         {
-            Vector3 direction = new(0, 0, -cameraDistance);
-            planetCam.transform.position = planet.transform.position + direction;
-            planetCam.transform.LookAt(planet.transform);
+            Vector3 direction = new(0, Mathf.Sin(Mathf.Deg2Rad * maxVerticalAngle) * cameraDistance, -Mathf.Cos(Mathf.Deg2Rad * maxVerticalAngle) * cameraDistance);
+            transform.position = rotateAround.transform.position + direction;
+
+            transform.LookAt(rotateAround.transform);
+
+            rotationX = 90f;
+            rotationY = 0f;
         }
     }
 
@@ -87,9 +93,6 @@ public class CameraRotation : MonoBehaviour
         TouchState touchState = touch.ReadValue<TouchState>();
         Vector2 mouseDeltaDelta = mouseDelta.ReadValue<Vector2>();
 
-        Debug.Log($"Move base on touch input?: {touchState.isInProgress && touchState.isPrimaryTouch && touchState.phase != TouchPhase.Began}");
-        Debug.Log($"Move base on click input?: {click.ReadValue<float>() > 0}");
-
         if (click.ReadValue<float>() > 0)
         {
             UpdateRotation(ref rotationVelocityY, mouseDeltaDelta.x);
@@ -109,12 +112,53 @@ public class CameraRotation : MonoBehaviour
         rotationY += rotationVelocityY;
         rotationX = Mathf.Clamp(rotationX + rotationVelocityX, minVerticalAngle, maxVerticalAngle);
 
-        if (planet != null && planetCam != null)
+        if (rotateAround != null)
         {
             Quaternion rotation = Quaternion.Euler(rotationX, rotationY, 0);
             Vector3 direction = rotation * new Vector3(0, 0, -cameraDistance);
-            planetCam.transform.position = planet.transform.position + direction;
-            planetCam.transform.LookAt(planet.transform);
+            transform.position = rotateAround.transform.position + direction;
+            transform.LookAt(rotateAround.transform);
         }
+    }
+
+    public void ResetCamera()
+    {
+        if (rotateAround.TryGetComponent<OrbitRing>(out var orbitRing))
+        {
+            orbitRing.SetLineVisibility(true);
+        }
+
+        rotateAround = resetToTarget;
+        cameraDistance = resetCameraDistance;
+
+        Vector3 direction = new(0, Mathf.Sin(Mathf.Deg2Rad * maxVerticalAngle) * cameraDistance, -Mathf.Cos(Mathf.Deg2Rad * maxVerticalAngle) * cameraDistance);
+        transform.position = rotateAround.transform.position + direction;
+
+        transform.LookAt(rotateAround.transform);
+
+        rotationX = 90f;
+        rotationY = 0f;
+    }
+
+    public void ResetCameraOnCurrentTarget()
+    {
+        cameraDistance = 20.0f;
+
+        rotationX = 0;
+        rotationY = 0;
+    }
+
+    public void SetTargetObject(GameObject target)
+    {
+        rotateAround = target;
+        cameraDistance = 20.0f;
+
+        rotationX = 0;
+        rotationY = 0;
+    }
+
+    public string GetCurrentTarget()
+    {
+        return rotateAround.name;
     }
 }
