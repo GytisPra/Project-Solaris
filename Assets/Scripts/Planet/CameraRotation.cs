@@ -83,13 +83,6 @@ public class CameraRotation : MonoBehaviour
 
     void Update()
     {
-
-        /* TODO: 
-             * remove angle clamping (allow to flip). 
-             * maybe add ability to zoom?
-             * Add ability to go to a level (will be displayed on the surface)
-        */
-
         TouchState touchState = touch.ReadValue<TouchState>();
         Vector2 mouseDeltaDelta = mouseDelta.ReadValue<Vector2>();
 
@@ -123,11 +116,6 @@ public class CameraRotation : MonoBehaviour
 
     public void ResetCamera()
     {
-        // if (rotateAround.TryGetComponent<OrbitRing>(out var orbitRing))
-        // {
-        //     orbitRing.SetLineVisibility(true);
-        // }
-
         rotateAround = resetToTarget;
         cameraDistance = resetCameraDistance;
 
