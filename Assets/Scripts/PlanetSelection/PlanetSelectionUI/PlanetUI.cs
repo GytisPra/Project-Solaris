@@ -29,18 +29,29 @@ public class PlanetUI : MonoBehaviour
     {
         SaveLastPlanet();
 
-        SceneManager.LoadScene("MainMenuScene");
+        if (planetSelectionUIManager != null)
+        {
+            planetSelectionUIManager.SetMainMenuCanvasActive(true);
+            planetSelectionUIManager.SetPlanetUICanvasActive(false);
+        }
+        else
+        {
+            Debug.LogError("Planet selection UI manager not assigned in inspector!");
+        }
+
+        cameraRotation.ResetCamera();
     }
 
     public void ReturnToPlanetSelection()
     {
         SaveLastPlanet();
 
-        if (planetSelectionUIManager != null) {
+        if (planetSelectionUIManager != null)
+        {
             planetSelectionUIManager.SetPlanetSelectionCanvasActive(true);
             planetSelectionUIManager.SetPlanetUICanvasActive(false);
-        } 
-        else 
+        }
+        else
         {
             Debug.LogError("Planet selection UI manager not assigned in inspector!");
         }

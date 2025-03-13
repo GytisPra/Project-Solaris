@@ -1,18 +1,14 @@
-using JetBrains.Annotations;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
-public class OpenLastPlanet : MonoBehaviour
+public class MainMenuScript : MonoBehaviour
 {
-    // TODO: fix a bug where the line dissapears forever
-
-
     public GameObject planets;
     public PlanetSelectionUIManager planetSelectionUIManager;
     public CameraRotation cameraRotation;
-
     private string lastPlanet;
-    
-    void Start()
+
+    public void StartGame()
     {
         if (!PlayerPrefs.HasKey("LastPlanet")) {
             return;
@@ -31,10 +27,6 @@ public class OpenLastPlanet : MonoBehaviour
             return;
         }
 
-        // if (planet.TryGetComponent<OrbitRing>(out var orbitRing)) {
-        //     orbitRing.SetLineVisibility(false);
-        // }
-
         if (cameraRotation != null) {
             cameraRotation.SetTargetObject(planet);
         } else {
@@ -50,6 +42,16 @@ public class OpenLastPlanet : MonoBehaviour
             Debug.LogError("Planet selection UI manager not set in inspector!");
 
         }
+    }
 
+    public void OpenOptions()
+    {
+        Debug.Log("Opening Options");
+    }
+
+    public void QuitGame()
+    {
+        Debug.Log("Quitting Game");
+        Application.Quit();
     }
 }

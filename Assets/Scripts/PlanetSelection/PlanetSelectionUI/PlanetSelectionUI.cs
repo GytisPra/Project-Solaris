@@ -43,7 +43,17 @@ public class PlanetSelectionUI : MonoBehaviour
     }
 
     public void ReturnToMainMenu() {
-        SceneManager.LoadScene("MainMenuScene");
+        if (planetSelectionUIManager != null)
+        {
+            planetSelectionUIManager.SetMainMenuCanvasActive(true);
+            planetSelectionUIManager.SetPlanetSelectionCanvasActive(false);
+        }
+        else
+        {
+            Debug.LogError("Planet selection UI manager not assigned in inspector!");
+        }
+
+        cameraRotation.ResetCamera();
     }
 
     public void ResetSolarSystemCamera() {
