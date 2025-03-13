@@ -64,7 +64,7 @@ public class CameraRotation : MonoBehaviour
 
             transform.LookAt(rotateAround.transform);
 
-            rotationX = 90f;
+            rotationX = 50f;
             rotationY = 0f;
         }
     }
@@ -123,10 +123,10 @@ public class CameraRotation : MonoBehaviour
 
     public void ResetCamera()
     {
-        if (rotateAround.TryGetComponent<OrbitRing>(out var orbitRing))
-        {
-            orbitRing.SetLineVisibility(true);
-        }
+        // if (rotateAround.TryGetComponent<OrbitRing>(out var orbitRing))
+        // {
+        //     orbitRing.SetLineVisibility(true);
+        // }
 
         rotateAround = resetToTarget;
         cameraDistance = resetCameraDistance;

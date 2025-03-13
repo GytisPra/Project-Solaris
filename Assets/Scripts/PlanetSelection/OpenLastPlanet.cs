@@ -3,6 +3,9 @@ using UnityEngine;
 
 public class OpenLastPlanet : MonoBehaviour
 {
+    // TODO: fix a bug where the line dissapears forever
+
+
     public GameObject planets;
     public PlanetSelectionUIManager planetSelectionUIManager;
     public CameraRotation cameraRotation;

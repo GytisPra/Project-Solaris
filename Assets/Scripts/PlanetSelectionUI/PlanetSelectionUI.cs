@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class PlanetSelectionUI : MonoBehaviour
 {
@@ -18,9 +19,9 @@ public class PlanetSelectionUI : MonoBehaviour
 
         if (planet != null)
         {
-            if (planet.TryGetComponent<OrbitRing>(out var orbitRing)) {
-                orbitRing.SetLineVisibility(false);
-            }
+            // if (planet.TryGetComponent<OrbitRing>(out var orbitRing)) {
+            //     orbitRing.SetLineVisibility(false);
+            // }
 
             PlayerPrefs.SetString("LastPlanet", planetName);
             PlayerPrefs.Save();
@@ -39,6 +40,10 @@ public class PlanetSelectionUI : MonoBehaviour
         {
             Debug.LogError($"Planet '{planetName}' not found!");
         }
+    }
+
+    public void ReturnToMainMenu() {
+        SceneManager.LoadScene("MainMenuScene");
     }
 
     public void ResetSolarSystemCamera() {

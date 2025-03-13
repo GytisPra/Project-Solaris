@@ -83,7 +83,7 @@ public class PinchScrollDetection : MonoBehaviour
             var difference = magnitude - previousMagnitude;
             previousMagnitude = magnitude;
 
-            CameraZoom(-(difference * (speed * 0.5f)));
+            CameraZoom(-(difference * (speed * 0.25f)));
         };
 
     }

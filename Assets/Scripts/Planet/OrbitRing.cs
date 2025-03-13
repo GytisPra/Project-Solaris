@@ -1,101 +1,23 @@
 using Unity.VisualScripting;
 using UnityEngine;
 
-[RequireComponent(typeof(LineRenderer))]
+[RequireComponent(typeof(TrailRenderer))]
 public class OrbitRing : MonoBehaviour
 {
-    public GameObject sun;
-    public int segments = 100;
-    public float lineWidth = 0.05f;
-    public Color lineColor;
+    
+    public float trailTime = 5f;
+    public float trailWidth = 0.05f;
+    public Gradient trailColorGradient;
 
-    private bool lineEnabled = true;
-    private float prevLineWidth;
-    private float orbitRadius;
-    private LineRenderer lineRenderer;
+    private TrailRenderer trail;
 
     void Start()
     {
-        if (!lineEnabled)
-        {
-            return;
-        }
+        trail = GetComponent<TrailRenderer>();
 
-        prevLineWidth = lineWidth;
-
-        orbitRadius = Mathf.Abs(transform.position.z - sun.transform.position.z);
-
-        lineRenderer = GetComponent<LineRenderer>();
-        lineRenderer.positionCount = segments + 1; // One extra point to close the circle
-        lineRenderer.loop = true; // Make it a closed loop
-        lineRenderer.startWidth = lineWidth;
-        lineRenderer.endWidth = lineWidth;
-
-        lineRenderer.endColor = lineColor;
-        lineRenderer.startColor = lineColor;
-
-        DrawOrbit();
-    }
-
-    public void SetLineVisibility(bool enabled)
-    {
-        lineEnabled = enabled;
-        if (lineRenderer != null)
-        {
-            lineRenderer.enabled = enabled;
-        }
-    }
-
-
-    void Update()
-    {
-        if (lineRenderer == null) return;
-
-        // Toggle visibility based on lineEnabled
-        if (!lineEnabled)
-        {
-            if (lineRenderer.enabled)
-            {
-                lineRenderer.enabled = false;
-            }
-            return;
-        }
-
-        if (!lineRenderer.enabled)
-        {
-            lineRenderer.enabled = true;
-        }
-
-        lineRenderer.endColor = lineColor;
-        lineRenderer.startColor = lineColor;
-
-        if (lineWidth == prevLineWidth)
-        {
-            return;
-        }
-
-        prevLineWidth = lineWidth;
-        lineRenderer.startWidth = lineWidth;
-        lineRenderer.endWidth = lineWidth;
-    }
-
-    void DrawOrbit()
-    {
-        if (sun == null)
-        {
-            Debug.LogError("Sun object not assigned to OrbitRing!");
-            return;
-        }
-
-        Vector3 center = sun.transform.position;
-        float angleStep = 2 * Mathf.PI / segments;
-
-        for (int i = 0; i <= segments; i++)
-        {
-            float angle = i * angleStep;
-            float x = center.x + Mathf.Cos(angle) * orbitRadius;
-            float z = center.z + Mathf.Sin(angle) * orbitRadius;
-            lineRenderer.SetPosition(i, new Vector3(x, center.y, z));
-        }
+        trail.time = trailTime;
+        trail.startWidth = trailWidth;
+        trail.endWidth = 0; // Taper to 0 for a smooth fade
+        trail.colorGradient = trailColorGradient; // Use a gradient to fade the trail
     }
 }

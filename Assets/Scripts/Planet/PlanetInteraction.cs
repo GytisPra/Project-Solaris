@@ -84,12 +84,12 @@ public class PlanetInteraction : MonoBehaviour
                     cameraRotation.cameraDistance = objectSize + offset;
                     zoomIn = !zoomIn;
                     
-                    if (hitObject.TryGetComponent<OrbitRing>(out var orbitRing)) {
-                        orbitRing.SetLineVisibility(false);
-                        if (prevHitObject != null && prevHitObject.TryGetComponent<OrbitRing>(out var prevOrbitRing)) {
-                            prevOrbitRing.SetLineVisibility(true);
-                        }
-                    }
+                    // if (hitObject.TryGetComponent<OrbitRing>(out var orbitRing)) {
+                    //     orbitRing.SetLineVisibility(false);
+                    //     if (prevHitObject != null && prevHitObject.TryGetComponent<OrbitRing>(out var prevOrbitRing)) {
+                    //         prevOrbitRing.SetLineVisibility(true);
+                    //     }
+                    // }
 
                     if (planetSelectionUIManager != null) {
                         planetSelectionUIManager.SetPlanetSelectionCanvasActive(false);

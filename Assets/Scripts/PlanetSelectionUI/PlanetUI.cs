@@ -30,7 +30,6 @@ public class PlanetUI : MonoBehaviour
         SaveLastPlanet();
 
         SceneManager.LoadScene("MainMenuScene");
-        SceneManager.UnloadSceneAsync(currentPlanetName);
     }
 
     public void ReturnToPlanetSelection()
