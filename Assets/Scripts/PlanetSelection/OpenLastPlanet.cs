@@ -21,6 +21,10 @@ public class OpenLastPlanet : MonoBehaviour
         lastPlanet = PlayerPrefs.GetString("LastPlanet");
         GameObject planet = planets.transform.Find(lastPlanet).gameObject;
 
+        if (lastPlanet == "Saturn") {
+           planet = planet.transform.Find("SaturnST").gameObject;
+        }
+
         if(planet == null) {
             Debug.LogError("Last Planet does not exist!");
             cameraRotation.ResetCamera();

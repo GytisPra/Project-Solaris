@@ -14,10 +14,8 @@ public class PlanetInteraction : MonoBehaviour
     private InputAction touch;
     private InputAction interactionPosition;
     private InputAction click;
-    private GameObject prevHitObject;
 
     private CameraRotation cameraRotation;
-    private bool zoomIn = true;
 
     private void Awake()
     {
@@ -68,40 +66,36 @@ public class PlanetInteraction : MonoBehaviour
 
             if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, layerMask))
             {
-                
+
                 GameObject hitObject = hit.collider.gameObject;
 
-                Debug.Log("Clicked on: " + hit.collider.gameObject.name);
+                Debug.Log("Clicked on: " + hitObject.name);
 
                 if (cameraRotation != null && cameraRotation.rotateAround.name != hitObject.name)
                 {
-                    cameraRotation.rotateAround = hitObject;
+                    if (hitObject.name == "Saturn")
+                    {
+                        hitObject = hitObject.transform.Find("SaturnST").gameObject;
+                    }
 
-                    Bounds bounds = hit.collider.bounds;
-                    float objectSize = bounds.extents.magnitude;
+                    if (cameraRotation.GetCurrentTarget() == hitObject.name) {
+                        return;
+                    } 
 
-                    float offset = 30.0f;
-                    cameraRotation.cameraDistance = objectSize + offset;
-                    zoomIn = !zoomIn;
-                    
-                    // if (hitObject.TryGetComponent<OrbitRing>(out var orbitRing)) {
-                    //     orbitRing.SetLineVisibility(false);
-                    //     if (prevHitObject != null && prevHitObject.TryGetComponent<OrbitRing>(out var prevOrbitRing)) {
-                    //         prevOrbitRing.SetLineVisibility(true);
-                    //     }
-                    // }
+                    cameraRotation.SetTargetObject(hitObject);
 
-                    if (planetSelectionUIManager != null) {
+                    if (planetSelectionUIManager != null)
+                    {
                         planetSelectionUIManager.SetPlanetSelectionCanvasActive(false);
                         planetSelectionUIManager.SetPlanetUICanvasActive(true);
-                    } else {
+                    }
+                    else
+                    {
                         Debug.LogError("Planet selection UI manager not assigned in inspector!");
                     }
 
-                    Debug.Log("New rotation target: " + hit.collider.gameObject.name);
+                    Debug.Log("New rotation target: " + hitObject.name);
                 }
-
-                prevHitObject = hitObject;
             }
             else
             {

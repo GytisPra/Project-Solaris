@@ -17,7 +17,7 @@ public class OrbitRing : MonoBehaviour
 
         trail.time = trailTime;
         trail.startWidth = trailWidth;
-        trail.endWidth = 0; // Taper to 0 for a smooth fade
-        trail.colorGradient = trailColorGradient; // Use a gradient to fade the trail
+        trail.endWidth = 0;
+        trail.colorGradient = trailColorGradient;
     }
 }

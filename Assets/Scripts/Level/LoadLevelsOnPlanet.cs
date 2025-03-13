@@ -1,8 +1,5 @@
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.InputSystem;
-using UnityEngine.InputSystem.LowLevel;
-using TouchPhase = UnityEngine.InputSystem.TouchPhase;
 
 public class LoadLevelsOnPlanet : MonoBehaviour
 {
@@ -17,6 +14,9 @@ public class LoadLevelsOnPlanet : MonoBehaviour
 
     void Start()
     {
+        radius = Utils.GetSphereRadius(gameObject) * 1.8f;
+        prevRadius = radius;
+
         if (jsonFile != null)
         {
             levelsInJson = JsonUtility.FromJson<Levels>(jsonFile.text);
@@ -38,13 +38,16 @@ public class LoadLevelsOnPlanet : MonoBehaviour
         float latRad = level.latitude * Mathf.Deg2Rad;
         float lonRad = level.longitude * Mathf.Deg2Rad;
 
-        Vector3 position = new(
+
+        Vector3 localPosition = new(
             radius * Mathf.Cos(latRad) * Mathf.Cos(lonRad),
             radius * Mathf.Sin(latRad),
             radius * Mathf.Cos(latRad) * Mathf.Sin(lonRad)
         );
 
-        GameObject point = Instantiate(pointPrefab, position, Quaternion.identity);
+        Vector3 worldPosition = transform.position + localPosition;
+
+        GameObject point = Instantiate(pointPrefab, worldPosition, Quaternion.identity);
         point.name = $"Level_{level.ID}";
         point.layer = 6;
         point.transform.parent = transform;
@@ -66,13 +69,13 @@ public class LoadLevelsOnPlanet : MonoBehaviour
             float latRad = level.latitude * Mathf.Deg2Rad;
             float lonRad = level.longitude * Mathf.Deg2Rad;
 
-            Vector3 newPosition = new(
+            Vector3 localPosition = new(
                 radius * Mathf.Cos(latRad) * Mathf.Cos(lonRad),
                 radius * Mathf.Sin(latRad),
                 radius * Mathf.Cos(latRad) * Mathf.Sin(lonRad)
             );
 
-            placedPoints[i].transform.position = newPosition;
+            placedPoints[i].transform.position = transform.position + localPosition; // Adjust for planet's position
         }
     }
 }

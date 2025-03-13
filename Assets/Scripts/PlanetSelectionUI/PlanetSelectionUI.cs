@@ -17,12 +17,12 @@ public class PlanetSelectionUI : MonoBehaviour
     {
         GameObject planet = planets.transform.Find(planetName).gameObject;
 
+        if (planetName == "Saturn") {
+           planet = planet.transform.Find("SaturnST").gameObject;
+        }
+
         if (planet != null)
         {
-            // if (planet.TryGetComponent<OrbitRing>(out var orbitRing)) {
-            //     orbitRing.SetLineVisibility(false);
-            // }
-
             PlayerPrefs.SetString("LastPlanet", planetName);
             PlayerPrefs.Save();
 

@@ -142,7 +142,7 @@ public class CameraRotation : MonoBehaviour
 
     public void ResetCameraOnCurrentTarget()
     {
-        cameraDistance = 20.0f;
+        cameraDistance = Utils.GetSphereRadius(rotateAround) * 10.0f;
 
         rotationX = 0;
         rotationY = 0;
@@ -151,7 +151,7 @@ public class CameraRotation : MonoBehaviour
     public void SetTargetObject(GameObject target)
     {
         rotateAround = target;
-        cameraDistance = 20.0f;
+        cameraDistance = Utils.GetSphereRadius(target) * 10.0f;
 
         rotationX = 0;
         rotationY = 0;

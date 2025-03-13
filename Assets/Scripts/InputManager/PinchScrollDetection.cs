@@ -10,7 +10,8 @@ public class PinchScrollDetection : MonoBehaviour
     private float previousMagnitude;
     private int touchCount;
 
-    public float speed = 10f;
+    public float scroolSpeed = 4.75f;
+    public float pinchSpeed = 2.5f;
     public float minDistance = 10f;
     public float maxDistance = 500f;
     void Start()
@@ -21,7 +22,7 @@ public class PinchScrollDetection : MonoBehaviour
         // Mouse scroll
         InputAction scrollAction = new(binding: "<Mouse>/scroll");
         scrollAction.Enable();
-        scrollAction.performed += ctx => CameraZoom(-ctx.ReadValue<Vector2>().y * speed);
+        scrollAction.performed += ctx => CameraZoom(-ctx.ReadValue<Vector2>().y * scroolSpeed);
 
         // Pinch gesture
         InputAction touch0Contact = new
@@ -83,7 +84,7 @@ public class PinchScrollDetection : MonoBehaviour
             var difference = magnitude - previousMagnitude;
             previousMagnitude = magnitude;
 
-            CameraZoom(-(difference * (speed * 0.25f)));
+            CameraZoom(-(difference * (pinchSpeed * 0.25f)));
         };
 
     }
