@@ -3,7 +3,7 @@ using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.LowLevel;
 using TouchPhase = UnityEngine.InputSystem.TouchPhase;
 
-public class PlanetInteraction : MonoBehaviour
+public class PlanetInteractionOld : MonoBehaviour
 {
     public InputActionAsset inputActionAsset;
     public Camera solarSystemCamera;
@@ -71,23 +71,35 @@ public class PlanetInteraction : MonoBehaviour
 
                 Debug.Log("Clicked on: " + hitObject.name);
 
-                if (cameraRotation != null)
+                if (cameraRotation != null && cameraRotation.rotateAround.name != hitObject.name)
                 {
+                    if (hitObject.name == "Saturn")
+                    {
+                        hitObject = hitObject.transform.Find("SaturnST").gameObject;
+                    }
+
                     if (cameraRotation.GetCurrentTarget() == hitObject.name) {
                         return;
                     } 
 
+                    cameraRotation.SetTargetObject(hitObject);
+
                     if (planetSelectionUIManager != null)
                     {
                         planetSelectionUIManager.SetPlanetSelectionCanvasActive(false);
-                        planetSelectionUIManager.SetPlanetUICanvasActive(false);
-                        planetSelectionUIManager.OpenLevelUI(int.Parse(hitObject.name));
+                        planetSelectionUIManager.SetPlanetUICanvasActive(true);
                     }
                     else
                     {
                         Debug.LogError("Planet selection UI manager not assigned in inspector!");
                     }
+
+                    Debug.Log("New rotation target: " + hitObject.name);
                 }
+            }
+            else
+            {
+                Debug.Log("Missed!");
             }
         }
     }

@@ -48,7 +48,7 @@ public class LoadLevelsOnPlanet : MonoBehaviour
         Vector3 worldPosition = transform.position + localPosition;
 
         GameObject point = Instantiate(pointPrefab, worldPosition, Quaternion.identity);
-        point.name = $"Level_{level.ID}";
+        point.name = $"{level.ID}";
         point.layer = 6;
         point.transform.parent = transform;
         point.GetComponent<Renderer>().material.color = pointColor;

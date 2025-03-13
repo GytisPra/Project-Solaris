@@ -25,8 +25,6 @@ public class CameraRotation : MonoBehaviour
     private InputAction click;
     private InputAction mouseDelta;
 
-    
-
     private void Awake()
     {
         uiActionMap = inputActionAsset.FindActionMap("UI", true);
@@ -86,12 +84,15 @@ public class CameraRotation : MonoBehaviour
         TouchState touchState = touch.ReadValue<TouchState>();
         Vector2 mouseDeltaDelta = mouseDelta.ReadValue<Vector2>();
 
-        if (click.ReadValue<float>() > 0)
+        bool isTouching = touchState.isInProgress && touchState.isPrimaryTouch && touchState.phase != TouchPhase.Began;
+        bool isClicking = click.ReadValue<float>() > 0;
+
+        if (isClicking)
         {
             UpdateRotation(ref rotationVelocityY, mouseDeltaDelta.x);
             UpdateRotation(ref rotationVelocityX, mouseDeltaDelta.y, true);
         }
-        else if (touchState.isInProgress && touchState.isPrimaryTouch && touchState.phase != TouchPhase.Began)
+        else if (isTouching)
         {
             UpdateRotation(ref rotationVelocityY, touchState.delta.x);
             UpdateRotation(ref rotationVelocityX, touchState.delta.y, true);
@@ -104,6 +105,7 @@ public class CameraRotation : MonoBehaviour
 
         rotationY += rotationVelocityY;
         rotationX = Mathf.Clamp(rotationX + rotationVelocityX, minVerticalAngle, maxVerticalAngle);
+
 
         if (rotateAround != null)
         {
