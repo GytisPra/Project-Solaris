@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public class MainMenuScript : MonoBehaviour
 {
@@ -11,6 +10,9 @@ public class MainMenuScript : MonoBehaviour
     public void StartGame()
     {
         if (!PlayerPrefs.HasKey("LastPlanet")) {
+            cameraRotation.ResetCamera();
+            planetSelectionUIManager.SetMainMenuCanvasActive(false);
+            planetSelectionUIManager.SetPlanetSelectionCanvasActive(true);
             return;
         }
 
