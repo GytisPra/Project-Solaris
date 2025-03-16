@@ -7,6 +7,8 @@ public class PlanetSelectionUIManager : MonoBehaviour
     public Canvas levelUICanvas;
     public Canvas mainMenuCanvas;
     public LevelUI levelUI;
+    public Volume postProcessingVolume;
+    private DepthOfField depthOfField;
 
     void Start()
     {
@@ -42,5 +44,15 @@ public class PlanetSelectionUIManager : MonoBehaviour
     {
         levelUI.DisplayLevelInfo(LevelID);
         levelUICanvas.gameObject.SetActive(true);
+    }
+
+    public void ToggleDepthOfFieldEffect()
+    {
+        if (bloom != null)
+        {
+            // Toggle the active state of Bloom effect
+            bloom.active = !bloom.active;
+            Debug.Log("Bloom effect toggled: " + bloom.active);
+        }
     }
 }
