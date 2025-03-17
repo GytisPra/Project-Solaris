@@ -6,6 +6,9 @@ public class PlanetSelectionUI : MonoBehaviour
     public GameObject planets;
     public PlanetSelectionUIManager planetSelectionUIManager;
 
+    public GameObject popup;
+    public GameObject planetSelection;
+
     private CameraRotation cameraRotation;
 
     void Start()
@@ -43,5 +46,11 @@ public class PlanetSelectionUI : MonoBehaviour
 
     public void ResetSolarSystemCamera() {
         cameraRotation.ResetCamera();
+    }
+
+    public void ShowPopup(bool show)
+    {
+        popup.SetActive(show);
+        planetSelection.SetActive(!show);
     }
 }
