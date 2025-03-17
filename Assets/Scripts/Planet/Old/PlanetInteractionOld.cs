@@ -71,7 +71,7 @@ public class PlanetInteractionOld : MonoBehaviour
 
                 Debug.Log("Clicked on: " + hitObject.name);
 
-                if (cameraRotation != null && cameraRotation.rotateAround.name != hitObject.name)
+                if (cameraRotation != null && cameraRotation.GetCurrentTarget() != hitObject.name)
                 {
                     if (hitObject.name == "Saturn")
                     {

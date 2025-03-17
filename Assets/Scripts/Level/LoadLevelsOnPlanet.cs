@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class LoadLevelsOnPlanet : MonoBehaviour
@@ -38,7 +39,6 @@ public class LoadLevelsOnPlanet : MonoBehaviour
         float latRad = level.latitude * Mathf.Deg2Rad;
         float lonRad = level.longitude * Mathf.Deg2Rad;
 
-
         Vector3 localPosition = new(
             radius * Mathf.Cos(latRad) * Mathf.Cos(lonRad),
             radius * Mathf.Sin(latRad),
@@ -52,6 +52,15 @@ public class LoadLevelsOnPlanet : MonoBehaviour
         point.layer = 6;
         point.transform.parent = transform;
         point.GetComponent<Renderer>().material.color = pointColor;
+
+        LevelData levelData = point.AddComponent<LevelData>();
+
+        levelData.description = level.description;
+        levelData.completed = level.completed;
+        levelData.levelID = level.ID;
+        levelData.planetName = gameObject.name;
+        levelData.title = level.title;
+        levelData.completed = level.completed;
 
         placedPoints.Add(point);
     }

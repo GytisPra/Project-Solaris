@@ -1,29 +1,38 @@
+using System;
 using TMPro;
 using UnityEngine;
 
 public class LevelUI : MonoBehaviour
 {
     public PlanetSelectionUIManager planetSelectionUIManager;
-    public TextMeshProUGUI levelInfo;
+    public TextMeshProUGUI levelDescription;
+    public TextMeshProUGUI levelID;
+    public TextMeshProUGUI levelTitle;
+    public TextMeshProUGUI levelState;
     public TextAsset[] jsonFiles;
 
     public void ClosePopUp()
     {
         planetSelectionUIManager.SetLevelUICanvasActive(false);
         planetSelectionUIManager.SetPlanetUICanvasActive(true);
+        planetSelectionUIManager.SetDepthOfFieldEffectActive(false);
     }
 
-    public void DisplayLevelInfo(int levelID)
+    public void DisplayLevelInfo(LevelData levelData)
     {
-        foreach (var jsonFile in jsonFiles)
+        levelDescription.text = levelData.description;
+        levelID.text = levelData.levelID.ToString();
+        levelTitle.text = levelData.title;
+
+        if (!levelData.completed)
         {
-            Levels levelsInJson = JsonUtility.FromJson<Levels>(jsonFile.text);
-            foreach (Level level in levelsInJson.levels)
-            {
-                if (level.ID == levelID) {
-                    levelInfo.text = $"LevelID: {level.ID}, longitude: {level.longitude}, latitude: {level.latitude}, type: {level.type}";
-                }
-            }
+            levelState.text = "Incomplete";
+            levelState.color = new(1f, 0.8901961f, 0.2588235f, 1f);
+        } 
+        else
+        {
+            levelState.text = "Completed";
+            levelState.color = new(0.5f, 1f, 0.3f, 1f);
         }
     }
 }

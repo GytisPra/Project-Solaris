@@ -1,58 +1,105 @@
 using UnityEngine;
-
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
 public class PlanetSelectionUIManager : MonoBehaviour
 {
     public Canvas planetUICanvas;
     public Canvas planetSelectionCanvas;
     public Canvas levelUICanvas;
     public Canvas mainMenuCanvas;
+    public Canvas travelUICanvas;
     public LevelUI levelUI;
     public Volume postProcessingVolume;
+    public CameraRotation cameraRotation;
+    public PlanetInteraction planetInteraction;
+
     private DepthOfField depthOfField;
 
     void Start()
     {
-        mainMenuCanvas.gameObject.SetActive(true);
+        SetMainMenuCanvasActive(true);
 
-        levelUICanvas.gameObject.SetActive(false);
-        planetSelectionCanvas.gameObject.SetActive(false);
-        planetUICanvas.gameObject.SetActive(false);
+        SetLevelUICanvasActive(false);
+        SetPlanetSelectionCanvasActive(false);
+        SetPlanetUICanvasActive(false);
 
+        if (!postProcessingVolume.profile.TryGet(out depthOfField))
+        {
+             Debug.LogError("No Depth of Field effect found in the Volume profile.");
+        }
     }
 
     public void SetPlanetUICanvasActive(bool active)
     {
         planetUICanvas.gameObject.SetActive(active);
+
+        if (active) {
+            cameraRotation.EnableInput();
+            planetInteraction.Enable();
+        }
     }
 
     public void SetPlanetSelectionCanvasActive(bool active)
     {
         planetSelectionCanvas.gameObject.SetActive(active);
+        SetDepthOfFieldEffectActive(active);
+
+        if (active) {
+            cameraRotation.DisableInput();
+            planetInteraction.Disable();
+        }
     }
 
     public void SetLevelUICanvasActive(bool active)
     {
         levelUICanvas.gameObject.SetActive(active);
+        SetDepthOfFieldEffectActive(active);
+
+        if (active) {
+            cameraRotation.DisableInput();
+            planetInteraction.Disable();
+        }
     }
 
     public void SetMainMenuCanvasActive(bool active)
     {
         mainMenuCanvas.gameObject.SetActive(active);
-    }
 
-    public void OpenLevelUI(int LevelID)
-    {
-        levelUI.DisplayLevelInfo(LevelID);
-        levelUICanvas.gameObject.SetActive(true);
-    }
-
-    public void ToggleDepthOfFieldEffect()
-    {
-        if (bloom != null)
-        {
-            // Toggle the active state of Bloom effect
-            bloom.active = !bloom.active;
-            Debug.Log("Bloom effect toggled: " + bloom.active);
+        if (active) {
+            cameraRotation.DisableInput();
+            planetInteraction.Disable();
         }
+    }
+
+    public void SetTravelUICanvasActive(bool active)
+    {
+        travelUICanvas.gameObject.SetActive(active);
+        SetDepthOfFieldEffectActive(active);
+
+        if (active) {
+            cameraRotation.DisableInput();
+            planetInteraction.Disable();
+        }
+    }
+
+    public void OpenLevelUI(LevelData levelData)
+    {
+        levelUI.DisplayLevelInfo(levelData);
+        levelUICanvas.gameObject.SetActive(true);
+        SetDepthOfFieldEffectActive(true);
+
+        cameraRotation.DisableInput();
+        planetInteraction.Disable();
+    }
+
+    public void SetDepthOfFieldEffectActive(bool active)
+    {
+        if (depthOfField == null)
+        {
+            Debug.LogError("Depth of Field effect is not found in the Volume profile.");
+            return;
+        }
+
+        depthOfField.active = active;
     }
 }

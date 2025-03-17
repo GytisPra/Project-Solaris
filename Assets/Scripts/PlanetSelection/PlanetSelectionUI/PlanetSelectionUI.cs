@@ -13,23 +13,18 @@ public class PlanetSelectionUI : MonoBehaviour
         cameraRotation = Camera.main.GetComponent<CameraRotation>();
     }
 
-    public void MoveToPlanet(string planetName)
+    public void MoveToPlanet(GameObject planet)
     {
-        GameObject planet = planets.transform.Find(planetName).gameObject;
-
-        if (planetName == "Saturn") {
-           planet = planet.transform.Find("SaturnST").gameObject;
-        }
-
         if (planet != null)
         {
-            PlayerPrefs.SetString("LastPlanet", planetName);
+            PlayerPrefs.SetString("LastPlanet", planet.name);
             PlayerPrefs.Save();
 
             cameraRotation.SetTargetObject(planet);
 
             if (planetSelectionUIManager != null)
             {
+                planetSelectionUIManager.SetTravelUICanvasActive(false);
                 planetSelectionUIManager.SetPlanetSelectionCanvasActive(false);
                 planetSelectionUIManager.SetPlanetUICanvasActive(true);
             } else {
@@ -38,22 +33,20 @@ public class PlanetSelectionUI : MonoBehaviour
         }
         else
         {
-            Debug.LogError($"Planet '{planetName}' not found!");
+            Debug.LogError($"Planet not provided!");
         }
     }
 
-    public void ReturnToMainMenu() {
+    public void ReturnToTravelMenu() {
         if (planetSelectionUIManager != null)
         {
-            planetSelectionUIManager.SetMainMenuCanvasActive(true);
+            planetSelectionUIManager.SetTravelUICanvasActive(true);
             planetSelectionUIManager.SetPlanetSelectionCanvasActive(false);
         }
         else
         {
             Debug.LogError("Planet selection UI manager not assigned in inspector!");
         }
-
-        cameraRotation.ResetCamera();
     }
 
     public void ResetSolarSystemCamera() {

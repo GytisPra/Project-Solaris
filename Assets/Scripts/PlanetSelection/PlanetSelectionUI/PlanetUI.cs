@@ -42,21 +42,19 @@ public class PlanetUI : MonoBehaviour
         cameraRotation.ResetCamera();
     }
 
-    public void ReturnToPlanetSelection()
+    public void GoToTravelMenu()
     {
         SaveLastPlanet();
 
         if (planetSelectionUIManager != null)
         {
-            planetSelectionUIManager.SetPlanetSelectionCanvasActive(true);
+            planetSelectionUIManager.SetTravelUICanvasActive(true);
             planetSelectionUIManager.SetPlanetUICanvasActive(false);
         }
         else
         {
             Debug.LogError("Planet selection UI manager not assigned in inspector!");
         }
-
-        cameraRotation.ResetCamera();
     }
 
     public void ResetSolarSystemCamera()

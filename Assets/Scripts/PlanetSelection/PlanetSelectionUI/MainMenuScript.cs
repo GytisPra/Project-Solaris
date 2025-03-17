@@ -17,6 +17,14 @@ public class MainMenuScript : MonoBehaviour
         }
 
         lastPlanet = PlayerPrefs.GetString("LastPlanet");
+
+        if (lastPlanet == "Sun") {
+            cameraRotation.ResetCamera();
+            planetSelectionUIManager.SetMainMenuCanvasActive(false);
+            planetSelectionUIManager.SetPlanetSelectionCanvasActive(true);
+            return;
+        }
+
         GameObject planet = planets.transform.Find(lastPlanet).gameObject;
 
         if (lastPlanet == "Saturn") {

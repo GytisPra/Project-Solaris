@@ -9,6 +9,7 @@ public class PlanetInteraction : MonoBehaviour
     public Camera solarSystemCamera;
     public LayerMask layerMask;
     public PlanetSelectionUIManager planetSelectionUIManager;
+    public bool disabled;
 
     private InputActionMap uiActionMap;
     private InputAction touch;
@@ -57,7 +58,7 @@ public class PlanetInteraction : MonoBehaviour
     {
         TouchState touchState = touch.ReadValue<TouchState>();
 
-        if (click.triggered || touchState.phase == TouchPhase.Began)
+        if ((click.triggered || touchState.phase == TouchPhase.Began) && !disabled)
         {
             var interactionLocation = touchState.phase == TouchPhase.Began ?
                                         touchState.position : interactionPosition.ReadValue<Vector2>();
@@ -66,22 +67,25 @@ public class PlanetInteraction : MonoBehaviour
 
             if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, layerMask))
             {
-
                 GameObject hitObject = hit.collider.gameObject;
 
-                Debug.Log("Clicked on: " + hitObject.name);
+                if (hitObject.layer == LayerMask.NameToLayer("Planet")) {
+                    return;
+                }
 
                 if (cameraRotation != null)
                 {
                     if (cameraRotation.GetCurrentTarget() == hitObject.name) {
                         return;
-                    } 
+                    }
+
+                    LevelData levelData = hitObject.GetComponent<LevelData>();
 
                     if (planetSelectionUIManager != null)
                     {
                         planetSelectionUIManager.SetPlanetSelectionCanvasActive(false);
                         planetSelectionUIManager.SetPlanetUICanvasActive(false);
-                        planetSelectionUIManager.OpenLevelUI(int.Parse(hitObject.name));
+                        planetSelectionUIManager.OpenLevelUI(levelData);
                     }
                     else
                     {
@@ -90,5 +94,15 @@ public class PlanetInteraction : MonoBehaviour
                 }
             }
         }
+    }
+
+    public void Disable() 
+    {
+        disabled = true; 
+    }
+
+    public void Enable() 
+    {
+        disabled = false; 
     }
 }
