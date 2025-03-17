@@ -2,9 +2,6 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.LowLevel;
 using TouchPhase = UnityEngine.InputSystem.TouchPhase;
-using System.Collections;
-using UnityEngine.InputSystem.EnhancedTouch;
-using Touch = UnityEngine.InputSystem.EnhancedTouch.Touch;
 
 public class CameraRotation : MonoBehaviour
 {
@@ -13,19 +10,22 @@ public class CameraRotation : MonoBehaviour
     public float minVerticalAngle = -80f;
     public float maxVerticalAngle = 80f;
     public float transitionSpeed = 200f;
-    public float rotationSpeed = 50f;
     public float resetCameraDistance;
     public GameObject target;
     public bool disableInput = false;
 
     [SerializeField] private float rotationDrag;
+    [SerializeField] private float minRotationSpeed = 0.1f;
+    [SerializeField] private float maxRotationSpeed = 5f;
+    [SerializeField] private float transitionDuration = 2f;
 
     private float rotationY = 0f;
     private float rotationX = 0f;
     private float rotationVelocityX;
     private float rotationVelocityY;
 
-    //private bool smoothTransition;
+    private bool smoothTransition;
+    private float transitionProgress = 0f;
 
     private Vector3 initialPosition;
     private Quaternion initialRotation;
@@ -135,24 +135,33 @@ public class CameraRotation : MonoBehaviour
             Vector3 direction = rotation * new Vector3(0, 0, -cameraDistance);
             Vector3 targetPosition = target.transform.position + direction;
 
-            //if (smoothTransition)
-            //{
-            //    transform.position = Vector3.MoveTowards(transform.position, targetPosition, transitionSpeed * Time.deltaTime);
+            if (smoothTransition)
+            {
+                transitionProgress += Time.deltaTime / transitionDuration;
+                transitionProgress = Mathf.Clamp01(transitionProgress);
 
-            //    Quaternion targetRotation = Quaternion.LookRotation(target.transform.position - transform.position);
-            //    transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
+                float smoothSpeed = Mathf.SmoothStep(0f, transitionSpeed, transitionProgress);
+                transform.position = Vector3.MoveTowards(transform.position, targetPosition, smoothSpeed * Time.deltaTime);
 
-            //    if (Vector3.Distance(transform.position, targetPosition) < 0.001f)
-            //    {
-            //        transform.SetPositionAndRotation(targetPosition, targetRotation);
-            //        smoothTransition = false;
-            //    }
-            //}
-            //else
-            //{
-            transform.position = targetPosition;
+                float distance = Vector3.Distance(transform.position, targetPosition);
+                float rotationFactor = 1f - Mathf.InverseLerp(0f, 10f, distance);
+                float dynamicRotationSpeed = Mathf.Lerp(minRotationSpeed, maxRotationSpeed, rotationFactor);
+
+                Quaternion targetRotation = Quaternion.LookRotation(target.transform.position - transform.position);
+                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, dynamicRotationSpeed * Time.deltaTime);
+
+                if (distance < 0.001f && Quaternion.Angle(transform.rotation, targetRotation) < 0.001f)
+                {
+                    transform.SetPositionAndRotation(targetPosition, targetRotation);
+                    smoothTransition = false;
+                    transitionProgress = 0f;
+                }
+            }
+            else
+            {
+                transform.position = targetPosition;
             transform.LookAt(target.transform);
-            //}
+            }
         }
     }
 
@@ -165,18 +174,23 @@ public class CameraRotation : MonoBehaviour
     public void ResetCameraOnCurrentTarget()
     {
         cameraDistance = Utils.GetSphereRadius(target) * 10.0f;
-        //smoothTransition = true;
+        smoothTransition = true;
 
         rotationX = 0;
-        rotationY = 0;
+        // rotationY = 0;
     }
 
     public void SetTargetObject(GameObject newTarget)
     {
+        if (newTarget == target)
+        {
+            return;
+        }
+
         target = newTarget;
         cameraDistance = Utils.GetSphereRadius(newTarget) * 10.0f;
 
-        //smoothTransition = true;
+        smoothTransition = true;
         rotationX = 0;
     }
     public string GetCurrentTarget()
