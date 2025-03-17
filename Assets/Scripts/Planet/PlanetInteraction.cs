@@ -5,54 +5,42 @@ using TouchPhase = UnityEngine.InputSystem.TouchPhase;
 
 public class PlanetInteraction : MonoBehaviour
 {
-    public InputActionAsset inputActionAsset;
-    public Camera solarSystemCamera;
     public LayerMask layerMask;
     public PlanetSelectionUIManager planetSelectionUIManager;
+    public CameraRotation cameraRotation;
     public bool disabled;
 
-    private InputActionMap uiActionMap;
     private InputAction touch;
     private InputAction interactionPosition;
     private InputAction click;
 
-    private CameraRotation cameraRotation;
 
     private void Awake()
     {
-        uiActionMap = inputActionAsset.FindActionMap("UI", true);
-        uiActionMap.Enable();
-
-        click = uiActionMap.FindAction("Click", true);
-        click.Enable();
-
-        touch = uiActionMap.FindAction("Touch", true);
+        touch = new(
+            type: InputActionType.Value,
+            binding: "<Touchscreen>/primaryTouch"
+        );
         touch.Enable();
 
-        interactionPosition = uiActionMap.FindAction("InteractionPosition", true);
+        click = new(
+            type: InputActionType.Button,
+            binding: "<Mouse>/leftButton"
+        );
+        click.Enable();
+
+        interactionPosition = new(
+            type: InputActionType.Value,
+            binding: "<Pointer>/position"
+        );
         interactionPosition.Enable();
-
-        if (solarSystemCamera != null)
-        {
-            cameraRotation = solarSystemCamera.GetComponent<CameraRotation>();
-        }
-        else
-        {
-            Debug.LogError("Solar system camera is not assigned in the Inspector!");
-        }
-    }
-
-    private void OnEnable()
-    {
-        uiActionMap?.Enable();
     }
 
     private void OnDisable()
     {
-        uiActionMap?.Disable();
-        click?.Disable();
-        touch?.Disable();
-        interactionPosition?.Disable();
+        click.Disable();
+        touch.Disable();
+        interactionPosition.Disable();
     }
     void Update()
     {

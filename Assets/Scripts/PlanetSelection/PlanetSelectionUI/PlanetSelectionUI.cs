@@ -38,15 +38,7 @@ public class PlanetSelectionUI : MonoBehaviour
     }
 
     public void ReturnToTravelMenu() {
-        if (planetSelectionUIManager != null)
-        {
-            planetSelectionUIManager.SetTravelUICanvasActive(true);
-            planetSelectionUIManager.SetPlanetSelectionCanvasActive(false);
-        }
-        else
-        {
-            Debug.LogError("Planet selection UI manager not assigned in inspector!");
-        }
+        planetSelectionUIManager.ClosePlanetSelectionUI();
     }
 
     public void ResetSolarSystemCamera() {

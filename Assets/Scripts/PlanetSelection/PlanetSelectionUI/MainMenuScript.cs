@@ -18,7 +18,9 @@ public class MainMenuScript : MonoBehaviour
 
         lastPlanet = PlayerPrefs.GetString("LastPlanet");
 
-        if (lastPlanet == "Sun") {
+        Debug.Log($"LastPlanet: {lastPlanet}");
+
+        if (lastPlanet == "Sun" || lastPlanet == "") {
             cameraRotation.ResetCamera();
             planetSelectionUIManager.SetMainMenuCanvasActive(false);
             planetSelectionUIManager.SetPlanetSelectionCanvasActive(true);
@@ -54,9 +56,22 @@ public class MainMenuScript : MonoBehaviour
         }
     }
 
+    public void OpenNewGamePopup()
+    {
+        planetSelectionUIManager.SetMainMenuCanvasActive(false);
+        planetSelectionUIManager.SetNewGamePopupCanvasActive(true);
+    }
+
     public void OpenOptions()
     {
-        Debug.Log("Opening Options");
+        planetSelectionUIManager.SetMainMenuCanvasActive(false);
+        planetSelectionUIManager.SetOptionsCanvasActive(true);
+    }
+
+    public void OpenCredits()
+    {
+        planetSelectionUIManager.SetMainMenuCanvasActive(false);
+        planetSelectionUIManager.SetCreditsCanvasActive(true);
     }
 
     public void QuitGame()

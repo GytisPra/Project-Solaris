@@ -8,7 +8,12 @@ public class PlanetSelectionUIManager : MonoBehaviour
     public Canvas levelUICanvas;
     public Canvas mainMenuCanvas;
     public Canvas travelUICanvas;
+    public Canvas newGamePopupCanvas;
+    public Canvas optionsCanvas;
+    public Canvas creditsCanvas;
+
     public LevelUI levelUI;
+
     public Volume postProcessingVolume;
     public CameraRotation cameraRotation;
     public PlanetInteraction planetInteraction;
@@ -23,7 +28,7 @@ public class PlanetSelectionUIManager : MonoBehaviour
         SetPlanetSelectionCanvasActive(false);
         SetPlanetUICanvasActive(false);
 
-        if (!postProcessingVolume.profile.TryGet(out depthOfField))
+        if (postProcessingVolume.profile.TryGet(out depthOfField))
         {
              Debug.LogError("No Depth of Field effect found in the Volume profile.");
         }
@@ -87,6 +92,51 @@ public class PlanetSelectionUIManager : MonoBehaviour
         levelUI.DisplayLevelInfo(levelData);
         levelUICanvas.gameObject.SetActive(true);
         SetDepthOfFieldEffectActive(true);
+
+        cameraRotation.DisableInput();
+        planetInteraction.Disable();
+    }
+
+    public void SetNewGamePopupCanvasActive(bool active)
+    {
+        newGamePopupCanvas.gameObject.SetActive(active);
+
+        SetDepthOfFieldEffectActive(active);
+
+        cameraRotation.DisableInput();
+        planetInteraction.Disable();
+    }
+
+    public void SetOptionsCanvasActive(bool active)
+    {
+        optionsCanvas.gameObject.SetActive(active);
+
+        SetDepthOfFieldEffectActive(active);
+
+        cameraRotation.DisableInput();
+        planetInteraction.Disable();
+    }
+
+    public void ClosePlanetSelectionUI()
+    {
+        planetSelectionCanvas.gameObject.SetActive(false);
+
+        if (cameraRotation.GetCurrentTarget() == "")
+        {
+            SetMainMenuCanvasActive(true);
+            SetDepthOfFieldEffectActive(false);
+        }
+        else
+        {
+            SetTravelUICanvasActive(true);
+        }
+    }
+
+    public void SetCreditsCanvasActive(bool active)
+    {
+        creditsCanvas.gameObject.SetActive(active);
+
+        SetDepthOfFieldEffectActive(active);
 
         cameraRotation.DisableInput();
         planetInteraction.Disable();
