@@ -63,7 +63,7 @@ public class PlanetInteraction : MonoBehaviour
 
                 if (cameraRotation != null)
                 {
-                    if (cameraRotation.GetCurrentTarget() == hitObject.name) {
+                    if (cameraRotation.GetCurrentTargetName() == hitObject.name) {
                         return;
                     }
 

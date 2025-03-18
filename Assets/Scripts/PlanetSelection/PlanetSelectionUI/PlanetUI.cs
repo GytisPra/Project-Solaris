@@ -5,13 +5,11 @@ public class PlanetUI : MonoBehaviour
 {
     public PlanetSelectionUIManager planetSelectionUIManager;
 
-    private string currentPlanetName;
     private CameraRotation cameraRotation;
 
     void Start()
     {
         cameraRotation = Camera.main.GetComponent<CameraRotation>();
-        currentPlanetName = cameraRotation.GetCurrentTarget();
 
         if (cameraRotation == null)
         {
@@ -21,7 +19,7 @@ public class PlanetUI : MonoBehaviour
 
     private void SaveLastPlanet()
     {
-        PlayerPrefs.SetString("LastPlanet", cameraRotation.GetCurrentTarget());
+        PlayerPrefs.SetString("LastPlanet", cameraRotation.GetCurrentTargetName());
         PlayerPrefs.Save();
     }
 

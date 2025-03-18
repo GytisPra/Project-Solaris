@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
@@ -22,16 +23,16 @@ public class PlanetSelectionUIManager : MonoBehaviour
 
     void Start()
     {
+        if (postProcessingVolume.profile.TryGet(out depthOfField))
+        {
+            Debug.LogError("Depth of field not found in Post Processing Volume!");
+        }
+
         SetMainMenuCanvasActive(true);
 
         SetLevelUICanvasActive(false);
         SetPlanetSelectionCanvasActive(false);
         SetPlanetUICanvasActive(false);
-
-        if (postProcessingVolume.profile.TryGet(out depthOfField))
-        {
-             Debug.LogError("No Depth of Field effect found in the Volume profile.");
-        }
     }
 
     public void SetPlanetUICanvasActive(bool active)
@@ -121,7 +122,7 @@ public class PlanetSelectionUIManager : MonoBehaviour
     {
         planetSelectionCanvas.gameObject.SetActive(false);
 
-        if (cameraRotation.GetCurrentTarget() == "")
+        if (cameraRotation.GetCurrentTargetName() == "")
         {
             SetMainMenuCanvasActive(true);
             SetDepthOfFieldEffectActive(false);
