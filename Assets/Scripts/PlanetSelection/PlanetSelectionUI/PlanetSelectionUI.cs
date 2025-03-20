@@ -1,11 +1,8 @@
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public class PlanetSelectionUI : MonoBehaviour
 {
-    public GameObject planets;
     public PlanetSelectionUIManager planetSelectionUIManager;
-
     public GameObject popup;
     public GameObject planetSelection;
 

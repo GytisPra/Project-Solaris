@@ -1,9 +1,9 @@
-using Unity.VisualScripting;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.LowLevel;
 using TouchPhase = UnityEngine.InputSystem.TouchPhase;
+using UnityEngine.EventSystems;
+using Unity.VisualScripting;
 
 public class CameraRotation : MonoBehaviour
 {
@@ -14,6 +14,7 @@ public class CameraRotation : MonoBehaviour
     public float transitionSpeed = 200f;
     public float resetCameraDistance;
     public GameObject target;
+    public GameObject sun;
     public bool disableInput = false;
 
     [SerializeField] private float rotationDrag;
@@ -36,39 +37,7 @@ public class CameraRotation : MonoBehaviour
     private InputAction click;
     private InputAction mouseDelta;
 
-    //private void Awake()
-    //{
-    //    InputAction touchAction = new(
-    //        type: InputActionType.Value,
-    //        binding: "<Touchscreen>/primaryTouch"
-    //    );
-    //    touchAction.Enable();
-
-    //    InputAction clickAction = new(
-    //        type: InputActionType.Button,
-    //        binding: "<Mouse>/leftButton"
-    //    );
-    //    clickAction.Enable();
-
-    //    InputAction mouseDeltaAction = new(
-    //        type: InputActionType.Value,
-    //        binding: "<Mouse>/delta"
-    //    );
-    //    mouseDeltaAction.Enable();
-
-    //    touch = touchAction;
-    //    click = clickAction;
-    //    mouseDelta = mouseDeltaAction;
-    //}
-
-    private void OnDisable()
-    {
-        click.Disable();
-        mouseDelta.Disable();
-        touch.Disable();
-    }
-
-    void Start()
+    private void Awake()
     {
         InputAction touchAction = new(
             type: InputActionType.Value,
@@ -91,7 +60,17 @@ public class CameraRotation : MonoBehaviour
         touch = touchAction;
         click = clickAction;
         mouseDelta = mouseDeltaAction;
+    }
 
+    private void OnDisable()
+    {
+        click.Disable();
+        mouseDelta.Disable();
+        touch.Disable();
+    }
+
+    void Start()
+    {
         if (target != null)
         {
             Vector3 direction = new(0, Mathf.Sin(Mathf.Deg2Rad * maxVerticalAngle) * cameraDistance, -Mathf.Cos(Mathf.Deg2Rad * maxVerticalAngle) * cameraDistance);
@@ -107,6 +86,31 @@ public class CameraRotation : MonoBehaviour
             initialPosition = transform.position;
             initialRotation = transform.rotation;
         }
+    }
+
+    private float GetLookRotationY(GameObject sun)
+    {
+        Vector3 lightDirection = (target.transform.position - sun.transform.position).normalized;
+        Vector3 newCameraPosition = target.transform.position - lightDirection * cameraDistance;
+
+        return Quaternion.LookRotation(target.transform.position - newCameraPosition).eulerAngles.y;
+    }
+    bool IsPointerOverUI()
+    {
+        if (EventSystem.current == null)
+            return false;
+
+        if (EventSystem.current.IsPointerOverGameObject() && click.ReadValue<float>() > 0)
+            return true;
+
+        if (Input.touchCount > 0)
+        {
+            Touch touch = Input.GetTouch(0);
+            if (EventSystem.current.IsPointerOverGameObject(touch.fingerId))
+                return true;
+        }
+
+        return false;
     }
 
     void UpdateRotation(ref float velocity, float input, bool invert = false)
@@ -128,8 +132,10 @@ public class CameraRotation : MonoBehaviour
             return;
         }
 
+        bool isPointerOverUI = IsPointerOverUI();
+
         TouchState touchState = touch.ReadValue<TouchState>();
-        Vector2 mouseDeltaDelta = mouseDelta.ReadValue<Vector2>();
+        Vector2 mouseDelta = this.mouseDelta.ReadValue<Vector2>();
 
         bool isTouching = touchState.isInProgress && touchState.isPrimaryTouch && touchState.phase != TouchPhase.Began;
         bool isClicking = click.ReadValue<float>() > 0;
@@ -138,10 +144,10 @@ public class CameraRotation : MonoBehaviour
 
         float planetRotationY = target.transform.rotation.eulerAngles.y;
 
-        if (isUserControlling && !disableInput)
+        if (isUserControlling && !disableInput && !isPointerOverUI)
         {
-            UpdateRotation(ref rotationVelocityY, isClicking ? mouseDeltaDelta.x : touchState.delta.x);
-            UpdateRotation(ref rotationVelocityX, isClicking ? mouseDeltaDelta.y : touchState.delta.y, true);
+            UpdateRotation(ref rotationVelocityY, isClicking ? mouseDelta.x : touchState.delta.x);
+            UpdateRotation(ref rotationVelocityX, isClicking ? mouseDelta.y : touchState.delta.y, true);
 
             lastPlanetRotationY = planetRotationY;
         }
@@ -174,7 +180,6 @@ public class CameraRotation : MonoBehaviour
             {
                 transitionProgress += Time.deltaTime / transitionDuration;
                 transitionProgress = Mathf.Clamp01(transitionProgress);
-
                 float distance = Vector3.Distance(transform.position, targetPosition);
 
                 if (distance < 0.07f)
@@ -212,13 +217,14 @@ public class CameraRotation : MonoBehaviour
 
     public void ResetCameraOnCurrentTarget()
     {
-        cameraDistance = Utils.GetSphereRadius(target) * 10.0f;
-        minAllowedDistance = cameraDistance;
+        if (target == null || sun == null) return;
+
+        cameraDistance = minAllowedDistance = Utils.GetSphereRadius(target) * 10.0f;
+
+        rotationY = GetLookRotationY(sun);
+        rotationX = 0;
 
         smoothTransition = true;
-
-        rotationX = 0;
-        rotationY = 0;
     }
 
     public void SetTargetObject(GameObject newTarget)
@@ -228,12 +234,24 @@ public class CameraRotation : MonoBehaviour
             return;
         }
 
+        if (newTarget.TryGetComponent<LoadLevelsOnPlanet>(out var loadLevelsOnNewTarget))
+        {
+            loadLevelsOnNewTarget.ShowLevels(true);
+        }
+
+        if (target != null && target.TryGetComponent<LoadLevelsOnPlanet>(out var loadLevelsOnOldTarget))
+        {
+            loadLevelsOnOldTarget.ShowLevels(false);
+        }
+
         target = newTarget;
         cameraDistance = Utils.GetSphereRadius(newTarget) * 10.0f;
         minAllowedDistance = cameraDistance;
 
-        smoothTransition = true;
         rotationX = 0;
+        rotationY = GetLookRotationY(sun);
+
+        smoothTransition = true;
     }
     public string GetCurrentTargetName()
     {

@@ -15,7 +15,7 @@ public class LoadLevelsOnPlanet : MonoBehaviour
 
     void Start()
     {
-        radius = Utils.GetSphereRadius(gameObject) * 1.8f;
+        radius = Utils.GetSphereRadius(gameObject);
         prevRadius = radius;
 
         if (jsonFile != null)
@@ -45,13 +45,13 @@ public class LoadLevelsOnPlanet : MonoBehaviour
             radius * Mathf.Cos(latRad) * Mathf.Sin(lonRad)
         );
 
-        Vector3 worldPosition = transform.position + localPosition;
+        Vector3 worldPosition = localPosition;
 
         GameObject point = Instantiate(pointPrefab, worldPosition, Quaternion.identity);
         point.name = $"{level.ID}";
         point.layer = 6;
         point.transform.parent = transform;
-        point.GetComponent<Renderer>().material.color = pointColor;
+        point.SetActive(false);
 
         LevelData levelData = point.AddComponent<LevelData>();
 
@@ -59,7 +59,7 @@ public class LoadLevelsOnPlanet : MonoBehaviour
         levelData.completed = level.completed;
         levelData.levelID = level.ID;
         levelData.planetName = gameObject.name;
-        levelData.title = level.title;
+        levelData.title = level.title;  
         levelData.completed = level.completed;
 
         placedPoints.Add(point);
@@ -85,6 +85,23 @@ public class LoadLevelsOnPlanet : MonoBehaviour
             );
 
             placedPoints[i].transform.position = transform.position + localPosition; // Adjust for planet's position
+        }
+    }
+    public void ShowLevels(bool show)
+    {
+        if (show)
+        {
+            foreach (var point in placedPoints)
+            {
+                point.SetActive(show);
+            }
+        }
+        else if (!show)
+        {
+            foreach (var point in placedPoints)
+            {
+                point.SetActive(show);
+            }
         }
     }
 }

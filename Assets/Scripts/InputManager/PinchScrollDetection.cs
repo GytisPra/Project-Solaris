@@ -9,6 +9,7 @@ public class PinchScrollDetection : MonoBehaviour
     private CameraRotation cameraRotation;
     private float previousMagnitude;
     private int touchCount;
+    private string prevTarget = "";
 
     public float scroolSpeed = 4.75f;
     public float pinchSpeed = 2.5f;
@@ -16,8 +17,9 @@ public class PinchScrollDetection : MonoBehaviour
     public float maxDistance = 500f;
     void Start()
     {
-
         cameraRotation = Camera.main.GetComponent<CameraRotation>();
+
+        
 
         // Mouse scroll
         InputAction scrollAction = new(binding: "<Mouse>/scroll");
@@ -94,5 +96,14 @@ public class PinchScrollDetection : MonoBehaviour
         cameraRotation.cameraDistance = Mathf.Clamp(cameraRotation.cameraDistance + increment, minDistance, maxDistance);
     }
 
+    void Update()
+    {
+        if (prevTarget == cameraRotation.GetCurrentTargetName())
+        {
+            return;
+        }
 
+        minDistance = Utils.GetSphereRadius(cameraRotation.GetCurrentTarget()) * 10f;
+        prevTarget = cameraRotation.GetCurrentTargetName();
+    }
 }
