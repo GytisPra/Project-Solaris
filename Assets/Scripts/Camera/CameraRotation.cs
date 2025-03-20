@@ -145,7 +145,7 @@ public class CameraRotation : MonoBehaviour
         TouchState touchState = touch.ReadValue<TouchState>();
         Vector2 mouseDelta = this.mouseDelta.ReadValue<Vector2>();
 
-        bool isTouching = touchState.isInProgress && touchState.isPrimaryTouch && touchState.phase != TouchPhase.Began;
+        bool isTouching = touchState.isInProgress && touchState.isPrimaryTouch;
         bool isClicking = click.ReadValue<float>() > 0;
 
         bool isUserControlling = isClicking || isTouching;
@@ -188,9 +188,10 @@ public class CameraRotation : MonoBehaviour
             {
                 transitionProgress += Time.deltaTime / transitionDuration;
                 transitionProgress = Mathf.Clamp01(transitionProgress);
-                float distance = Vector3.Distance(transform.position, targetPosition);
 
-                if (distance < 0.07f)
+                float dstToTargetPos = Vector3.Distance(transform.position, targetPosition);
+
+                if (dstToTargetPos < 1f)
                 {
                     transform.position = targetPosition;
                     smoothTransition = false;
