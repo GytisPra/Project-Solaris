@@ -14,7 +14,6 @@ public class PlanetInteraction : MonoBehaviour
     private InputAction interactionPosition;
     private InputAction click;
 
-
     private void Awake()
     {
         touch = new(
@@ -57,40 +56,29 @@ public class PlanetInteraction : MonoBehaviour
             {
                 GameObject hitObject = hit.collider.gameObject;
 
-                if (hitObject.layer == LayerMask.NameToLayer("Planet")) {
+                if (hitObject.layer == LayerMask.NameToLayer("Planet"))
+                {
                     return;
                 }
 
-                if (cameraRotation != null)
-                {
-                    if (cameraRotation.GetCurrentTargetName() == hitObject.name) {
-                        return;
-                    }
+                LevelData levelData = hitObject.GetComponent<LevelData>();
+                SpriteRenderer fillRenderer = hitObject.transform.GetChild(0).GetComponent<SpriteRenderer>();
 
-                    LevelData levelData = hitObject.GetComponent<LevelData>();
-
-                    if (planetSelectionUIManager != null)
-                    {
-                        planetSelectionUIManager.SetPlanetSelectionCanvasActive(false);
-                        planetSelectionUIManager.SetPlanetUICanvasActive(false);
-                        planetSelectionUIManager.OpenLevelUI(levelData);
-                    }
-                    else
-                    {
-                        Debug.LogError("Planet selection UI manager not assigned in inspector!");
-                    }
-                }
+                planetSelectionUIManager.SetPlanetSelectionCanvasActive(false);
+                planetSelectionUIManager.SetPlanetUICanvasActive(false);
+                planetSelectionUIManager.OpenLevelUI(levelData, fillRenderer);
+                cameraRotation.GoToLevel(hitObject);
             }
         }
     }
 
-    public void Disable() 
+    public void Disable()
     {
-        disabled = true; 
+        disabled = true;
     }
 
-    public void Enable() 
+    public void Enable()
     {
-        disabled = false; 
+        disabled = false;
     }
 }

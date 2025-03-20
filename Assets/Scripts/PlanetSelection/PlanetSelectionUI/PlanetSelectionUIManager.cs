@@ -88,9 +88,9 @@ public class PlanetSelectionUIManager : MonoBehaviour
         }
     }
 
-    public void OpenLevelUI(LevelData levelData)
+    public void OpenLevelUI(LevelData levelData, SpriteRenderer fillRenderer)
     {
-        levelUI.DisplayLevelInfo(levelData);
+        levelUI.DisplayLevelInfo(levelData, fillRenderer);
         levelUICanvas.gameObject.SetActive(true);
         SetDepthOfFieldEffectActive(true);
 

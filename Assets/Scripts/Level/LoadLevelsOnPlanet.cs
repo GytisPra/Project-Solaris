@@ -13,11 +13,13 @@ public class LoadLevelsOnPlanet : MonoBehaviour
     private readonly List<GameObject> placedPoints = new();
     private float prevRadius = 1f;
 
-    void Start()
+    void Update()
     {
-        radius = Utils.GetSphereRadius(gameObject);
-        prevRadius = radius;
+        AdjustPointsRadius();
+    }
 
+    private void PlacePoints()
+    {
         if (jsonFile != null)
         {
             levelsInJson = JsonUtility.FromJson<Levels>(jsonFile.text);
@@ -27,13 +29,12 @@ public class LoadLevelsOnPlanet : MonoBehaviour
             }
         }
     }
-    void Update()
-    {
-        AdjustPointsRadius();
-    }
 
     void PlacePoint(Level level)
     {
+        radius = Utils.GetRadius(gameObject) * 2f;
+        prevRadius = radius;
+
         if (pointPrefab == null) return;
 
         float latRad = level.latitude * Mathf.Deg2Rad;
@@ -48,10 +49,17 @@ public class LoadLevelsOnPlanet : MonoBehaviour
         Vector3 worldPosition = localPosition;
 
         GameObject point = Instantiate(pointPrefab, worldPosition, Quaternion.identity);
-        point.name = $"{level.ID}";
+        point.transform.position = transform.position + localPosition;
+
+        point.name = $"Level_{level.ID}";
         point.layer = 6;
         point.transform.parent = transform;
+        point.AddComponent<FaceCamera>();
         point.SetActive(false);
+
+        SpriteRenderer fillRenderer = point.transform.GetChild(0).GetComponent<SpriteRenderer>();
+
+        fillRenderer.material.color = new(1f, 1f, 1f, 0.2f);
 
         LevelData levelData = point.AddComponent<LevelData>();
 
@@ -59,7 +67,7 @@ public class LoadLevelsOnPlanet : MonoBehaviour
         levelData.completed = level.completed;
         levelData.levelID = level.ID;
         levelData.planetName = gameObject.name;
-        levelData.title = level.title;  
+        levelData.title = level.title;
         levelData.completed = level.completed;
 
         placedPoints.Add(point);
@@ -91,6 +99,11 @@ public class LoadLevelsOnPlanet : MonoBehaviour
     {
         if (show)
         {
+            if (placedPoints.Count <= 0)
+            {
+                PlacePoints();
+            }
+
             foreach (var point in placedPoints)
             {
                 point.SetActive(show);

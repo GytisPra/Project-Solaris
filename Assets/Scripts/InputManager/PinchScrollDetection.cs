@@ -103,7 +103,7 @@ public class PinchScrollDetection : MonoBehaviour
             return;
         }
 
-        minDistance = Utils.GetSphereRadius(cameraRotation.GetCurrentTarget()) * 10f;
+        minDistance = Utils.GetRadius(cameraRotation.GetCurrentTarget()) * 10f;
         prevTarget = cameraRotation.GetCurrentTargetName();
     }
 }

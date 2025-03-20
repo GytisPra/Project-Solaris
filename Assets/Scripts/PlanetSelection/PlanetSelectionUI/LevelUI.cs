@@ -11,18 +11,27 @@ public class LevelUI : MonoBehaviour
     public TextMeshProUGUI levelState;
     public TextAsset[] jsonFiles;
 
+    private Color intialColor;
+    private SpriteRenderer fillRenderer;
+
     public void ClosePopUp()
     {
         planetSelectionUIManager.SetLevelUICanvasActive(false);
         planetSelectionUIManager.SetPlanetUICanvasActive(true);
         planetSelectionUIManager.SetDepthOfFieldEffectActive(false);
+        fillRenderer.material.color = intialColor;
     }
 
-    public void DisplayLevelInfo(LevelData levelData)
+    public void DisplayLevelInfo(LevelData levelData, SpriteRenderer fillRenderer)
     {
         levelDescription.text = levelData.description;
         levelID.text = levelData.levelID.ToString();
         levelTitle.text = levelData.title;
+
+        intialColor = fillRenderer.material.color;
+        fillRenderer.material.color = Color.red;
+
+        this.fillRenderer = fillRenderer;
 
         if (!levelData.completed)
         {

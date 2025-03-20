@@ -15,15 +15,20 @@ public static class Utils
         return false;
     }
 
-    public static float GetSphereRadius(GameObject planet)
+    public static float GetRadius(GameObject obj)
     {
-        if (planet == null)
+        if (obj == null)
         {
-            Debug.LogError("Sphere GameObject is null.");
+            Debug.LogError("Sphere is null.");
             return 0f;
         }
 
-        return planet.name switch
+        if (obj.name.Contains("Level"))
+        {
+            return 0.1f;
+        }
+
+        return obj.name switch
         {
             "Mercury" => 1f,
             "Venus" => 2f,
@@ -34,7 +39,7 @@ public static class Utils
             "SaturnST" => 5f,
             "Uranus" => 5f,
             "Neptune" => 5f,
-            _ => throw new System.Exception($"Could not find radius for {planet.name}. Check Utils!"),
+            _ => throw new System.Exception($"Could not find radius for {obj.name}. Check Utils!"),
         };
     }
 }

@@ -88,12 +88,20 @@ public class CameraRotation : MonoBehaviour
         }
     }
 
-    private float GetLookRotationY(GameObject sun)
+    private float GetLookRotationY(GameObject gameObject)
     {
-        Vector3 lightDirection = (target.transform.position - sun.transform.position).normalized;
-        Vector3 newCameraPosition = target.transform.position - lightDirection * cameraDistance;
+        Vector3 direction = (target.transform.position - gameObject.transform.position).normalized;
+        Vector3 newCameraPosition = target.transform.position - direction * cameraDistance;
 
         return Quaternion.LookRotation(target.transform.position - newCameraPosition).eulerAngles.y;
+    }
+
+    private float GetLookRotationX(GameObject gameObject)
+    {
+        Vector3 direction = (target.transform.position - gameObject.transform.position).normalized;
+        Vector3 newCameraPosition = target.transform.position - direction * cameraDistance;
+
+        return Quaternion.LookRotation(target.transform.position - newCameraPosition).eulerAngles.x;
     }
     bool IsPointerOverUI()
     {
@@ -219,7 +227,7 @@ public class CameraRotation : MonoBehaviour
     {
         if (target == null || sun == null) return;
 
-        cameraDistance = minAllowedDistance = Utils.GetSphereRadius(target) * 10.0f;
+        cameraDistance = minAllowedDistance = Utils.GetRadius(target) * 10.0f;
 
         rotationY = GetLookRotationY(sun);
         rotationX = 0;
@@ -245,13 +253,19 @@ public class CameraRotation : MonoBehaviour
         }
 
         target = newTarget;
-        cameraDistance = Utils.GetSphereRadius(newTarget) * 10.0f;
+        cameraDistance = Utils.GetRadius(newTarget) * 10.0f;
         minAllowedDistance = cameraDistance;
 
         rotationX = 0;
         rotationY = GetLookRotationY(sun);
 
         smoothTransition = true;
+    }
+    public void GoToLevel(GameObject level)
+    {
+        smoothTransition = true;
+        rotationX = GetLookRotationX(level);
+        rotationY = GetLookRotationY(level);
     }
     public string GetCurrentTargetName()
     {

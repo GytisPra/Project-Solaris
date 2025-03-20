@@ -29,7 +29,7 @@ public class MainMenuScript : MonoBehaviour
 
         GameObject planet = planets.transform.Find(lastPlanet).gameObject;
 
-        if (lastPlanet == "Saturn") {
+        if (lastPlanet == "SaturnST") {
            planet = planet.transform.Find("SaturnST").gameObject;
         }
 
