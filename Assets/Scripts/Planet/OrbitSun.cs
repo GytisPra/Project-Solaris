@@ -16,7 +16,7 @@ public class OrbitSun : MonoBehaviour
         angle = Mathf.Atan2(direction.z, direction.x) * Mathf.Rad2Deg;
     }
 
-    void Update()
+    void FixedUpdate()
     {
         angle += orbitSpeed * Time.deltaTime;
         float radian = angle * Mathf.Deg2Rad;
