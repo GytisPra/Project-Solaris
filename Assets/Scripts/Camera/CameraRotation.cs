@@ -88,6 +88,13 @@ public class CameraRotation : MonoBehaviour
         }
     }
 
+    private float GetLookRotationY(GameObject gameObject, GameObject target)
+    {
+        Vector3 direction = (target.transform.position - gameObject.transform.position).normalized;
+        Vector3 newCameraPosition = target.transform.position - 5.0f * Utils.GetRadius(target) * direction;
+
+        return Quaternion.LookRotation(target.transform.position - newCameraPosition).eulerAngles.y;
+    }
     private float GetLookRotationY(GameObject gameObject)
     {
         Vector3 direction = (target.transform.position - gameObject.transform.position).normalized;
@@ -254,11 +261,10 @@ public class CameraRotation : MonoBehaviour
         }
 
         target = newTarget;
-        cameraDistance = Utils.GetRadius(newTarget) * 5.0f;
-        minAllowedDistance = cameraDistance;
+        cameraDistance = minAllowedDistance = Utils.GetRadius(newTarget) * 5.0f;
 
+        rotationY = GetLookRotationY(sun, newTarget);
         rotationX = 0;
-        rotationY = GetLookRotationY(sun);
 
         smoothTransition = true;
     }
