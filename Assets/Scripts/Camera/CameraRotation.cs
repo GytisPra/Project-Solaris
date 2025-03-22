@@ -228,7 +228,7 @@ public class CameraRotation : MonoBehaviour
     {
         if (target == null || sun == null) return;
 
-        cameraDistance = minAllowedDistance = Utils.GetRadius(target) * 10.0f;
+        cameraDistance = minAllowedDistance = Utils.GetRadius(target) * 5.0f;
 
         rotationY = GetLookRotationY(sun);
         rotationX = 0;
@@ -254,7 +254,7 @@ public class CameraRotation : MonoBehaviour
         }
 
         target = newTarget;
-        cameraDistance = Utils.GetRadius(newTarget) * 10.0f;
+        cameraDistance = Utils.GetRadius(newTarget) * 5.0f;
         minAllowedDistance = cameraDistance;
 
         rotationX = 0;

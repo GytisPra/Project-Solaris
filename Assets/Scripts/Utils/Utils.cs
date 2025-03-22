@@ -30,15 +30,14 @@ public static class Utils
 
         return obj.name switch
         {
-            "Mercury" => 1f,
-            "Venus" => 2f,
-            "Earth" => 3f,
-            "Mars" => 2.5f,
-            "Jupiter" => 6f,
-            "Saturn" => 5f,
-            "SaturnST" => 5f,
-            "Uranus" => 5f,
-            "Neptune" => 5f,
+            "Mercury" => 0.5f,
+            "Venus" => 1f,
+            "Earth" => 1f,
+            "Mars" => 0.625f,
+            "Jupiter" => 3.15f,
+            "Saturn" => 3f,
+            "Uranus" => 1.8f,
+            "Neptune" => 1.8f,
             _ => throw new System.Exception($"Could not find radius for {obj.name}. Check Utils!"),
         };
     }

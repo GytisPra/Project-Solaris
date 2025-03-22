@@ -7,7 +7,6 @@ public class LoadLevelsOnPlanet : MonoBehaviour
     public TextAsset jsonFile;
     public float radius = 1f;
     public GameObject pointPrefab;
-    public Color pointColor;
 
     private Levels levelsInJson;
     private readonly List<GameObject> placedPoints = new();
@@ -32,7 +31,7 @@ public class LoadLevelsOnPlanet : MonoBehaviour
 
     void PlacePoint(Level level)
     {
-        radius = Utils.GetRadius(gameObject) * 2f;
+        radius = Utils.GetRadius(gameObject) * 1f;
         prevRadius = radius;
 
         if (pointPrefab == null) return;
@@ -54,6 +53,11 @@ public class LoadLevelsOnPlanet : MonoBehaviour
         point.name = $"Level_{level.ID}";
         point.layer = 6;
         point.transform.parent = transform;
+
+        Vector3 planetScale = transform.localScale;
+
+        point.transform.localScale = new(0.015f / planetScale.x, 0.015f / planetScale.y, 0.015f / planetScale.z);
+
         point.AddComponent<FaceCamera>();
         point.SetActive(false);
 

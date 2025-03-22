@@ -8,6 +8,7 @@ public class FPSLogger : MonoBehaviour
     }
     void Update()
     {
+        Application.targetFrameRate = 60;
         int fps = Mathf.RoundToInt(1f / Time.deltaTime); // Calculate FPS
         Debug.Log("FPS: " + fps);
     }
