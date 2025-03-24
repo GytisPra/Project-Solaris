@@ -1,4 +1,3 @@
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
@@ -23,7 +22,7 @@ public class PlanetSelectionUIManager : MonoBehaviour
 
     void Start()
     {
-        if (postProcessingVolume.profile.TryGet(out depthOfField))
+        if (!postProcessingVolume.profile.TryGet(out depthOfField))
         {
             Debug.LogError("Depth of field not found in Post Processing Volume!");
         }

@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class LoadLevelsOnPlanet : MonoBehaviour
@@ -52,11 +51,9 @@ public class LoadLevelsOnPlanet : MonoBehaviour
 
         point.name = $"Level_{level.ID}";
         point.layer = 6;
-        point.transform.parent = transform;
 
-        Vector3 planetScale = transform.localScale;
-
-        point.transform.localScale = new(0.015f / planetScale.x, 0.015f / planetScale.y, 0.015f / planetScale.z);
+        point.transform.SetParent(transform);
+        point.transform.localScale = new(transform.localScale.x * radius, transform.localScale.y * radius, transform.localScale.z * radius);
 
         point.AddComponent<FaceCamera>();
         point.SetActive(false);

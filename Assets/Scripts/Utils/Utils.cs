@@ -31,7 +31,7 @@ public static class Utils
         return obj.name switch
         {
             "Mercury" => 0.5f,
-            "Venus" => 1f,
+            "Venus" => 0.8f,
             "Earth" => 1f,
             "Mars" => 0.625f,
             "Jupiter" => 3.15f,

@@ -18,8 +18,6 @@ public class MainMenuScript : MonoBehaviour
 
         lastPlanet = PlayerPrefs.GetString("LastPlanet");
 
-        Debug.Log($"LastPlanet: {lastPlanet}");
-
         if (lastPlanet == "Sun" || lastPlanet == "") {
             cameraRotation.ResetCamera();
             planetSelectionUIManager.SetMainMenuCanvasActive(false);
@@ -28,10 +26,6 @@ public class MainMenuScript : MonoBehaviour
         }
 
         GameObject planet = planets.transform.Find(lastPlanet).gameObject;
-
-        if (lastPlanet == "SaturnST") {
-           planet = planet.transform.Find("SaturnST").gameObject;
-        }
 
         if(planet == null) {
             Debug.LogError("Last Planet does not exist!");

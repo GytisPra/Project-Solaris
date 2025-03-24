@@ -1,9 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.LowLevel;
-using TouchPhase = UnityEngine.InputSystem.TouchPhase;
 using UnityEngine.EventSystems;
-using Unity.VisualScripting;
 
 public class CameraRotation : MonoBehaviour
 {

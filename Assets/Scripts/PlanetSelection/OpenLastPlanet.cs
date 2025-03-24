@@ -1,11 +1,7 @@
-using JetBrains.Annotations;
 using UnityEngine;
 
 public class OpenLastPlanet : MonoBehaviour
 {
-    // TODO: fix a bug where the line dissapears forever
-
-
     public GameObject planets;
     public PlanetSelectionUIManager planetSelectionUIManager;
     public CameraRotation cameraRotation;
@@ -30,10 +26,6 @@ public class OpenLastPlanet : MonoBehaviour
             cameraRotation.ResetCamera();
             return;
         }
-
-        // if (planet.TryGetComponent<OrbitRing>(out var orbitRing)) {
-        //     orbitRing.SetLineVisibility(false);
-        // }
 
         if (cameraRotation != null) {
             cameraRotation.SetTargetObject(planet);
