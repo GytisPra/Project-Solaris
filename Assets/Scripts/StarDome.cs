@@ -10,7 +10,6 @@ using UnityEngine;
 
 public class StarDome : MonoBehaviour
 {
-
     public MeshRenderer starPrefab;
     public Vector2 radiusMinMax;
     public int count = 1000;

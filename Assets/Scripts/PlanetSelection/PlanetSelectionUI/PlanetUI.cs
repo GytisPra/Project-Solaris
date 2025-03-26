@@ -1,17 +1,14 @@
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public class PlanetUI : MonoBehaviour
 {
     public PlanetSelectionUIManager planetSelectionUIManager;
 
-    private string currentPlanetName;
     private CameraRotation cameraRotation;
 
     void Start()
     {
         cameraRotation = Camera.main.GetComponent<CameraRotation>();
-        currentPlanetName = cameraRotation.GetCurrentTarget();
 
         if (cameraRotation == null)
         {
@@ -21,7 +18,7 @@ public class PlanetUI : MonoBehaviour
 
     private void SaveLastPlanet()
     {
-        PlayerPrefs.SetString("LastPlanet", cameraRotation.GetCurrentTarget());
+        PlayerPrefs.SetString("LastPlanet", cameraRotation.GetCurrentTargetName());
         PlayerPrefs.Save();
     }
 
@@ -42,21 +39,19 @@ public class PlanetUI : MonoBehaviour
         cameraRotation.ResetCamera();
     }
 
-    public void ReturnToPlanetSelection()
+    public void GoToTravelMenu()
     {
         SaveLastPlanet();
 
         if (planetSelectionUIManager != null)
         {
-            planetSelectionUIManager.SetPlanetSelectionCanvasActive(true);
+            planetSelectionUIManager.SetTravelUICanvasActive(true);
             planetSelectionUIManager.SetPlanetUICanvasActive(false);
         }
         else
         {
             Debug.LogError("Planet selection UI manager not assigned in inspector!");
         }
-
-        cameraRotation.ResetCamera();
     }
 
     public void ResetSolarSystemCamera()

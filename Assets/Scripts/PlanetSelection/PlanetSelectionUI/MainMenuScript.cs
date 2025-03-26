@@ -17,11 +17,15 @@ public class MainMenuScript : MonoBehaviour
         }
 
         lastPlanet = PlayerPrefs.GetString("LastPlanet");
-        GameObject planet = planets.transform.Find(lastPlanet).gameObject;
 
-        if (lastPlanet == "Saturn") {
-           planet = planet.transform.Find("SaturnST").gameObject;
+        if (lastPlanet == "Sun" || lastPlanet == "") {
+            cameraRotation.ResetCamera();
+            planetSelectionUIManager.SetMainMenuCanvasActive(false);
+            planetSelectionUIManager.SetPlanetSelectionCanvasActive(true);
+            return;
         }
+
+        GameObject planet = planets.transform.Find(lastPlanet).gameObject;
 
         if(planet == null) {
             Debug.LogError("Last Planet does not exist!");
@@ -46,9 +50,22 @@ public class MainMenuScript : MonoBehaviour
         }
     }
 
+    public void OpenNewGamePopup()
+    {
+        planetSelectionUIManager.SetMainMenuCanvasActive(false);
+        planetSelectionUIManager.SetNewGamePopupCanvasActive(true);
+    }
+
     public void OpenOptions()
     {
-        Debug.Log("Opening Options");
+        planetSelectionUIManager.SetMainMenuCanvasActive(false);
+        planetSelectionUIManager.SetOptionsCanvasActive(true);
+    }
+
+    public void OpenCredits()
+    {
+        planetSelectionUIManager.SetMainMenuCanvasActive(false);
+        planetSelectionUIManager.SetCreditsCanvasActive(true);
     }
 
     public void QuitGame()

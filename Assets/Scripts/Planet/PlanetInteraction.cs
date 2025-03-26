@@ -5,59 +5,47 @@ using TouchPhase = UnityEngine.InputSystem.TouchPhase;
 
 public class PlanetInteraction : MonoBehaviour
 {
-    public InputActionAsset inputActionAsset;
-    public Camera solarSystemCamera;
     public LayerMask layerMask;
     public PlanetSelectionUIManager planetSelectionUIManager;
+    public CameraRotation cameraRotation;
+    public bool disabled;
 
-    private InputActionMap uiActionMap;
     private InputAction touch;
     private InputAction interactionPosition;
     private InputAction click;
 
-    private CameraRotation cameraRotation;
-
     private void Awake()
     {
-        uiActionMap = inputActionAsset.FindActionMap("UI", true);
-        uiActionMap.Enable();
-
-        click = uiActionMap.FindAction("Click", true);
-        click.Enable();
-
-        touch = uiActionMap.FindAction("Touch", true);
+        touch = new(
+            type: InputActionType.Value,
+            binding: "<Touchscreen>/primaryTouch"
+        );
         touch.Enable();
 
-        interactionPosition = uiActionMap.FindAction("InteractionPosition", true);
+        click = new(
+            type: InputActionType.Button,
+            binding: "<Mouse>/leftButton"
+        );
+        click.Enable();
+
+        interactionPosition = new(
+            type: InputActionType.Value,
+            binding: "<Pointer>/position"
+        );
         interactionPosition.Enable();
-
-        if (solarSystemCamera != null)
-        {
-            cameraRotation = solarSystemCamera.GetComponent<CameraRotation>();
-        }
-        else
-        {
-            Debug.LogError("Solar system camera is not assigned in the Inspector!");
-        }
-    }
-
-    private void OnEnable()
-    {
-        uiActionMap?.Enable();
     }
 
     private void OnDisable()
     {
-        uiActionMap?.Disable();
-        click?.Disable();
-        touch?.Disable();
-        interactionPosition?.Disable();
+        click.Disable();
+        touch.Disable();
+        interactionPosition.Disable();
     }
     void Update()
     {
         TouchState touchState = touch.ReadValue<TouchState>();
 
-        if (click.triggered || touchState.phase == TouchPhase.Began)
+        if ((click.triggered || touchState.phase == TouchPhase.Began) && !disabled)
         {
             var interactionLocation = touchState.phase == TouchPhase.Began ?
                                         touchState.position : interactionPosition.ReadValue<Vector2>();
@@ -66,29 +54,31 @@ public class PlanetInteraction : MonoBehaviour
 
             if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, layerMask))
             {
-
                 GameObject hitObject = hit.collider.gameObject;
 
-                Debug.Log("Clicked on: " + hitObject.name);
-
-                if (cameraRotation != null)
+                if (hitObject.layer == LayerMask.NameToLayer("Planet"))
                 {
-                    if (cameraRotation.GetCurrentTarget() == hitObject.name) {
-                        return;
-                    } 
-
-                    if (planetSelectionUIManager != null)
-                    {
-                        planetSelectionUIManager.SetPlanetSelectionCanvasActive(false);
-                        planetSelectionUIManager.SetPlanetUICanvasActive(false);
-                        planetSelectionUIManager.OpenLevelUI(int.Parse(hitObject.name));
-                    }
-                    else
-                    {
-                        Debug.LogError("Planet selection UI manager not assigned in inspector!");
-                    }
+                    return;
                 }
+
+                LevelData levelData = hitObject.GetComponent<LevelData>();
+                SpriteRenderer fillRenderer = hitObject.transform.GetChild(0).GetComponent<SpriteRenderer>();
+
+                planetSelectionUIManager.SetPlanetSelectionCanvasActive(false);
+                planetSelectionUIManager.SetPlanetUICanvasActive(false);
+                planetSelectionUIManager.OpenLevelUI(levelData, fillRenderer);
+                cameraRotation.GoToLevel(hitObject);
             }
         }
+    }
+
+    public void Disable()
+    {
+        disabled = true;
+    }
+
+    public void Enable()
+    {
+        disabled = false;
     }
 }
