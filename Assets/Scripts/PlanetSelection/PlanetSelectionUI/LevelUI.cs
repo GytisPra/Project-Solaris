@@ -1,8 +1,6 @@
 using TMPro;
-using UnityEditor.SearchService;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using Scene = UnityEngine.SceneManagement.Scene;
 
 public class LevelUI : MonoBehaviour
 {
@@ -26,7 +24,7 @@ public class LevelUI : MonoBehaviour
 
     public void OpenLevel(string levelSceneName)
     {
-        Screen.orientation = ScreenOrientation.LandscapeLeft;
+        //Screen.orientation = ScreenOrientation.LandscapeLeft;
         SceneManager.LoadScene(levelSceneName);
     }
 

@@ -6,7 +6,6 @@ public class MainMenuScript : MonoBehaviour
     public PlanetSelectionUIManager planetSelectionUIManager;
     public CameraRotation cameraRotation;
     private string lastPlanet;
-
     public void StartGame()
     {
         if (!PlayerPrefs.HasKey("LastPlanet")) {
