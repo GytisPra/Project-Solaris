@@ -1,5 +1,8 @@
 using TMPro;
+using UnityEditor.SearchService;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using Scene = UnityEngine.SceneManagement.Scene;
 
 public class LevelUI : MonoBehaviour
 {
@@ -19,6 +22,12 @@ public class LevelUI : MonoBehaviour
         planetSelectionUIManager.SetPlanetUICanvasActive(true);
         planetSelectionUIManager.SetDepthOfFieldEffectActive(false);
         fillRenderer.material.color = intialColor;
+    }
+
+    public void OpenLevel(string levelSceneName)
+    {
+        Screen.orientation = ScreenOrientation.LandscapeLeft;
+        SceneManager.LoadScene(levelSceneName);
     }
 
     public void DisplayLevelInfo(LevelData levelData, SpriteRenderer fillRenderer)

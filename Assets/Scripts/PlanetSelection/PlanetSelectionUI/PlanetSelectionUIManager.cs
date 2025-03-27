@@ -22,6 +22,8 @@ public class PlanetSelectionUIManager : MonoBehaviour
 
     void Start()
     {
+        Screen.orientation = ScreenOrientation.Portrait;
+
         if (!postProcessingVolume.profile.TryGet(out depthOfField))
         {
             Debug.LogError("Depth of field not found in Post Processing Volume!");
