@@ -11,10 +11,10 @@ using UnityEngine;
 public class StarDome : MonoBehaviour
 {
     public MeshRenderer starPrefab;
-    public Vector2 radiusMinMax;
-    public int count = 1000;
+    public Vector2 radiusMinMax = new(10, 100);
+    public int count = 10000;
     const float calibrationDst = 20000;
-    public Vector2 brightnessMinMax;
+    public Vector2 brightnessMinMax = new(10, 100);
 
 
     void Start()

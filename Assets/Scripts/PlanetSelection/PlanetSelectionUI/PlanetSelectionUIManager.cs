@@ -29,11 +29,11 @@ public class PlanetSelectionUIManager : MonoBehaviour
             Debug.LogError("Depth of field not found in Post Processing Volume!");
         }
 
-        SetMainMenuCanvasActive(true);
+        //SetMainMenuCanvasActive(true);
 
-        SetLevelUICanvasActive(false);
-        SetPlanetSelectionCanvasActive(false);
-        SetPlanetUICanvasActive(false);
+        //SetLevelUICanvasActive(false);
+        //SetPlanetSelectionCanvasActive(false);
+        //SetPlanetUICanvasActive(false);
     }
 
     public void SetPlanetUICanvasActive(bool active)

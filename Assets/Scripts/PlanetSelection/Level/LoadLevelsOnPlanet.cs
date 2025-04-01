@@ -63,7 +63,6 @@ public class LoadLevelsOnPlanet : MonoBehaviour
         fillRenderer.material.color = new(1f, 1f, 1f, 0.2f);
 
         LevelData levelData = point.AddComponent<LevelData>();
-
         levelData.description = level.description;
         levelData.completed = level.completed;
         levelData.levelID = level.ID;

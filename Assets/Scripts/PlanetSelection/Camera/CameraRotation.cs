@@ -69,6 +69,9 @@ public class CameraRotation : MonoBehaviour
 
     void Start()
     {
+        initialPosition = transform.position;
+        initialRotation = transform.rotation;
+
         if (target != null)
         {
             Vector3 direction = new(0, Mathf.Sin(Mathf.Deg2Rad * maxVerticalAngle) * cameraDistance, -Mathf.Cos(Mathf.Deg2Rad * maxVerticalAngle) * cameraDistance);
@@ -78,11 +81,6 @@ public class CameraRotation : MonoBehaviour
 
             rotationX = 50f;
             rotationY = 0f;
-        }
-        else
-        {
-            initialPosition = transform.position;
-            initialRotation = transform.rotation;
         }
     }
     private float GetLookRotationY(GameObject gameObject)
