@@ -5,6 +5,8 @@ public class LevelUIManager : MonoBehaviour
 {
     public Canvas levelUICanvas;
     public Canvas exitLevelPopupCanvas;
+    public Canvas interactionCanvas;
+    public Canvas interactionPopupCanvas;
     public Volume postProcessingVolume;
     private DepthOfField depthOfField;
 

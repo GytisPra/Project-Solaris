@@ -11,29 +11,66 @@ public class PlayerController : MonoBehaviour
     private Vector2 touchDirection;
     private bool isMoving = false;
     private Animator animator;
-    private new Rigidbody rigidbody;
+    private int touchCount = 0;
+
+    private InputAction keyboardAction;
 
     void Start()
     {
-        rigidbody = GetComponent<Rigidbody>();
+        animator = GetComponent<Animator>();
+
+        InputAction touch0Contact = new(type: InputActionType.Button, binding: "<Touchscreen>/touch0/press");
+        touch0Contact.Enable();
+        touch0Contact.performed += _ => touchCount++;
+        touch0Contact.canceled += _ => touchCount--;;
+
+        InputAction touch1Contact = new(type: InputActionType.Button, binding: "<Touchscreen>/touch1/press");
+        touch1Contact.Enable();
+        touch1Contact.performed += _ => touchCount++;
+        touch1Contact.canceled += _ => touchCount--;
+
         EnhancedTouchSupport.Enable();
         Touch.onFingerDown += OnFingerDown;
         Touch.onFingerMove += OnFingerMove;
         Touch.onFingerUp += OnFingerUp;
-        animator = GetComponent<Animator>();
+
+        keyboardAction = new InputAction(type: InputActionType.Value);
+        keyboardAction.AddCompositeBinding("2DVector")
+            .With("Up", "<Keyboard>/w")
+            .With("Up", "<Keyboard>/upArrow")
+            .With("Down", "<Keyboard>/s")
+            .With("Down", "<Keyboard>/downArrow")
+            .With("Left", "<Keyboard>/a")
+            .With("Left", "<Keyboard>/leftArrow")
+            .With("Right", "<Keyboard>/d")
+            .With("Right", "<Keyboard>/rightArrow");
+        keyboardAction.Enable();
     }
 
     void FixedUpdate()
     {
-        if (Touch.activeTouches.Count > 1)
+        if (touchCount > 1)
         {
-            animator.SetFloat("speedPercent", 0f);  // Reset speedPercent if there are multiple touches.
+            animator.SetFloat("speedPercent", 0f);  // Reset speedPercent if multiple touches.
             return;
         }
 
         if (isMoving)
         {
-            MovePlayer();
+            MovePlayer(touchDirection);
+        }
+        else
+        {
+            Vector2 keyboardInput = keyboardAction.ReadValue<Vector2>();
+
+            if (keyboardInput != Vector2.zero)
+            {
+                MovePlayer(keyboardInput);
+            }
+            else
+            {
+                animator.SetFloat("speedPercent", 0f);
+            }
         }
     }
 
@@ -41,7 +78,7 @@ public class PlayerController : MonoBehaviour
     {
         touchStartPosition = finger.screenPosition;
         isMoving = true;
-        animator.SetFloat("speedPercent", 1f);  // Set speed to walking when the finger is down.
+        animator.SetFloat("speedPercent", 1f);
     }
 
     void OnFingerMove(Finger finger)
@@ -56,11 +93,11 @@ public class PlayerController : MonoBehaviour
         animator.SetFloat("speedPercent", 0f);
     }
 
-    void MovePlayer()
+    void MovePlayer(Vector2 normalizedInput)
     {
-        if (touchDirection != Vector2.zero)
+        if (normalizedInput != Vector2.zero)
         {
-            Vector3 movementDirection = new(touchDirection.x, 0, touchDirection.y);
+            Vector3 movementDirection = new(normalizedInput.x, 0, normalizedInput.y);
             transform.rotation = Quaternion.LookRotation(movementDirection);
             transform.Translate(Time.deltaTime * walkSpeed * movementDirection, Space.World);
 
