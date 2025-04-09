@@ -5,6 +5,7 @@ public class PlanetSelectionUI : MonoBehaviour
     public PlanetSelectionUIManager planetSelectionUIManager;
     public GameObject popup;
     public GameObject planetSelection;
+    public Transform planets;
 
     private CameraRotation cameraRotation;
 
@@ -27,7 +28,9 @@ public class PlanetSelectionUI : MonoBehaviour
                 planetSelectionUIManager.SetTravelUICanvasActive(false);
                 planetSelectionUIManager.SetPlanetSelectionCanvasActive(false);
                 planetSelectionUIManager.SetPlanetUICanvasActive(true);
-            } else {
+            }
+            else
+            {
                 Debug.LogError("planetSelectionUIManager not assigned in the inspector!");
             }
         }
@@ -37,11 +40,13 @@ public class PlanetSelectionUI : MonoBehaviour
         }
     }
 
-    public void ReturnToTravelMenu() {
+    public void ReturnToTravelMenu()
+    {
         planetSelectionUIManager.ClosePlanetSelectionUI();
     }
 
-    public void ResetSolarSystemCamera() {
+    public void ResetSolarSystemCamera()
+    {
         cameraRotation.ResetCamera();
     }
 

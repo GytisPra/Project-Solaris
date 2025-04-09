@@ -13,10 +13,14 @@ public class PlayerController : MonoBehaviour
     private Animator animator;
     private int touchCount = 0;
 
+    private Transform cameraTransform;
+
     private InputAction keyboardAction;
 
     void Start()
     {
+        cameraTransform = Camera.main.gameObject.transform;
+
         animator = GetComponent<Animator>();
 
         InputAction touch0Contact = new(type: InputActionType.Button, binding: "<Touchscreen>/touch0/press");
@@ -78,7 +82,6 @@ public class PlayerController : MonoBehaviour
     {
         touchStartPosition = finger.screenPosition;
         isMoving = true;
-        animator.SetFloat("speedPercent", 1f);
     }
 
     void OnFingerMove(Finger finger)
@@ -97,9 +100,18 @@ public class PlayerController : MonoBehaviour
     {
         if (normalizedInput != Vector2.zero)
         {
-            Vector3 movementDirection = new(normalizedInput.x, 0, normalizedInput.y);
-            transform.rotation = Quaternion.LookRotation(movementDirection);
-            transform.Translate(Time.deltaTime * walkSpeed * movementDirection, Space.World);
+            Vector3 cameraForward = cameraTransform.forward;
+            cameraForward.y = 0;
+            cameraForward.Normalize();
+
+            Vector3 cameraRight = cameraTransform.right;
+            cameraRight.y = 0;
+            cameraRight.Normalize();
+
+            Vector3 moveDirection = cameraForward * normalizedInput.y + cameraRight * normalizedInput.x;
+
+            transform.rotation = Quaternion.LookRotation(moveDirection);
+            transform.Translate(Time.deltaTime * walkSpeed * moveDirection, Space.World);
 
             animator.SetFloat("speedPercent", 1f);
         }

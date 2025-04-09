@@ -9,7 +9,7 @@ public class ThirdPersonCamera : MonoBehaviour
     public float maxFOV = 90f;
     public float zoomSpeed = 0.5f;
     public float pitchSensitivity = 10f;
-    public float rotateSensitivity = 15f;
+    public float rotateSensitivity = 80f;
     public float maxPitch = 80f;
     public float minPitch = 10f;
 
@@ -18,6 +18,7 @@ public class ThirdPersonCamera : MonoBehaviour
     private bool pinching;
     private bool moving;
     private bool rotating;
+    private bool rotatingKBM;
     private Vector2 previousTouchVector;
 
     private Camera cam;
@@ -28,17 +29,29 @@ public class ThirdPersonCamera : MonoBehaviour
     private InputAction touch1Contact;
     private InputAction touch1Pos;
     private InputAction touch1Delta;
-
     private InputAction scrollAction;
+    private InputAction middleButton;
+
+    [SerializeField] private Vector3 offset = new(0, 5, -10);
+    [SerializeField] private float followSpeed = 5f;
 
     void Start()
     {
         cam = Camera.main;
         EnhancedTouchSupport.Enable();
 
+
         scrollAction = new(binding: "<Mouse>/scroll");
         scrollAction.Enable();
         scrollAction.performed += ctx => CameraZoom(-ctx.ReadValue<Vector2>().y * zoomSpeed);
+
+        middleButton = new(binding: "<Mouse>/middleButton");
+        middleButton.Enable();
+        middleButton.started += ctx => rotatingKBM = true;
+        middleButton.canceled += ctx => 
+        {
+            rotatingKBM = false;
+        };
 
         touch0Contact = new InputAction(type: InputActionType.Button, binding: "<Touchscreen>/touch0/press");
         touch0Contact.Enable();
@@ -84,9 +97,41 @@ public class ThirdPersonCamera : MonoBehaviour
             rotating = false;
         }
 
+        if (rotatingKBM)
+        {
+            Vector2 mouseDelta = Mouse.current.delta.ReadValue();
+            float rotationAmountY = mouseDelta.x * rotateSensitivity * 0.5f * Time.deltaTime;
+            float rotationAmountX = -mouseDelta.y * rotateSensitivity * 0.5f * Time.deltaTime;
+
+            transform.RotateAround(target.position, Vector3.up, rotationAmountY);
+
+            Vector3 directionToCamera = (cam.transform.position - target.transform.position).normalized;
+            float distanceToTarget = Vector3.Distance(cam.transform.position, target.transform.position);
+
+            Vector3 flatDirection = new Vector3(directionToCamera.x, 0, directionToCamera.z).normalized;
+            float currentPitch = Vector3.SignedAngle(flatDirection, directionToCamera, Vector3.Cross(flatDirection, Vector3.up));
+
+            float newPitch = Mathf.Clamp(currentPitch + rotationAmountX, minPitch, maxPitch);
+            float pitchDelta = newPitch - currentPitch;
+
+            Vector3 rightAxis = Vector3.Cross(directionToCamera, Vector3.up).normalized;
+            Vector3 newDirection = Quaternion.AngleAxis(pitchDelta, rightAxis) * directionToCamera;
+
+            Vector3 targetPosition = target.transform.position + newDirection * distanceToTarget;
+            cam.transform.position = targetPosition;
+
+            offset = transform.position - target.position;
+            cam.transform.LookAt(target.transform);
+        }
+
         if (target)
         {
-            transform.LookAt(target.transform, target.up);
+            Vector3 desiredPosition = target.position + offset;
+            transform.position = Vector3.Lerp(transform.position, desiredPosition, followSpeed * Time.deltaTime);
+        }
+        else
+        {
+            cam.transform.LookAt(target.transform);
         }
     }
 
@@ -126,8 +171,8 @@ public class ThirdPersonCamera : MonoBehaviour
 
         if (!pinching && !moving && !rotating)
         {
-            bool isZooming = Mathf.Abs(magnitudeDifference) > 50f;
-            bool isRotating = Mathf.Abs(angleDelta) > 4f;
+            bool isZooming = Mathf.Abs(magnitudeDifference) > 30f;
+            bool isRotating = Mathf.Abs(angleDelta) > 2f;
             bool isMoving = Vector2.Dot(delta0.normalized, delta1.normalized) > 0.2f;
 
             if (isZooming)
@@ -152,6 +197,8 @@ public class ThirdPersonCamera : MonoBehaviour
             transform.RotateAround(target.position, Vector3.up, rotationAmount);
 
             transform.LookAt(target);
+
+            offset = transform.position - target.position;
         }
         else if (pinching)
         {
@@ -160,7 +207,7 @@ public class ThirdPersonCamera : MonoBehaviour
         }
         else if (moving)
         {
-            float moveAmount = -delta0.y * Time.deltaTime * pitchSensitivity;
+            float moveAmountX = -delta0.y * Time.deltaTime * pitchSensitivity;
 
             Vector3 directionToCamera = (cam.transform.position - target.transform.position).normalized;
             float distanceToTarget = Vector3.Distance(cam.transform.position, target.transform.position);
@@ -168,7 +215,7 @@ public class ThirdPersonCamera : MonoBehaviour
             Vector3 flatDirection = new Vector3(directionToCamera.x, 0, directionToCamera.z).normalized;
             float currentPitch = Vector3.SignedAngle(flatDirection, directionToCamera, Vector3.Cross(flatDirection, Vector3.up));
 
-            float newPitch = Mathf.Clamp(currentPitch + moveAmount, minPitch, maxPitch);
+            float newPitch = Mathf.Clamp(currentPitch + moveAmountX, minPitch, maxPitch);
             float pitchDelta = newPitch - currentPitch;
 
             Vector3 rightAxis = Vector3.Cross(directionToCamera, Vector3.up).normalized;
@@ -178,6 +225,7 @@ public class ThirdPersonCamera : MonoBehaviour
             cam.transform.position = targetPosition;
 
             cam.transform.LookAt(target.transform);
+            offset = transform.position - target.position;
         }
     }
 

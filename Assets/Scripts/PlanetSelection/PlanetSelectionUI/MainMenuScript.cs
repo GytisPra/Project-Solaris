@@ -8,14 +8,7 @@ public class MainMenuScript : MonoBehaviour
     private string lastPlanet;
     public void StartGame()
     {
-        if (!PlayerPrefs.HasKey("LastPlanet")) {
-            cameraRotation.ResetCamera();
-            planetSelectionUIManager.SetMainMenuCanvasActive(false);
-            planetSelectionUIManager.SetPlanetSelectionCanvasActive(true);
-            return;
-        }
-
-        lastPlanet = PlayerPrefs.GetString("LastPlanet");
+        lastPlanet = PlayerPrefs.GetString("LastPlanet", "Earth");
 
         if (lastPlanet == "Sun" || lastPlanet == "") {
             cameraRotation.ResetCamera();

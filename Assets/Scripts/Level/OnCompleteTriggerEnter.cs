@@ -5,11 +5,19 @@ public class OnCompleteTriggerEnter : MonoBehaviour
 {
     private void OnTriggerEnter(Collider other)
     {
-        LevelData levelData = LevelDataHolder.currLevelData;
+        string planetName = PlayerPrefs.GetString("levelPlanet");
+        int levelID = PlayerPrefs.GetInt("levelID");
+
+        if (planetName == null || planetName == "" || levelID == 0)
+        {
+            Debug.LogError($"Level data for the current level not found. " +
+                $"You need to enter the level from the planetSelection scene!");
+            return;
+        }
 
         if (other.CompareTag("Player"))
         {
-            Debug.Log($"Level ID: {levelData.levelID} | Planet: {levelData.planetName}");
+            Debug.Log($"Level ID: {levelID} | Planet: {planetName}");
             //TextAsset levelJson = Utils.GetJsonFile(levelData.planetName);
 
             SceneManager.LoadScene("PlanetSelection");

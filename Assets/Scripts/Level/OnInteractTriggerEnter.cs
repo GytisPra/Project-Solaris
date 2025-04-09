@@ -1,17 +1,21 @@
-using UnityEditor;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public class OnInteractTriggerEnter : MonoBehaviour
 {
-    public Canvas interactionCanvas;
+    private bool disabled = false;
+
+    public LevelUIManager levelUIManager;
+    public PlayerController playerController;
+
     private void OnTriggerEnter(Collider other)
     {
-        interactionCanvas.gameObject.SetActive(true);
-    }
+        if (disabled) return;
 
-    private void OnTriggerExit(Collider other)
-    {
-        interactionCanvas.gameObject.SetActive(false);
+        levelUIManager.SetLevelUICanvasActive(false);
+
+        levelUIManager.SetInteractionPopupActive(true);
+        levelUIManager.SetDepthOfFieldEffectActive(true);
     }
+    public void DisableTrigger() => disabled = true;
+    public void EnableTrigger() => disabled = false;
 }

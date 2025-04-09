@@ -82,6 +82,7 @@ public class PlanetSelectionUIManager : MonoBehaviour
         if (active) {
             cameraRotation.DisableInput();
             planetInteraction.Disable();
+            Screen.orientation = ScreenOrientation.Portrait;
         }
     }
 

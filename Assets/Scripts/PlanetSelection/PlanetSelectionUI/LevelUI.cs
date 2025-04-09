@@ -25,7 +25,15 @@ public class LevelUI : MonoBehaviour
 
     public void OpenLevel()
     {
+        Screen.orientation = ScreenOrientation.AutoRotation;
+
         LevelDataHolder.currLevelData = currLevelData;
+
+        PlayerPrefs.SetString("levelPlanet", currLevelData.planetName);
+        PlayerPrefs.SetString("lastPlanet", currLevelData.planetName);
+        PlayerPrefs.SetInt("levelID", currLevelData.levelID);
+        PlayerPrefs.Save();
+
         SceneManager.LoadScene(currLevelData.planetName + currLevelData.levelID);
     }
 

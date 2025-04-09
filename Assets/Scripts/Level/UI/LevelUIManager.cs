@@ -5,14 +5,13 @@ public class LevelUIManager : MonoBehaviour
 {
     public Canvas levelUICanvas;
     public Canvas exitLevelPopupCanvas;
-    public Canvas interactionCanvas;
     public Canvas interactionPopupCanvas;
     public Volume postProcessingVolume;
     private DepthOfField depthOfField;
 
     void Start()
     {
-        Screen.orientation = ScreenOrientation.Portrait;
+        Screen.orientation = ScreenOrientation.AutoRotation;
 
         if (!postProcessingVolume.profile.TryGet(out depthOfField))
         {
@@ -31,6 +30,13 @@ public class LevelUIManager : MonoBehaviour
     public void SetExitLevelPopupCanvasActive(bool active)
     {
         exitLevelPopupCanvas.gameObject.SetActive(active);
+
+        SetDepthOfFieldEffectActive(active);
+    }
+
+    public void SetInteractionPopupActive(bool active)
+    {
+        interactionPopupCanvas.gameObject.SetActive(active);
 
         SetDepthOfFieldEffectActive(active);
     }
