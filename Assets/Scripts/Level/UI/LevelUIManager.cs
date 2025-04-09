@@ -41,7 +41,6 @@ public class LevelUIManager : MonoBehaviour
         SetDepthOfFieldEffectActive(active);
     }
 
-
     public void SetDepthOfFieldEffectActive(bool active)
     {
         if (depthOfField == null)

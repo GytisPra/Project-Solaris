@@ -22,6 +22,14 @@ public class IceMelt : MonoBehaviour
                 targetScale,
                 meltSpeed * Time.deltaTime
                 );
+
+            if (Vector3.Distance(iceTransform.localScale, targetScale) < 0.001f)
+            {
+                foreach (BoxCollider collider in iceTransform.GetComponents<BoxCollider>())
+                {
+                    collider.enabled = false;
+                }
+            }
         }
         else
         {

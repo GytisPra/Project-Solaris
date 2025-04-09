@@ -15,6 +15,15 @@ public class InteractionUIScript : MonoBehaviour
     [SerializeField] private TMP_Text errorMsg;
     [SerializeField] private AnimateLampRay animateLampRay;
     [SerializeField] private IceMelt iceMelt;
+    [SerializeField] private OnInteractTriggerEnter onInteractTriggerEnter;
+
+    public void Close()
+    {
+        levelUIManager.SetInteractionPopupActive(false);
+        levelUIManager.SetLevelUICanvasActive(true);
+        levelUIManager.SetDepthOfFieldEffectActive(false);
+    }
+
     public void Confirm()
     {
         bool meltIce = false;
@@ -31,8 +40,9 @@ public class InteractionUIScript : MonoBehaviour
 
             levelUIManager.SetInteractionPopupActive(false);
             levelUIManager.SetLevelUICanvasActive(true);
-
             levelUIManager.SetDepthOfFieldEffectActive(false);
+
+            onInteractTriggerEnter.DisableTrigger();
 
             StartCoroutine(MoveLens(targetPos, meltIce));
         }
@@ -88,6 +98,7 @@ public class InteractionUIScript : MonoBehaviour
         }
 
         animateLampRay.EnableLamp();
+        onInteractTriggerEnter.EnableTrigger();
 
         if (meltIce)
         {

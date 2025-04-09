@@ -7,8 +7,8 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: MouthClosedMaterial
-  m_Shader: {fileID: -6465566751694194690, guid: f5cac88794ed4494aa9a47254fbdfbc8, type: 3}
+  m_Name: Mouth
+  m_Shader: {fileID: -6465566751694194690, guid: 4f6b2b18bfc6d0c45b9a42dcb95ba376, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -25,7 +25,7 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - _BaseMap:
-        m_Texture: {fileID: 2800000, guid: 9f04e1ddfa14cde438bc2e77b8fbb6d4, type: 3}
+        m_Texture: {fileID: 2800000, guid: 22d699ac639b3f345bc265470b61455a, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _BumpMap:
@@ -73,7 +73,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _Texture2D:
-        m_Texture: {fileID: 2800000, guid: 9f04e1ddfa14cde438bc2e77b8fbb6d4, type: 3}
+        m_Texture: {fileID: 2800000, guid: 22d699ac639b3f345bc265470b61455a, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - unity_Lightmaps:
@@ -91,9 +91,12 @@ Material:
     m_Ints: []
     m_Floats:
     - _AddPrecomputedVelocity: 0
+    - _Alpha: 0
     - _AlphaClip: 1
+    - _AlphaThreashold: 0.5
     - _AlphaToMask: 1
     - _Alpha_Clip_Treashold: 0.5
+    - _Alpha_Threashold: 0.5
     - _Blend: 0
     - _BlendModePreserveSpecular: 1
     - _BlendOp: 0
@@ -110,13 +113,16 @@ Material:
     - _GlossMapScale: 0
     - _Glossiness: 0
     - _GlossyReflections: 0
+    - _Max: 1
     - _Metallic: 0
+    - _Min: 0.3
     - _OcclusionStrength: 1
     - _Parallax: 0.005
     - _QueueControl: 0
     - _QueueOffset: 0
     - _ReceiveShadows: 1
     - _SampleGI: 0
+    - _Shades: 0.39
     - _Smoothness: 0
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
@@ -132,7 +138,7 @@ Material:
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
---- !u!114 &2298385491727152397
+--- !u!114 &3519062280624659129
 MonoBehaviour:
   m_ObjectHideFlags: 11
   m_CorrespondingSourceObject: {fileID: 0}

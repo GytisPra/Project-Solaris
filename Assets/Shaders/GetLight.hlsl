@@ -8,7 +8,7 @@ void GetLight_float(float3 WorldPos, out float3 Direction, out float3 Color, out
 		float4 sCoord = TransformWorldToShadowCoord(WorldPos);
 
 		Light mainLight = GetMainLight(sCoord);
-		Direction = normalize(_SunPosition - WorldPos);
+		Direction = mainLight.direction;
 		Color = mainLight.color;
 		Attenuation = mainLight.shadowAttenuation;
 	#endif
