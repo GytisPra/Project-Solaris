@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class AboveCharCanvasScript : MonoBehaviour
+public class NearLensCanvasScript : MonoBehaviour
 {
     public LevelUIManager levelUIManager;
 
@@ -8,7 +8,7 @@ public class AboveCharCanvasScript : MonoBehaviour
     {
         levelUIManager.SetInteractionPopupActive(true);
         levelUIManager.SetLevelUICanvasActive(false);
-        levelUIManager.SetAboveCharCanvasActive(false);
+        levelUIManager.SetNearLensCanvasActive(false);
         levelUIManager.SetDepthOfFieldEffectActive(false);
     }
 }

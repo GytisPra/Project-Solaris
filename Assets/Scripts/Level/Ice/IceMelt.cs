@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 public class IceMelt : MonoBehaviour
@@ -6,7 +7,6 @@ public class IceMelt : MonoBehaviour
 
     private Transform iceTransform;
     [SerializeField] AnimateLensRay animateLensRay;
-    private bool isMelting = false;
     private bool targetReached = false;
 
     void Start()
@@ -14,32 +14,31 @@ public class IceMelt : MonoBehaviour
         iceTransform = transform;
     }
 
-    void Update()
+    public IEnumerator Melt()
     {
-        if (isMelting && !targetReached)
+        Vector3 targetScale = new(0, 0, 0);
+
+        while (Vector3.Distance(iceTransform.localScale, targetScale) > 0.001f)
         {
-            Vector3 targetScale = new(0, 0, 0);
             iceTransform.localScale = Vector3.MoveTowards(
                 iceTransform.localScale,
                 targetScale,
                 meltSpeed * Time.deltaTime
-                );
+            );
 
-            if (Vector3.Distance(iceTransform.localScale, targetScale) < 0.001f)
-            {
-                foreach (BoxCollider collider in iceTransform.GetComponents<BoxCollider>())
-                {
-                    collider.enabled = false;
-                }
-
-                animateLensRay.ReavealFully();
-
-                targetReached = true;
-            }
+            yield return null;
         }
-    }
 
-    public void Melt() => isMelting = true;
-    public void StopMelt() => isMelting = false;
+        iceTransform.localScale = targetScale;
+
+        foreach (BoxCollider collider in iceTransform.GetComponents<BoxCollider>())
+        {
+            collider.enabled = false;
+        }
+
+        animateLensRay.ReavealFullyFromCurrentRevealHeight();
+
+        targetReached = true;
+    }
     public bool IsDoneMelting() => targetReached;
 }

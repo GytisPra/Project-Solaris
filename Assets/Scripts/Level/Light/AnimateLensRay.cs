@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class AnimateLensRay : MonoBehaviour
@@ -8,28 +7,55 @@ public class AnimateLensRay : MonoBehaviour
 
     [SerializeField] private Transform lensRayTransform;
     [SerializeField] private IceMelt iceMelt;
+    [SerializeField] private float dioptreOfLens = 2f;
+    [SerializeField] private float rayOriginalLength = 1f;
+    [SerializeField] private float blenderZLength = 4.5f;
 
     private readonly float targetRevealHeight = -22.31f;
-    private readonly float startingRevealHeight = -17.3f;
-    private readonly float fullRevealHeight = -30f;
+    private float startingRevealHeight = -17.3f;
+    private float fullRevealHeight = -23f;
 
     private MeshRenderer lensRayRenderer;
     private float currentRevealHeight;
 
     private void Start()
     {
+        startingRevealHeight = transform.parent.position.z;
         lensRayRenderer = lensRayTransform.GetComponent<MeshRenderer>();
         lensRayRenderer.material.SetFloat("_RevealHeight", startingRevealHeight);
         currentRevealHeight = startingRevealHeight;
     }
 
-    public void ReavealFully()
+    private void Update()
+    {
+        if (Mathf.Approximately(dioptreOfLens, 0f))
+            return;
+
+        float focalLength = 1f / dioptreOfLens; // meters
+        float zScale = focalLength / blenderZLength;
+
+        Vector3 scale = lensRayTransform.localScale;
+        scale.z = Mathf.Round(zScale * 100f) / 100f;
+        lensRayTransform.localScale = scale;
+    }
+
+    public IEnumerator ReavealFully()
+    {
+        currentRevealHeight = transform.parent.position.z;
+        fullRevealHeight = currentRevealHeight - 4.5f; // 4.5 is the length of the ray
+        lensRayRenderer.material.SetFloat("_RevealHeight", currentRevealHeight);
+        yield return StartCoroutine(AnimateRevealHeight(currentRevealHeight, fullRevealHeight));
+    }
+
+    public void ReavealFullyFromCurrentRevealHeight()
     {
         StartCoroutine(AnimateRevealHeight(currentRevealHeight, fullRevealHeight));
     }
 
     public IEnumerator Reveal()
     {
+        currentRevealHeight = transform.parent.position.z;
+        lensRayRenderer.material.SetFloat("_RevealHeight", currentRevealHeight);
         yield return StartCoroutine(AnimateRevealHeight(currentRevealHeight, targetRevealHeight));
     }
 

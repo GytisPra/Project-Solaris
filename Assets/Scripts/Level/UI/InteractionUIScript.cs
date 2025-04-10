@@ -16,12 +16,17 @@ public class InteractionUIScript : MonoBehaviour
     [SerializeField] private AnimateLampRay animateLampRay;
     [SerializeField] private IceMelt iceMelt;
 
+    [Header("Cameras for transition")]
+    [SerializeField] private Camera fromCamera;
+    [SerializeField] private Camera toCamera;
+    [SerializeField] private Camera toCameraPortrait;
+
     public void Close()
     {
         levelUIManager.SetInteractionPopupActive(false);
         levelUIManager.SetLevelUICanvasActive(true);
         levelUIManager.SetDepthOfFieldEffectActive(false);
-        levelUIManager.SetAboveCharCanvasActive(true);
+        levelUIManager.SetNearLensCanvasActive(true);
     }
 
     public void Confirm()
@@ -31,24 +36,38 @@ public class InteractionUIScript : MonoBehaviour
 
         if (ValidateInput(inputedText, out float distance))
         {
-            if (distance == targetDistance)
-            {
-                distanceCorrect = true;
-            }
-
-            Vector3 targetPos = new(lensTransform.localPosition.x, lensTransform.localPosition.y, -distance);
-
             levelUIManager.SetInteractionPopupActive(false);
             levelUIManager.SetLevelUICanvasActive(true);
             levelUIManager.SetDepthOfFieldEffectActive(false);
-            levelUIManager.SetAboveCharCanvasActive(true);
+            levelUIManager.SetNearLensCanvasActive(true);
 
-            StartCoroutine(MoveLens(targetPos, distanceCorrect));
+            StartCoroutine(WaitForCameraTransition(distance, distanceCorrect, targetDistance));
         }
+    }
+
+    private IEnumerator WaitForCameraTransition(float distance, bool distanceCorrect, float targetDistance)
+    {
+        if (Screen.orientation == ScreenOrientation.Portrait)
+        {
+            yield return StartCoroutine(CameraTransition.Instance.SmoothCameraTransition(fromCamera, toCameraPortrait, true));
+        } 
+        else
+        {
+            yield return StartCoroutine(CameraTransition.Instance.SmoothCameraTransition(fromCamera, toCamera, true));
+        }
+
+        if (distance == targetDistance)
+        {
+            distanceCorrect = true;
+        }
+
+        Vector3 targetPos = new(lensTransform.localPosition.x, lensTransform.localPosition.y, -distance);
+
+        yield return StartCoroutine(MoveLens(targetPos, distanceCorrect));
     }
     public void OnValueChanged()
     {
-        animateLampRay.DisableLamp();
+        StartCoroutine(animateLampRay.DisableLamp());
     }
 
     private bool ValidateInput(string input, out float number)
@@ -101,6 +120,6 @@ public class InteractionUIScript : MonoBehaviour
             animateLampRay.DistanceCorrect();
         }
 
-        animateLampRay.EnableLamp();
+        StartCoroutine(animateLampRay.EnableLamp());
     }
 }

@@ -11,6 +11,7 @@ public class PlayerController : MonoBehaviour
     private Vector2 touchStartPosition;
     private Vector2 touchDirection;
     private bool isMoving = false;
+    private bool isDisabled = false;
     private Animator animator;
     private int touchCount = 0;
 
@@ -54,6 +55,11 @@ public class PlayerController : MonoBehaviour
 
     void FixedUpdate()
     {
+        if (isDisabled)
+        {
+            return;
+        }
+
         if (touchCount > 1)
         {
             animator.SetFloat("speedPercent", 0f);
@@ -124,4 +130,7 @@ public class PlayerController : MonoBehaviour
         Touch.onFingerMove -= OnFingerMove;
         Touch.onFingerUp -= OnFingerUp;
     }
+
+    public void Disable() => isDisabled = true;
+    public void Enable() => isDisabled = false;
 }

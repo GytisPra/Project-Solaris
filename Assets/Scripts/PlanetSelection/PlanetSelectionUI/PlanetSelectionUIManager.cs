@@ -145,7 +145,6 @@ public class PlanetSelectionUIManager : MonoBehaviour
     {
         if (depthOfField == null)
         {
-            Debug.LogError("Depth of Field effect is not found in the Volume profile.");
             return;
         }
 

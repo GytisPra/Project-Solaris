@@ -3,25 +3,29 @@ using UnityEngine.SceneManagement;
 
 public class OnCompleteTriggerEnter : MonoBehaviour
 {
+    private bool triggered = false;
     private void OnTriggerEnter(Collider other)
     {
-        string planetName = PlayerPrefs.GetString("levelPlanet");
-        int levelID = PlayerPrefs.GetInt("levelID");
-
-        if (planetName == null || planetName == "" || levelID == 0)
-        {
-            Debug.LogError($"Level data for the current level not found. " +
-                $"You need to enter the level from the planetSelection scene!");
-            return;
-        }
+        if (triggered) return;
 
         if (other.CompareTag("Player"))
         {
-            Debug.Log($"Level ID: {levelID} | Planet: {planetName}");
-            //TextAsset levelJson = Utils.GetJsonFile(levelData.planetName);
+            triggered = true;
 
-            SceneManager.LoadScene("PlanetSelection");
+            string planetName = PlayerPrefs.GetString("levelPlanet");
+            int levelID = PlayerPrefs.GetInt("levelID");
+
+            if (string.IsNullOrEmpty(planetName) || levelID == 0)
+            {
+                Debug.LogError("Level data not found! Enter from planet selection scene.");
+                return;
+            }
+
+            Debug.Log($"Level ID: {levelID} | Planet: {planetName}");
+
+            SceneManager.sceneLoaded -= OnSceneLoaded;
             SceneManager.sceneLoaded += OnSceneLoaded;
+            SceneManager.LoadScene("PlanetSelection");
         }
     }
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
