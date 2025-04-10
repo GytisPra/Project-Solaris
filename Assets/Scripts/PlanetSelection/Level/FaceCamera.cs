@@ -13,10 +13,14 @@ public class FaceCamera : MonoBehaviour
     private void Start()
     {
         mainCamera = Camera.main;
-        fillRenderer = gameObject.transform.GetChild(0).GetComponent<SpriteRenderer>();
-        outlineRenderer = gameObject.transform.GetChild(1).GetComponent<SpriteRenderer>();
 
-        if (fillRenderer != null)
+        if (gameObject.transform.childCount >= 1)
+        {
+            fillRenderer = gameObject.transform.GetChild(0).GetComponent<SpriteRenderer>();
+            outlineRenderer = gameObject.transform.GetChild(1).GetComponent<SpriteRenderer>();
+        }
+
+        if (fillRenderer != null && outlineRenderer != null)
         {
             originalFillColor = fillRenderer.material.color;
             originalOutlineColor = outlineRenderer.material.color;
@@ -27,9 +31,10 @@ public class FaceCamera : MonoBehaviour
     {
         if (mainCamera != null)
         {
-            transform.LookAt(mainCamera.transform);
+            transform.LookAt(mainCamera.transform, Vector3.up);
 
-            CheckVisibility();
+            if (fillRenderer != null && outlineRenderer != null)
+                CheckVisibility();
         }
     }
 

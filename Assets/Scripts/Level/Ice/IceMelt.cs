@@ -5,7 +5,9 @@ public class IceMelt : MonoBehaviour
     public float meltSpeed = 2f;
 
     private Transform iceTransform;
+    [SerializeField] AnimateLensRay animateLensRay;
     private bool isMelting = false;
+    private bool targetReached = false;
 
     void Start()
     {
@@ -14,9 +16,9 @@ public class IceMelt : MonoBehaviour
 
     void Update()
     {
-        if (isMelting)
+        if (isMelting && !targetReached)
         {
-            Vector3 targetScale = new(1, 1, 0);
+            Vector3 targetScale = new(0, 0, 0);
             iceTransform.localScale = Vector3.MoveTowards(
                 iceTransform.localScale,
                 targetScale,
@@ -29,20 +31,15 @@ public class IceMelt : MonoBehaviour
                 {
                     collider.enabled = false;
                 }
+
+                animateLensRay.ReavealFully();
+
+                targetReached = true;
             }
-        }
-        else
-        {
-            Vector3 targetScale = new(1, 1, 1);
-            iceTransform.localScale = Vector3.MoveTowards(
-                iceTransform.localScale,
-                targetScale,
-                meltSpeed * Time.deltaTime
-                );
         }
     }
 
     public void Melt() => isMelting = true;
     public void StopMelt() => isMelting = false;
-
+    public bool IsDoneMelting() => targetReached;
 }

@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 public class AnimateLampRay : MonoBehaviour
@@ -5,11 +6,14 @@ public class AnimateLampRay : MonoBehaviour
     public float adjustmentSpeed = 2f;
     public float rayLengthToScaleRatio = 5f / 1.4f;
 
+    [SerializeField] private AnimateLensRay animateLensRay;
+    [SerializeField] private IceMelt iceMelt;
     [SerializeField] private Transform lampRayTransform;
     [SerializeField] private Transform lensRayTransform;
     [SerializeField] private Transform lensTransform;
     private Transform lampTransform;
     private bool isOn = false;
+    private bool isDistanceCorrect = false;
 
     void Start()
     {
@@ -33,14 +37,18 @@ public class AnimateLampRay : MonoBehaviour
             if (lampRayTransform.localScale == targetScale)
             {
                 lensRayTransform.gameObject.SetActive(true);
-            }
-            else
-            {
-                lensRayTransform.gameObject.SetActive(false);
+                if (iceMelt.IsDoneMelting())
+                {
+                    animateLensRay.ReavealFully();
+                } else
+                {
+                    StartCoroutine(HandleLensRayReveal());
+                }
             }
         }
         else
         {
+            animateLensRay.ResetRevealHeight();
             lensRayTransform.gameObject.SetActive(false);
 
             Vector3 targetScale = new(1, 1, 0);
@@ -53,6 +61,18 @@ public class AnimateLampRay : MonoBehaviour
         
     }
 
+    private IEnumerator HandleLensRayReveal()
+    {
+        yield return StartCoroutine(animateLensRay.Reveal());
+
+        if (iceMelt != null && isDistanceCorrect)
+        {
+            iceMelt.Melt();
+        }
+    }
+
     public void EnableLamp() => isOn = true;
     public void DisableLamp() => isOn = false;
+
+    public void DistanceCorrect() => isDistanceCorrect = true;
 }

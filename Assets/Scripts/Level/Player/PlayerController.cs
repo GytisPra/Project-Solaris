@@ -1,3 +1,4 @@
+using System.Reflection;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.EnhancedTouch;
@@ -55,7 +56,7 @@ public class PlayerController : MonoBehaviour
     {
         if (touchCount > 1)
         {
-            animator.SetFloat("speedPercent", 0f);  // Reset speedPercent if multiple touches.
+            animator.SetFloat("speedPercent", 0f);
             return;
         }
 

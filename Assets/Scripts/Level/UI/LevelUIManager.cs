@@ -6,7 +6,9 @@ public class LevelUIManager : MonoBehaviour
     public Canvas levelUICanvas;
     public Canvas exitLevelPopupCanvas;
     public Canvas interactionPopupCanvas;
+    public Canvas aboveCharCanvas;
     public Volume postProcessingVolume;
+    public InteractTrigger interactTrigger;
     private DepthOfField depthOfField;
 
     void Start()
@@ -39,6 +41,18 @@ public class LevelUIManager : MonoBehaviour
         interactionPopupCanvas.gameObject.SetActive(active);
 
         SetDepthOfFieldEffectActive(active);
+    }
+    
+    public void SetAboveCharCanvasActive(bool active)
+    {
+        if (active && interactTrigger.IsCharInTrigger())
+        {
+            aboveCharCanvas.gameObject.SetActive(true);
+        }
+        else
+        {
+            aboveCharCanvas.gameObject.SetActive(false);
+        }
     }
 
     public void SetDepthOfFieldEffectActive(bool active)

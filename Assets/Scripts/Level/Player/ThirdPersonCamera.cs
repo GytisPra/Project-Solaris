@@ -88,7 +88,12 @@ public class ThirdPersonCamera : MonoBehaviour
         touch1Pos.performed += _ => DetectMotion();
     }
 
-    void LateUpdate()
+    private void Update()
+    {
+        cam.transform.LookAt(target.transform);
+    }
+
+    void FixedUpdate()
     {
         if (touchCount <= 1)
         {
@@ -128,10 +133,6 @@ public class ThirdPersonCamera : MonoBehaviour
         {
             Vector3 desiredPosition = target.position + offset;
             transform.position = Vector3.Lerp(transform.position, desiredPosition, followSpeed * Time.deltaTime);
-        }
-        else
-        {
-            cam.transform.LookAt(target.transform);
         }
     }
 

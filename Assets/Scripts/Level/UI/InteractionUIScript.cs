@@ -15,25 +15,25 @@ public class InteractionUIScript : MonoBehaviour
     [SerializeField] private TMP_Text errorMsg;
     [SerializeField] private AnimateLampRay animateLampRay;
     [SerializeField] private IceMelt iceMelt;
-    [SerializeField] private OnInteractTriggerEnter onInteractTriggerEnter;
 
     public void Close()
     {
         levelUIManager.SetInteractionPopupActive(false);
         levelUIManager.SetLevelUICanvasActive(true);
         levelUIManager.SetDepthOfFieldEffectActive(false);
+        levelUIManager.SetAboveCharCanvasActive(true);
     }
 
     public void Confirm()
     {
-        bool meltIce = false;
+        bool distanceCorrect = false;
         string inputedText = inputField.text.Replace('.', ',');
 
         if (ValidateInput(inputedText, out float distance))
         {
             if (distance == targetDistance)
             {
-                meltIce = true;
+                distanceCorrect = true;
             }
 
             Vector3 targetPos = new(lensTransform.localPosition.x, lensTransform.localPosition.y, -distance);
@@ -41,10 +41,9 @@ public class InteractionUIScript : MonoBehaviour
             levelUIManager.SetInteractionPopupActive(false);
             levelUIManager.SetLevelUICanvasActive(true);
             levelUIManager.SetDepthOfFieldEffectActive(false);
+            levelUIManager.SetAboveCharCanvasActive(true);
 
-            onInteractTriggerEnter.DisableTrigger();
-
-            StartCoroutine(MoveLens(targetPos, meltIce));
+            StartCoroutine(MoveLens(targetPos, distanceCorrect));
         }
     }
     public void OnValueChanged()
@@ -85,7 +84,7 @@ public class InteractionUIScript : MonoBehaviour
         number = distance;
         return true;
     }
-    private IEnumerator MoveLens(Vector3 targetPos, bool meltIce)
+    private IEnumerator MoveLens(Vector3 targetPos, bool distanceCorrect)
     {
         while (lensTransform.localPosition != targetPos)
         {
@@ -97,12 +96,11 @@ public class InteractionUIScript : MonoBehaviour
             yield return null;
         }
 
-        animateLampRay.EnableLamp();
-        onInteractTriggerEnter.EnableTrigger();
-
-        if (meltIce)
+        if (distanceCorrect)
         {
-            iceMelt.Melt();
+            animateLampRay.DistanceCorrect();
         }
+
+        animateLampRay.EnableLamp();
     }
 }

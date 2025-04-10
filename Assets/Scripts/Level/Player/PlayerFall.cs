@@ -19,8 +19,6 @@ public class PlayerFall : MonoBehaviour
 
     void FixedUpdate()
     {
-        //GetComponent<Rigidbody>().AddForce(gravityMultiplier * Vector3.down, ForceMode.Acceleration);
-
         if (transform.localPosition.y < fallThreshold)
         {
             ResetPlayerPosition();

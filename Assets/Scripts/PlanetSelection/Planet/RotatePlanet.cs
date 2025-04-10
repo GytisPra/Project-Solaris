@@ -16,7 +16,7 @@ public class RotatePlanet : MonoBehaviour
         }
     }
 
-    void Update()
+    void FixedUpdate()
     {
         transform.Rotate(rotationAxis, -rotationSpeed * Time.deltaTime, Space.World);
     }
