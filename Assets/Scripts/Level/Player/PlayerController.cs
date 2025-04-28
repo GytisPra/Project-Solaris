@@ -19,6 +19,31 @@ public class PlayerController : MonoBehaviour
 
     private InputAction keyboardAction;
 
+    private void Awake()
+    {
+        GameStateManager.OnGameStateChanged += HandleGameStateChange;
+    }
+    void OnDestroy()
+    {
+        GameStateManager.OnGameStateChanged -= HandleGameStateChange;
+
+        Touch.onFingerDown -= OnFingerDown;
+        Touch.onFingerMove -= OnFingerMove;
+        Touch.onFingerUp -= OnFingerUp;
+    }
+
+    private void HandleGameStateChange(GameState newState)
+    {
+        if (newState == GameState.Gameplay)
+        {
+            Enable();
+        }
+        else
+        {
+            Disable();
+        }
+    }
+
     void Start()
     {
         cameraTransform = Camera.main.gameObject.transform;
@@ -28,7 +53,7 @@ public class PlayerController : MonoBehaviour
         InputAction touch0Contact = new(type: InputActionType.Button, binding: "<Touchscreen>/touch0/press");
         touch0Contact.Enable();
         touch0Contact.performed += _ => touchCount++;
-        touch0Contact.canceled += _ => touchCount--;;
+        touch0Contact.canceled += _ => touchCount--; ;
 
         InputAction touch1Contact = new(type: InputActionType.Button, binding: "<Touchscreen>/touch1/press");
         touch1Contact.Enable();
@@ -122,13 +147,6 @@ public class PlayerController : MonoBehaviour
 
             animator.SetFloat("speedPercent", 1f);
         }
-    }
-
-    void OnDestroy()
-    {
-        Touch.onFingerDown -= OnFingerDown;
-        Touch.onFingerMove -= OnFingerMove;
-        Touch.onFingerUp -= OnFingerUp;
     }
 
     public void Disable() => isDisabled = true;

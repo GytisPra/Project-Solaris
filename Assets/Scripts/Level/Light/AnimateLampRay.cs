@@ -6,7 +6,6 @@ public class AnimateLampRay : MonoBehaviour
     public float adjustmentSpeed = 2f;
     public float rayLengthToScaleRatio = 5f / 1.4f;
 
-    [SerializeField] private Camera fromCameraPotrait;
     [SerializeField] private Camera fromCamera;
     [SerializeField] private Camera toCamera;
     [SerializeField] private AnimateLensRay animateLensRay;
@@ -43,7 +42,7 @@ public class AnimateLampRay : MonoBehaviour
         lampRayTransform.localScale = targetScale;
         lensRayTransform.gameObject.SetActive(true);
 
-        if (iceMelt.IsDoneMelting())
+        if (iceMelt.IsMelted())
         {
             yield return StartCoroutine(animateLensRay.ReavealFully()); // Wait for lensRay to be fully reveled
         }
@@ -58,8 +57,7 @@ public class AnimateLampRay : MonoBehaviour
 
         yield return new WaitForSeconds(0.2f); // Wait a little bit (200ms)
 
-        Camera fromCamera = Screen.orientation == ScreenOrientation.Portrait ? fromCameraPotrait : this.fromCamera;
-        StartCoroutine(CameraTransition.Instance.SmoothCameraTransition(fromCamera, toCamera, false));
+        StartCoroutine(CameraTransition.Instance.TransitionBack());
     }
 
     public IEnumerator DisableLamp()

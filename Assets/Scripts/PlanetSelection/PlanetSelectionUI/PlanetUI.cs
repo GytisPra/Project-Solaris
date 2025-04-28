@@ -58,4 +58,8 @@ public class PlanetUI : MonoBehaviour
     {
         cameraRotation.ResetCameraOnCurrentTarget();
     }
+    public void OpenSolarPad()
+    {
+        SolarPad.Instance.Open();
+    }
 }

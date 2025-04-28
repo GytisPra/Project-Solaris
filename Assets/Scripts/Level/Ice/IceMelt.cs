@@ -40,5 +40,5 @@ public class IceMelt : MonoBehaviour
 
         targetReached = true;
     }
-    public bool IsDoneMelting() => targetReached;
+    public bool IsMelted() => targetReached;
 }

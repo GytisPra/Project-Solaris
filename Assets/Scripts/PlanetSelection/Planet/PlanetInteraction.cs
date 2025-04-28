@@ -50,6 +50,11 @@ public class PlanetInteraction : MonoBehaviour
             var interactionLocation = touchState.phase == TouchPhase.Began ?
                                         touchState.position : interactionPosition.ReadValue<Vector2>();
 
+            if (interactionLocation == null || Camera.main == null)
+            {
+                return;
+            }
+
             Ray ray = Camera.main.ScreenPointToRay(interactionLocation);
 
             if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, layerMask))

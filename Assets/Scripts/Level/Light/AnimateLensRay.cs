@@ -8,10 +8,9 @@ public class AnimateLensRay : MonoBehaviour
     [SerializeField] private Transform lensRayTransform;
     [SerializeField] private IceMelt iceMelt;
     [SerializeField] private float dioptreOfLens = 2f;
-    [SerializeField] private float rayOriginalLength = 1f;
     [SerializeField] private float blenderZLength = 4.5f;
 
-    private readonly float targetRevealHeight = -22.31f;
+    private float targetRevealHeight = -22.31f;
     private float startingRevealHeight = -17.3f;
     private float fullRevealHeight = -23f;
 
@@ -20,10 +19,13 @@ public class AnimateLensRay : MonoBehaviour
 
     private void Start()
     {
+        Debug.Log($"Z of parent {transform.parent.position.z}");
+
         startingRevealHeight = transform.parent.position.z;
         lensRayRenderer = lensRayTransform.GetComponent<MeshRenderer>();
         lensRayRenderer.material.SetFloat("_RevealHeight", startingRevealHeight);
         currentRevealHeight = startingRevealHeight;
+        targetRevealHeight = iceMelt.transform.position.z + 0.5f;
     }
 
     private void Update()
@@ -55,8 +57,17 @@ public class AnimateLensRay : MonoBehaviour
     public IEnumerator Reveal()
     {
         currentRevealHeight = transform.parent.position.z;
-        lensRayRenderer.material.SetFloat("_RevealHeight", currentRevealHeight);
-        yield return StartCoroutine(AnimateRevealHeight(currentRevealHeight, targetRevealHeight));
+
+        // Check if the light ray reaches the ice
+        if (transform.parent.position.z - 4.5f < iceMelt.transform.position.z) 
+        {
+            lensRayRenderer.material.SetFloat("_RevealHeight", currentRevealHeight);
+            yield return StartCoroutine(AnimateRevealHeight(currentRevealHeight, targetRevealHeight));
+        }
+        else // If it does not reach then just fully reveal it
+        {
+            yield return StartCoroutine(ReavealFully());
+        }
     }
 
     private IEnumerator AnimateRevealHeight(float fromHeight, float toHeight)

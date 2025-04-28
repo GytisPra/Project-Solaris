@@ -1,12 +1,13 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 public class CameraTransition : MonoBehaviour
 {
     public static CameraTransition Instance { get; private set; }
 
-    [SerializeField] private PlayerController playerController;
-    [SerializeField] private ThirdPersonCamera thirdPersonCamera;
+    private Camera previousCamera;
+    private Camera currentCamera;
 
     private void Awake()
     {
@@ -20,20 +21,22 @@ public class CameraTransition : MonoBehaviour
         }
     }
 
-    public IEnumerator SmoothCameraTransition(Camera fromCamera, Camera toCamera, bool turnControlsOff, float duration = 2f)
+    public IEnumerator SmoothCameraTransition(Camera fromCamera, Camera toCamera, float duration = 2f)
     {
+        // At the start of the transition setState to cutscene
+        // At the end we set it to gameplay to enable controls
+        GameStateManager.Instance.SetState(GameState.Cutscene);
+
+        previousCamera = fromCamera;
+        currentCamera = toCamera;
+
         float elapsedTime = 0f;
-
-        if (turnControlsOff)
-        {
-            playerController.Disable();
-            thirdPersonCamera.gameObject.SetActive(false);
-        }
-
 
         fromCamera.transform.GetPositionAndRotation(out Vector3 startingPosition, out Quaternion startingRotation);
         toCamera.transform.GetPositionAndRotation(out Vector3 targetPosition, out Quaternion targetRotation);
 
+        toCamera.transform.SetPositionAndRotation(startingPosition, startingRotation);
+        fromCamera.gameObject.SetActive(false);
         toCamera.gameObject.SetActive(true);
 
         while (elapsedTime < duration)
@@ -48,12 +51,22 @@ public class CameraTransition : MonoBehaviour
         }
 
         toCamera.transform.SetPositionAndRotation(targetPosition, targetRotation);
-        fromCamera.gameObject.SetActive(false);
 
-        if (!turnControlsOff)
+        GameStateManager.Instance.SetState(GameState.Gameplay);
+    }
+
+    public IEnumerator TransitionBack(float duration = 2f)
+    {
+        if (previousCamera == null)
         {
-            playerController.Enable();
-            thirdPersonCamera.gameObject.SetActive(true);
+            Debug.LogError("There is no previous camera to transition back to.");
         }
+
+        if (currentCamera == null)
+        {
+            Debug.LogError("Current camera is not set.");
+        }
+
+        yield return StartCoroutine(SmoothCameraTransition(currentCamera, previousCamera, duration));
     }
 }

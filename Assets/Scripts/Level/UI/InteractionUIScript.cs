@@ -19,7 +19,6 @@ public class InteractionUIScript : MonoBehaviour
     [Header("Cameras for transition")]
     [SerializeField] private Camera fromCamera;
     [SerializeField] private Camera toCamera;
-    [SerializeField] private Camera toCameraPortrait;
 
     public void Close()
     {
@@ -47,14 +46,7 @@ public class InteractionUIScript : MonoBehaviour
 
     private IEnumerator WaitForCameraTransition(float distance, bool distanceCorrect, float targetDistance)
     {
-        if (Screen.orientation == ScreenOrientation.Portrait)
-        {
-            yield return StartCoroutine(CameraTransition.Instance.SmoothCameraTransition(fromCamera, toCameraPortrait, true));
-        } 
-        else
-        {
-            yield return StartCoroutine(CameraTransition.Instance.SmoothCameraTransition(fromCamera, toCamera, true));
-        }
+        yield return StartCoroutine(CameraTransition.Instance.SmoothCameraTransition(fromCamera, toCamera));
 
         if (distance == targetDistance)
         {

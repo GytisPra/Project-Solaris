@@ -37,6 +37,8 @@ public class CameraRotation : MonoBehaviour
 
     private void Awake()
     {
+        GameStateManager.OnGameStateChanged += HandleGameStateChange;
+
         InputAction touchAction = new(
             type: InputActionType.Value,
             binding: "<Touchscreen>/primaryTouch"
@@ -59,12 +61,30 @@ public class CameraRotation : MonoBehaviour
         click = clickAction;
         mouseDelta = mouseDeltaAction;
     }
+    private void OnDestroy()
+    {
+        GameStateManager.OnGameStateChanged -= HandleGameStateChange;
+
+        click.Dispose();
+        mouseDelta.Dispose();
+        touch.Dispose();
+    }
+
+    private void HandleGameStateChange(GameState newState)
+    {
+        if (newState == GameState.Gameplay)
+        {
+            EnableInput();
+        }
+        else
+        {
+            DisableInput();
+        }
+    }
 
     private void OnDisable()
     {
-        click.Disable();
-        mouseDelta.Disable();
-        touch.Disable();
+
     }
 
     void Start()

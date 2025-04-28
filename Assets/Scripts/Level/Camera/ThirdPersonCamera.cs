@@ -35,11 +35,43 @@ public class ThirdPersonCamera : MonoBehaviour
     [SerializeField] private Vector3 offset = new(0, 5, -10);
     [SerializeField] private float followSpeed = 5f;
 
+
+    private void Awake()
+    {
+        GameStateManager.OnGameStateChanged += HandleGameStateChange;
+    }
+
+    private void OnDestroy()
+    {
+        GameStateManager.OnGameStateChanged -= HandleGameStateChange;
+
+        scrollAction.Dispose();
+        middleButton.Dispose();
+
+        touch0Contact.Dispose();
+        touch0Pos.Dispose();
+        touch0Delta.Dispose();
+
+        touch1Contact.Dispose();
+        touch1Pos.Dispose();
+        touch1Delta.Dispose();
+    }
+
+    private void HandleGameStateChange(GameState newState)
+    {
+        if (newState == GameState.Gameplay)
+        {
+            Enable();
+        }
+        else
+        {
+            Disable();
+        }
+    }
     void Start()
     {
         cam = Camera.main;
         EnhancedTouchSupport.Enable();
-
 
         scrollAction = new(binding: "<Mouse>/scroll");
         scrollAction.Enable();
@@ -235,16 +267,35 @@ public class ThirdPersonCamera : MonoBehaviour
         cam.fieldOfView = Mathf.Clamp(cam.fieldOfView + increment, minFOV, maxFOV);
     }
 
-    void OnDestroy()
+    private void Enable()
     {
-        scrollAction.Dispose();
+        enabled = true;
 
-        touch0Contact.Dispose();
-        touch0Pos.Dispose();
-        touch0Delta.Dispose();
+        scrollAction.Enable();
+        middleButton.Enable();
 
-        touch1Contact.Dispose();
-        touch1Pos.Dispose();
-        touch1Delta.Dispose();
+        touch0Contact.Enable();
+        touch0Pos.Enable();
+        touch0Delta.Enable();
+
+        touch1Contact.Enable();
+        touch1Pos.Enable();
+        touch1Delta.Enable();
+    }
+
+    private void Disable()
+    {
+        enabled = false;
+
+        scrollAction.Disable();
+        middleButton.Disable();
+
+        touch0Contact.Disable();
+        touch0Pos.Disable();
+        touch0Delta.Disable();
+
+        touch1Contact.Disable();
+        touch1Pos.Disable();
+        touch1Delta.Disable();
     }
 }
