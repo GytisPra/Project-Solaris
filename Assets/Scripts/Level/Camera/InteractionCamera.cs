@@ -4,8 +4,14 @@ public class InteractionCamera : MonoBehaviour
 {
     [SerializeField] private Camera parentCamera;
     [SerializeField] private Transform interactionCanvas;
+    [SerializeField] private float minScale = 1f;
+    [SerializeField] private float maxScale = 1.5f;
+
+    private float minFOV = 15f;
+    private float maxFOV = 50f;
+
     private Camera thisCamera;
-    private float prevFov = 30f;
+
     void Start()
     {
         if (parentCamera == null)
@@ -18,33 +24,24 @@ public class InteractionCamera : MonoBehaviour
         {
             Debug.LogError("Camera component not found!");
         }
+
+        if(parentCamera.TryGetComponent<ThirdPersonCamera>(out var thirdPersonCamera))
+        {
+            minFOV = thirdPersonCamera.minFOV + 10f;
+            maxFOV = thirdPersonCamera.maxFOV - 10f;
+        }
     }
 
     void Update()
     {
-        if (!thisCamera || !interactionCanvas)
-        {
+        if (!thisCamera || !interactionCanvas || !parentCamera)
             return;
-        }
 
-        if (thisCamera.fieldOfView == parentCamera.fieldOfView)
-        {
-            return;
-        }
+        thisCamera.fieldOfView = parentCamera.fieldOfView; 
 
-        prevFov = thisCamera.fieldOfView;
-        thisCamera.fieldOfView = parentCamera.fieldOfView;
+        float normalizedFov = Mathf.InverseLerp(minFOV, maxFOV, thisCamera.fieldOfView);
+        float targetScale = Mathf.Lerp(minScale, maxScale, normalizedFov);
 
-
-        if (interactionCanvas)
-        {
-            float fovDelta = (thisCamera.fieldOfView - prevFov) / 45;
-
-            interactionCanvas.localScale = new(
-                interactionCanvas.localScale.x + fovDelta,
-                interactionCanvas.localScale.y + fovDelta,
-                interactionCanvas.localScale.z + fovDelta
-                );
-        }
+        interactionCanvas.localScale = Vector3.one * targetScale;
     }
 }

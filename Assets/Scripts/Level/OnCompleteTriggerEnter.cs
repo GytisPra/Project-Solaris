@@ -21,8 +21,6 @@ public class OnCompleteTriggerEnter : MonoBehaviour
                 return;
             }
 
-            Debug.Log($"Level ID: {levelID} | Planet: {planetName}");
-
             SceneManager.sceneLoaded -= OnSceneLoaded;
             SceneManager.sceneLoaded += OnSceneLoaded;
             SceneManager.LoadScene("PlanetSelection");

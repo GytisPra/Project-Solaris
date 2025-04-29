@@ -10,10 +10,12 @@ public class ExitLevelPopup : MonoBehaviour
         levelUIManager.SetLevelUICanvasActive(true);
 
         levelUIManager.SetDepthOfFieldEffectActive(false);
+        GameStateManager.Instance.SetState(GameState.Gameplay);
     }
 
     public void ExitLevel()
     {
+        GameStateManager.Instance.SetState(GameState.Gameplay);
         SceneManager.LoadScene("PlanetSelection");
         SceneManager.sceneLoaded += OnSceneLoaded;
     }

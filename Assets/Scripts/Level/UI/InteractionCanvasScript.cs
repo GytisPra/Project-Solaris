@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class NearLensCanvasScript : MonoBehaviour
+public class InteractionCanvasScript : MonoBehaviour
 {
     public LevelUIManager levelUIManager;
 
@@ -10,5 +10,7 @@ public class NearLensCanvasScript : MonoBehaviour
         levelUIManager.SetLevelUICanvasActive(false);
         levelUIManager.SetNearLensCanvasActive(false);
         levelUIManager.SetDepthOfFieldEffectActive(false);
+
+        GameStateManager.Instance.SetState(GameState.Menu);
     }
 }

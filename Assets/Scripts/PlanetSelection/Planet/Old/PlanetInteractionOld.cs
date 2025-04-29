@@ -69,8 +69,6 @@ public class PlanetInteractionOld : MonoBehaviour
 
                 GameObject hitObject = hit.collider.gameObject;
 
-                Debug.Log("Clicked on: " + hitObject.name);
-
                 if (cameraRotation != null && cameraRotation.GetCurrentTargetName() != hitObject.name)
                 {
                     if (hitObject.name == "Saturn")
@@ -89,13 +87,7 @@ public class PlanetInteractionOld : MonoBehaviour
                     {
                         Debug.LogError("Planet selection UI manager not assigned in inspector!");
                     }
-
-                    Debug.Log("New rotation target: " + hitObject.name);
                 }
-            }
-            else
-            {
-                Debug.Log("Missed!");
             }
         }
     }

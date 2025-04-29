@@ -11,13 +11,14 @@ public class PlayerController : MonoBehaviour
     private Vector2 touchStartPosition;
     private Vector2 touchDirection;
     private bool isMoving = false;
-    private bool isDisabled = false;
     private Animator animator;
     private int touchCount = 0;
 
     private Transform cameraTransform;
 
     private InputAction keyboardAction;
+    private InputAction touch0Contact;
+    private InputAction touch1Contact;
 
     private void Awake()
     {
@@ -50,12 +51,12 @@ public class PlayerController : MonoBehaviour
 
         animator = GetComponent<Animator>();
 
-        InputAction touch0Contact = new(type: InputActionType.Button, binding: "<Touchscreen>/touch0/press");
+        touch0Contact = new(type: InputActionType.Button, binding: "<Touchscreen>/touch0/press");
         touch0Contact.Enable();
         touch0Contact.performed += _ => touchCount++;
         touch0Contact.canceled += _ => touchCount--; ;
 
-        InputAction touch1Contact = new(type: InputActionType.Button, binding: "<Touchscreen>/touch1/press");
+        touch1Contact = new(type: InputActionType.Button, binding: "<Touchscreen>/touch1/press");
         touch1Contact.Enable();
         touch1Contact.performed += _ => touchCount++;
         touch1Contact.canceled += _ => touchCount--;
@@ -80,11 +81,6 @@ public class PlayerController : MonoBehaviour
 
     void FixedUpdate()
     {
-        if (isDisabled)
-        {
-            return;
-        }
-
         if (touchCount > 1)
         {
             animator.SetFloat("speedPercent", 0f);
@@ -149,6 +145,24 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    public void Disable() => isDisabled = true;
-    public void Enable() => isDisabled = false;
+    public void Disable()
+    {
+        Touch.onFingerDown -= OnFingerDown;
+        Touch.onFingerMove -= OnFingerMove;
+        Touch.onFingerUp -= OnFingerUp;
+
+        touch0Contact.Disable();
+        touch1Contact.Disable();
+        keyboardAction.Disable();
+    }
+    public void Enable()
+    {
+        Touch.onFingerDown += OnFingerDown;
+        Touch.onFingerMove += OnFingerMove;
+        Touch.onFingerUp += OnFingerUp;
+
+        touch0Contact.Enable();
+        touch1Contact.Enable();
+        keyboardAction.Enable();
+    }
 }

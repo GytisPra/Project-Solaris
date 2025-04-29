@@ -19,13 +19,11 @@ public class AnimateLensRay : MonoBehaviour
 
     private void Start()
     {
-        Debug.Log($"Z of parent {transform.parent.position.z}");
-
         startingRevealHeight = transform.parent.position.z;
         lensRayRenderer = lensRayTransform.GetComponent<MeshRenderer>();
         lensRayRenderer.material.SetFloat("_RevealHeight", startingRevealHeight);
         currentRevealHeight = startingRevealHeight;
-        targetRevealHeight = iceMelt.transform.position.z + 0.5f;
+        targetRevealHeight = iceMelt.transform.position.z + 0.5f; // Add 0.5 because the ice Z is in the middle of it we want the edge
     }
 
     private void Update()
@@ -59,7 +57,7 @@ public class AnimateLensRay : MonoBehaviour
         currentRevealHeight = transform.parent.position.z;
 
         // Check if the light ray reaches the ice
-        if (transform.parent.position.z - 4.5f < iceMelt.transform.position.z) 
+        if (transform.parent.position.z - 4.5f < targetRevealHeight) 
         {
             lensRayRenderer.material.SetFloat("_RevealHeight", currentRevealHeight);
             yield return StartCoroutine(AnimateRevealHeight(currentRevealHeight, targetRevealHeight));

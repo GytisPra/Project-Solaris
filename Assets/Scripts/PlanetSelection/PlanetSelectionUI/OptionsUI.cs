@@ -14,8 +14,6 @@ public class OptionsUI : MonoBehaviour
         {
             string volumeLevel = PlayerPrefs.GetString("VolumeLevel");
 
-            Debug.Log($"Current volume level: {volumeLevel}");
-
             this.volumeLevel.text = $"{volumeLevel}%";
             volumeSlider.value = float.Parse(volumeLevel) / 100;
         }

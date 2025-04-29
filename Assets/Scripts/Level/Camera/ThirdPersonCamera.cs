@@ -170,8 +170,6 @@ public class ThirdPersonCamera : MonoBehaviour
 
     void DetectMotion()
     {
-        Debug.Log($"pinching: {pinching} | moving: {moving} | rotating: {rotating}");
-
         if (touchCount < 2 || cam == null)
             return;
 

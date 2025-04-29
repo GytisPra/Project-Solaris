@@ -26,6 +26,8 @@ public class InteractionUIScript : MonoBehaviour
         levelUIManager.SetLevelUICanvasActive(true);
         levelUIManager.SetDepthOfFieldEffectActive(false);
         levelUIManager.SetNearLensCanvasActive(true);
+
+        GameStateManager.Instance.SetState(GameState.Gameplay);
     }
 
     public void Confirm()
@@ -39,6 +41,7 @@ public class InteractionUIScript : MonoBehaviour
             levelUIManager.SetLevelUICanvasActive(true);
             levelUIManager.SetDepthOfFieldEffectActive(false);
             levelUIManager.SetNearLensCanvasActive(true);
+
 
             StartCoroutine(WaitForCameraTransition(distance, distanceCorrect, targetDistance));
         }
@@ -56,6 +59,8 @@ public class InteractionUIScript : MonoBehaviour
         Vector3 targetPos = new(lensTransform.localPosition.x, lensTransform.localPosition.y, -distance);
 
         yield return StartCoroutine(MoveLens(targetPos, distanceCorrect));
+
+        GameStateManager.Instance.SetState(GameState.Gameplay);
     }
     public void OnValueChanged()
     {

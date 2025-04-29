@@ -14,6 +14,8 @@ public class LevelUIScript : MonoBehaviour
 
         levelUIManager.SetExitLevelPopupCanvasActive(true);
         levelUIManager.SetDepthOfFieldEffectActive(true);
+
+        GameStateManager.Instance.SetState(GameState.Menu);
     }
 
     public void OpenSolarPad()
