@@ -1,0 +1,172 @@
+using System.Reflection;
+using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.EnhancedTouch;
+using Touch = UnityEngine.InputSystem.EnhancedTouch.Touch;
+
+public class PlayerController : MonoBehaviour
+{
+    public float walkSpeed = 2.0f;
+
+    private Vector2 touchStartPosition;
+    private Vector2 touchDirection;
+    private bool isMoving = false;
+    private Animator animator;
+    private int touchCount = 0;
+
+    private Transform cameraTransform;
+
+    private InputAction keyboardAction;
+    private InputAction touch0Contact;
+    private InputAction touch1Contact;
+
+    private void Awake()
+    {
+        GameStateManager.OnGameStateChanged += HandleGameStateChange;
+    }
+    void OnDestroy()
+    {
+        GameStateManager.OnGameStateChanged -= HandleGameStateChange;
+
+        Touch.onFingerDown -= OnFingerDown;
+        Touch.onFingerMove -= OnFingerMove;
+        Touch.onFingerUp -= OnFingerUp;
+
+        touch0Contact.Dispose();
+        touch1Contact.Dispose();
+        keyboardAction.Dispose();
+    }
+
+    private void HandleGameStateChange(GameState newState)
+    {
+        if (newState == GameState.Gameplay)
+        {
+            Enable();
+        }
+        else
+        {
+            Disable();
+        }
+    }
+
+    void Start()
+    {
+        cameraTransform = Camera.main.gameObject.transform;
+
+        animator = GetComponent<Animator>();
+
+        touch0Contact = new(type: InputActionType.Button, binding: "<Touchscreen>/touch0/press");
+        touch0Contact.Enable();
+        touch0Contact.performed += _ => touchCount++;
+        touch0Contact.canceled += _ => touchCount--; ;
+
+        touch1Contact = new(type: InputActionType.Button, binding: "<Touchscreen>/touch1/press");
+        touch1Contact.Enable();
+        touch1Contact.performed += _ => touchCount++;
+        touch1Contact.canceled += _ => touchCount--;
+
+        EnhancedTouchSupport.Enable();
+        Touch.onFingerDown += OnFingerDown;
+        Touch.onFingerMove += OnFingerMove;
+        Touch.onFingerUp += OnFingerUp;
+
+        keyboardAction = new InputAction(type: InputActionType.Value);
+        keyboardAction.AddCompositeBinding("2DVector")
+            .With("Up", "<Keyboard>/w")
+            .With("Up", "<Keyboard>/upArrow")
+            .With("Down", "<Keyboard>/s")
+            .With("Down", "<Keyboard>/downArrow")
+            .With("Left", "<Keyboard>/a")
+            .With("Left", "<Keyboard>/leftArrow")
+            .With("Right", "<Keyboard>/d")
+            .With("Right", "<Keyboard>/rightArrow");
+        keyboardAction.Enable();
+    }
+
+    void FixedUpdate()
+    {
+        if (touchCount > 1)
+        {
+            animator.SetFloat("speedPercent", 0f);
+            return;
+        }
+
+        if (isMoving)
+        {
+            MovePlayer(touchDirection);
+        }
+        else
+        {
+            Vector2 keyboardInput = keyboardAction.ReadValue<Vector2>();
+
+            if (keyboardInput != Vector2.zero)
+            {
+                MovePlayer(keyboardInput);
+            }
+            else
+            {
+                animator.SetFloat("speedPercent", 0f);
+            }
+        }
+    }
+
+    void OnFingerDown(Finger finger)
+    {
+        touchStartPosition = finger.screenPosition;
+        isMoving = true;
+    }
+
+    void OnFingerMove(Finger finger)
+    {
+        touchDirection = (finger.screenPosition - touchStartPosition).normalized;
+    }
+
+    void OnFingerUp(Finger finger)
+    {
+        isMoving = false;
+        touchDirection = Vector2.zero;
+        animator.SetFloat("speedPercent", 0f);
+    }
+
+    void MovePlayer(Vector2 normalizedInput)
+    {
+        if (normalizedInput != Vector2.zero)
+        {
+            Vector3 cameraForward = cameraTransform.forward;
+            cameraForward.y = 0;
+            cameraForward.Normalize();
+
+            Vector3 cameraRight = cameraTransform.right;
+            cameraRight.y = 0;
+            cameraRight.Normalize();
+
+            Vector3 moveDirection = cameraForward * normalizedInput.y + cameraRight * normalizedInput.x;
+
+            transform.rotation = Quaternion.LookRotation(moveDirection);
+            transform.Translate(Time.deltaTime * walkSpeed * moveDirection, Space.World);
+
+            animator.SetFloat("speedPercent", 1f);
+        }
+    }
+
+    public void Disable()
+    {
+        Touch.onFingerDown -= OnFingerDown;
+        Touch.onFingerMove -= OnFingerMove;
+        Touch.onFingerUp -= OnFingerUp;
+
+        touch0Contact.Disable();
+        touch1Contact.Disable();
+        keyboardAction.Disable();
+    }
+    public void Enable()
+    {
+        Touch.onFingerDown += OnFingerDown;
+        Touch.onFingerMove += OnFingerMove;
+        Touch.onFingerUp += OnFingerUp;
+
+        touch0Contact.Enable();
+        touch1Contact.Enable();
+        keyboardAction.Enable();
+    }
+}

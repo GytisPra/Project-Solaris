@@ -1,5 +1,6 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class LevelUI : MonoBehaviour
 {
@@ -12,6 +13,7 @@ public class LevelUI : MonoBehaviour
 
     private Color intialColor;
     private SpriteRenderer fillRenderer;
+    private LevelData currLevelData;
 
     public void ClosePopUp()
     {
@@ -21,8 +23,24 @@ public class LevelUI : MonoBehaviour
         fillRenderer.material.color = intialColor;
     }
 
+    public void OpenLevel()
+    {
+        Screen.orientation = ScreenOrientation.AutoRotation;
+
+        LevelDataHolder.currLevelData = currLevelData;
+
+        PlayerPrefs.SetString("levelPlanet", currLevelData.planetName);
+        PlayerPrefs.SetString("lastPlanet", currLevelData.planetName);
+        PlayerPrefs.SetInt("levelID", currLevelData.levelID);
+        PlayerPrefs.Save();
+
+        SceneManager.LoadScene(currLevelData.planetName + currLevelData.levelID);
+    }
+
     public void DisplayLevelInfo(LevelData levelData, SpriteRenderer fillRenderer)
     {
+        currLevelData = levelData;
+
         levelDescription.text = levelData.description;
         levelID.text = levelData.levelID.ToString();
         levelTitle.text = levelData.title;

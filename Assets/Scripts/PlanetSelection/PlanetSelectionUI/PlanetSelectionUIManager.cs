@@ -26,12 +26,6 @@ public class PlanetSelectionUIManager : MonoBehaviour
         {
             Debug.LogError("Depth of field not found in Post Processing Volume!");
         }
-
-        SetMainMenuCanvasActive(true);
-
-        SetLevelUICanvasActive(false);
-        SetPlanetSelectionCanvasActive(false);
-        SetPlanetUICanvasActive(false);
     }
 
     public void SetPlanetUICanvasActive(bool active)
@@ -41,6 +35,7 @@ public class PlanetSelectionUIManager : MonoBehaviour
         if (active) {
             cameraRotation.EnableInput();
             planetInteraction.Enable();
+            Screen.orientation = ScreenOrientation.AutoRotation;
         }
     }
 
@@ -52,6 +47,7 @@ public class PlanetSelectionUIManager : MonoBehaviour
         if (active) {
             cameraRotation.DisableInput();
             planetInteraction.Disable();
+            Screen.orientation = ScreenOrientation.Portrait;
         }
     }
 
@@ -63,6 +59,7 @@ public class PlanetSelectionUIManager : MonoBehaviour
         if (active) {
             cameraRotation.DisableInput();
             planetInteraction.Disable();
+            Screen.orientation = ScreenOrientation.AutoRotation;
         }
     }
 
@@ -73,6 +70,7 @@ public class PlanetSelectionUIManager : MonoBehaviour
         if (active) {
             cameraRotation.DisableInput();
             planetInteraction.Disable();
+            Screen.orientation = ScreenOrientation.Portrait;
         }
     }
 
@@ -84,6 +82,7 @@ public class PlanetSelectionUIManager : MonoBehaviour
         if (active) {
             cameraRotation.DisableInput();
             planetInteraction.Disable();
+            Screen.orientation = ScreenOrientation.Portrait;
         }
     }
 
@@ -146,7 +145,6 @@ public class PlanetSelectionUIManager : MonoBehaviour
     {
         if (depthOfField == null)
         {
-            Debug.LogError("Depth of Field effect is not found in the Volume profile.");
             return;
         }
 
