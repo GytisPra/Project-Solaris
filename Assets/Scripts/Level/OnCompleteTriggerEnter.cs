@@ -1,9 +1,11 @@
+using System;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class OnCompleteTriggerEnter : MonoBehaviour
 {
     private bool triggered = false;
+    public LevelsDatabase levelsDatabase;
     private void OnTriggerEnter(Collider other)
     {
         if (triggered) return;
@@ -20,6 +22,22 @@ public class OnCompleteTriggerEnter : MonoBehaviour
                 Debug.LogError("Level data not found! Enter from planet selection scene.");
                 return;
             }
+
+            // find and update the status of the level
+            var level = Array.Find(levelsDatabase.levels, l => levelID == l.ID);
+
+            if (level == null)
+            {
+                Debug.LogError("The level was not found!");
+            }
+            else if (level.completed)
+            {
+                Debug.LogWarning("The level is already completed");
+            }
+            else
+            {
+                level.SetLevelToCompleted();
+            }  
 
             SceneManager.sceneLoaded -= OnSceneLoaded;
             SceneManager.sceneLoaded += OnSceneLoaded;

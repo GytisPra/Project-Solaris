@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using UnityEngine;
 
 public class InteractTrigger : MonoBehaviour
@@ -21,6 +20,21 @@ public class InteractTrigger : MonoBehaviour
     {
         interactCanvas.gameObject.SetActive(false);
         isCharInTrigger = false;
+    }
+
+    /// <summary>
+    /// Will display the interact canvas only if the char is still in the trigger
+    /// </summary>
+    public void ShowInteract()
+    {
+        if (isCharInTrigger)
+        {
+            interactCanvas.gameObject.SetActive(true);
+        }
+        else
+        {
+            interactCanvas.gameObject.SetActive(false);
+        }
     }
     public void DisableTrigger() => disabled = true;
     public void EnableTrigger() => disabled = false;

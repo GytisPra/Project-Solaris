@@ -14,10 +14,10 @@ public class FaceCamera : MonoBehaviour
     {
         mainCamera = Camera.main;
 
-        if (gameObject.transform.childCount >= 1)
+        if (transform.childCount >= 2)
         {
-            fillRenderer = gameObject.transform.GetChild(0).GetComponent<SpriteRenderer>();
-            outlineRenderer = gameObject.transform.GetChild(1).GetComponent<SpriteRenderer>();
+            fillRenderer = transform.GetChild(0).GetComponent<SpriteRenderer>();
+            outlineRenderer = transform.GetChild(1).GetComponent<SpriteRenderer>();
         }
 
         if (fillRenderer != null && outlineRenderer != null)

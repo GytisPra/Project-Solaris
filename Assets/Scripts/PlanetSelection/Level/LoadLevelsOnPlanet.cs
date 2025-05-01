@@ -3,13 +3,18 @@ using UnityEngine;
 
 public class LoadLevelsOnPlanet : MonoBehaviour
 {
-    public TextAsset jsonFile;
+    public LevelsDatabase levelsDatabase;
     public float radius = 1f;
     public GameObject pointPrefab;
 
-    private Levels levelsInJson;
     private readonly List<GameObject> placedPoints = new();
+    private string planetName;
     private float prevRadius = 1f;
+
+    void Start()
+    {
+        planetName = gameObject.name;
+    }
 
     void Update()
     {
@@ -18,11 +23,15 @@ public class LoadLevelsOnPlanet : MonoBehaviour
 
     private void PlacePoints()
     {
-        if (jsonFile != null)
+        if (levelsDatabase != null)
         {
-            levelsInJson = JsonUtility.FromJson<Levels>(jsonFile.text);
-            foreach (Level level in levelsInJson.levels)
+            foreach (Level level in levelsDatabase.levels)
             {
+                if (PlayerPrefs.HasKey($"{planetName}_{level.title}_{level.ID}"))
+                {
+                    level.completed = true;
+                }
+
                 PlacePoint(level);
             }
         }
@@ -81,7 +90,7 @@ public class LoadLevelsOnPlanet : MonoBehaviour
 
         for (int i = 0; i < placedPoints.Count; i++)
         {
-            Level level = levelsInJson.levels[i];
+            Level level = levelsDatabase.levels[i];
 
             float latRad = level.latitude * Mathf.Deg2Rad;
             float lonRad = level.longitude * Mathf.Deg2Rad;

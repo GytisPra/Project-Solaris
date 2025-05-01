@@ -59,8 +59,6 @@ public class InteractionUIScript : MonoBehaviour
         Vector3 targetPos = new(lensTransform.localPosition.x, lensTransform.localPosition.y, -distance);
 
         yield return StartCoroutine(MoveLens(targetPos, distanceCorrect));
-
-        GameStateManager.Instance.SetState(GameState.Gameplay);
     }
     public void OnValueChanged()
     {
@@ -102,6 +100,8 @@ public class InteractionUIScript : MonoBehaviour
     }
     private IEnumerator MoveLens(Vector3 targetPos, bool distanceCorrect)
     {
+        GameStateManager.Instance.SetState(GameState.Cutscene);
+
         while (lensTransform.localPosition != targetPos)
         {
             lensTransform.localPosition = Vector3.MoveTowards(

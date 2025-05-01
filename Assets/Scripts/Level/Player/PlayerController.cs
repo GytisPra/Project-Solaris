@@ -31,6 +31,10 @@ public class PlayerController : MonoBehaviour
         Touch.onFingerDown -= OnFingerDown;
         Touch.onFingerMove -= OnFingerMove;
         Touch.onFingerUp -= OnFingerUp;
+
+        touch0Contact.Dispose();
+        touch1Contact.Dispose();
+        keyboardAction.Dispose();
     }
 
     private void HandleGameStateChange(GameState newState)
