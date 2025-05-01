@@ -27,8 +27,6 @@ public class InteractTrigger : MonoBehaviour
     /// </summary>
     public void ShowInteract()
     {
-        Debug.Log($"isCharInTrigger: {isCharInTrigger}, if true will show the interactCanvas!");
-
         if (isCharInTrigger)
         {
             interactCanvas.gameObject.SetActive(true);
