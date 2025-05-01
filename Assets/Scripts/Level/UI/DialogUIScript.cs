@@ -14,6 +14,8 @@ public class DialogUIScript : MonoBehaviour
         public string content;
     }
 
+    public InteractTrigger interactTrigger;
+
     private bool isFirstConversation = true;
     private bool isTyping = false;
 
@@ -99,6 +101,12 @@ public class DialogUIScript : MonoBehaviour
 
     public void NextPage()
     {
+        if (currentPageNumber + 1 >= numberOfPages)
+        {
+            SetupButton("Exit", redColor, ExitConversation);
+            isFirstConversation = false;
+        }
+
         if (isTyping)
         {
             isTyping = false;
@@ -107,13 +115,6 @@ public class DialogUIScript : MonoBehaviour
 
         currentPageNumber++;
         Page page = GetPage(currentPageNumber);
-
-        if (currentPageNumber >= numberOfPages || page == null)
-        {
-            SetupButton("Exit", redColor, ExitConversation);
-            isFirstConversation = false;
-            return;
-        }
 
         StopAllCoroutines();
         StartCoroutine(TypeText(page.content));
@@ -133,6 +134,7 @@ public class DialogUIScript : MonoBehaviour
     {
         SolarPad.Instance.UnlockSubject("TEST");
         StartCoroutine(CameraTransition.Instance.TransitionBack(1));
+        interactTrigger.ShowInteract();
         gameObject.SetActive(false);
     }
 

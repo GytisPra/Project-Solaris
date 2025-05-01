@@ -30,7 +30,7 @@ public class TMPFontEditorTool : EditorWindow
 
     static void ReplaceFontsInScene(TMP_FontAsset font)
     {
-        TMP_Text[] texts = GameObject.FindObjectsOfType<TMP_Text>(true);
+        TMP_Text[] texts = GameObject.FindObjectsByType<TMP_Text>(FindObjectsSortMode.InstanceID);
         foreach (var text in texts)
         {
             Undo.RecordObject(text, "Change TMP Font");

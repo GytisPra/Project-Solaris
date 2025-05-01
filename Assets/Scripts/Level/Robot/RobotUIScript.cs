@@ -7,14 +7,15 @@ public class RobotUIScript : MonoBehaviour
 {
     public event Action OnRobotInteracted;
     public Canvas conversationCanvas;
-    public LookController lookController;
-
-    private ConversationCamera convCamScript;
+    public Canvas interactCanvas;
+    public CharLookController lookController;
     public GameObject lightBulb;
 
     [Header("Cameras for transitions")]
     public Camera thirdPersonCamera;
     public Camera conversationCamera;
+
+    private ConversationCamera convCamScript;
 
     void Start()
     {
@@ -26,6 +27,8 @@ public class RobotUIScript : MonoBehaviour
         lightBulb.SetActive(false); // Hide the light bulb so that it doesn't show up anymore
 
         OnRobotInteracted?.Invoke();
+
+        interactCanvas.gameObject.SetActive(false);
 
         // Changing the gameState to conversation
         // will begin the rotation of the player character to face the robot
