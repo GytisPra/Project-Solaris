@@ -4,5 +4,5 @@ public enum GameState
     SolarPad,
     Menu,
     Cutscene,
-    Talking
+    Conversation
 }
