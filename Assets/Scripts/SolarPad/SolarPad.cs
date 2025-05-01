@@ -89,6 +89,8 @@ public class SolarPad : MonoBehaviour
                     $"\nWill be setting the theory page to DoesNotExist. " +
                     $"Check the Subject page bindings in the inspector.");
 
+
+
                 theoryPage = subjectPageBindings.Find(b =>
                     string.Equals(b.subjectTitle, "NotFound", StringComparison.OrdinalIgnoreCase))?.theoryPage;
                 button.GetComponent<Button>().onClick.AddListener(() => OpenTheory(theoryPage));

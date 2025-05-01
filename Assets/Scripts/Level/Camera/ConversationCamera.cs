@@ -1,23 +1,28 @@
+using Unity.VisualScripting.Dependencies.Sqlite;
 using UnityEngine;
 
 public class ConversationCamera : MonoBehaviour
 {
-    public Vector3 postionOffset = new(1f, 2.5f, 1f);
+    public Transform follow;
     public Transform target;
-    private Transform myTransform;
-    private Transform parent;
-   
-    void Start()
-    {
-        myTransform = transform;
-        parent = transform.parent;
-    }
+    public Camera conversationCamera;
 
-    void Update()
-    {
-        Quaternion targetRotation = Quaternion.LookRotation(target.position - myTransform.position);
+    [SerializeField] private Vector3 offset = new(0.5f, 2f, -4f);
 
-        Vector3 targetPosition = parent.position + postionOffset;
-        myTransform.SetPositionAndRotation(targetPosition, targetRotation);
+    public void PrepareForConversation()
+    {
+        if (target != null && follow != null && conversationCamera.isActiveAndEnabled)
+        {
+            // Make offset relative to the follow's rotation (local space to world space)
+            Vector3 shoulderOffset = follow.TransformDirection(offset);
+            Vector3 desiredPosition = follow.position + shoulderOffset;
+
+            Vector3 directionToTarget = target.position - desiredPosition;
+            directionToTarget.y = 0f;
+
+            Quaternion targetRotation = Quaternion.LookRotation(directionToTarget);
+
+            conversationCamera.transform.SetPositionAndRotation(desiredPosition, targetRotation);
+        }
     }
 }

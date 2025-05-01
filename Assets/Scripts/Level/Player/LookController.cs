@@ -57,7 +57,6 @@ public class LookController : MonoBehaviour
 
 
             float angleToTarget = Vector3.Angle(transform.forward, directionToTarget); // Angle between forward and target
-            Debug.Log($"currentLookWeight: {currentLookWeight} | Head rotated: {Mathf.Approximately(currentLookWeight, targetWeight)} | body rotated: {angleToTarget < 10f}");
             if (currentLookWeight >= 0.8f && angleToTarget < 12f) // 15 degree tolerance
             {
                 finishedRotation = true;

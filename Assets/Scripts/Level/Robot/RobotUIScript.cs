@@ -9,25 +9,41 @@ public class RobotUIScript : MonoBehaviour
     public Canvas conversationCanvas;
     public LookController lookController;
 
+    private ConversationCamera convCamScript;
+    public GameObject lightBulb;
+
     [Header("Cameras for transitions")]
     public Camera thirdPersonCamera;
     public Camera conversationCamera;
 
+    void Start()
+    {
+        convCamScript = conversationCamera.gameObject.GetComponent<ConversationCamera>();
+    }
+
     public void InteractWithRobot()
     {
+        lightBulb.SetActive(false); // Hide the light bulb so that it doesn't show up anymore
+
         OnRobotInteracted?.Invoke();
 
         // Changing the gameState to conversation
         // will begin the rotation of the player character to face the robot
         GameStateManager.Instance.SetState(GameState.Conversation);
-        conversationCamera.gameObject.SetActive(true);
-        StartCoroutine(TransitionCamera());
+
+        StartCoroutine(TransitionCamera()); // Start camera transitioning
     }
 
     private IEnumerator TransitionCamera()
     {
+        conversationCamera.gameObject.SetActive(true); // Eanble the camera
+
         // Wait for the rotation of the character to finish
         yield return new WaitWhile(() => !lookController.finishedRotation);
+
+        convCamScript.PrepareForConversation();
+        // wait one frame to ensure transform updates are processed
+        yield return new WaitForEndOfFrame();
 
         // Transition to conversation camera and enable the canvas
         yield return StartCoroutine(CameraTransition.Instance.SmoothCameraTransition(
@@ -37,14 +53,5 @@ public class RobotUIScript : MonoBehaviour
             GameState.Conversation // GameState after transition
         ));
         conversationCanvas.gameObject.SetActive(true);
-    }
-
-    public void ExitConversation()
-    {
-        SolarPad.Instance.UnlockSubject("TEST");
-
-        conversationCanvas.gameObject.SetActive(false);
-
-        StartCoroutine(CameraTransition.Instance.TransitionBack(1));
     }
 }

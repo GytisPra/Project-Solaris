@@ -60,13 +60,16 @@ public class CameraTransition : MonoBehaviour
         if (previousCamera == null)
         {
             Debug.LogError("There is no previous camera to transition back to.");
+            yield break;
         }
 
         if (currentCamera == null)
         {
             Debug.LogError("Current camera is not set.");
+            yield break;
         }
 
         yield return StartCoroutine(SmoothCameraTransition(currentCamera, previousCamera, duration, stateAfterTransition));
+        
     }
 }
