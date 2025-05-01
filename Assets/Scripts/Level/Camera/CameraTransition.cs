@@ -21,7 +21,7 @@ public class CameraTransition : MonoBehaviour
         }
     }
 
-    public IEnumerator SmoothCameraTransition(Camera fromCamera, Camera toCamera, float duration = 2f)
+    public IEnumerator SmoothCameraTransition(Camera fromCamera, Camera toCamera, float duration = 2f, GameState stateAfterTransition = GameState.Gameplay)
     {
         // At the start of the transition setState to cutscene
         // At the end we set it to gameplay to enable controls
@@ -52,10 +52,10 @@ public class CameraTransition : MonoBehaviour
 
         toCamera.transform.SetPositionAndRotation(targetPosition, targetRotation);
 
-        GameStateManager.Instance.SetState(GameState.Gameplay);
+        GameStateManager.Instance.SetState(stateAfterTransition);
     }
 
-    public IEnumerator TransitionBack(float duration = 2f)
+    public IEnumerator TransitionBack(float duration = 2f, GameState stateAfterTransition = GameState.Gameplay)
     {
         if (previousCamera == null)
         {
@@ -67,6 +67,6 @@ public class CameraTransition : MonoBehaviour
             Debug.LogError("Current camera is not set.");
         }
 
-        yield return StartCoroutine(SmoothCameraTransition(currentCamera, previousCamera, duration));
+        yield return StartCoroutine(SmoothCameraTransition(currentCamera, previousCamera, duration, stateAfterTransition));
     }
 }
