@@ -1,10 +1,7 @@
 using System;
-using System.Text.RegularExpressions;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.Windows;
 
 public class NFCReader : MonoBehaviour
 {
@@ -66,7 +63,7 @@ public class NFCReader : MonoBehaviour
                     }
                     catch (Exception ex)
                     {
-                        string text = ex.Message;
+                        _ = ex.Message;
 
                     }
                 }
