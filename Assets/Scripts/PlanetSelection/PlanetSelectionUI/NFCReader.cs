@@ -1,7 +1,10 @@
 using System;
+using System.Text.RegularExpressions;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.Windows;
 
 public class NFCReader : MonoBehaviour
 {
@@ -11,13 +14,19 @@ public class NFCReader : MonoBehaviour
     private AndroidJavaObject mIntent;
     private string sAction;
     [SerializeField] private NFCManager nfcManager;
+    public GameObject scannedPlanet;
+    public PlanetSelectionUI planetselectionUI;
     public TextMeshProUGUI planet;
+    public TextMeshProUGUI cardScanner;
+    [SerializeField] public string result;
+    public Button button;
 
     void Update()
     {
-
+       
         if (nfcManager.AllowedNFC == true)
         {
+            
             if (Application.platform == RuntimePlatform.Android)
             {
                 if (!tagFound)
@@ -36,21 +45,56 @@ public class NFCReader : MonoBehaviour
                             AndroidJavaObject[] rawMsg = mIntent.Call<AndroidJavaObject[]>("getParcelableArrayExtra", "android.nfc.extra.NDEF_MESSAGES");
                             AndroidJavaObject[] records = rawMsg[0].Call<AndroidJavaObject[]>("getRecords");
                             byte[] payLoad = records[0].Call<byte[]>("getPayload");
-                            string result = System.Text.Encoding.Default.GetString(payLoad).Remove(1,2).Trim();
-                            planet.text = result;
+                            int langCodeLength = payLoad[0] & 0x3F;
+                            //string result = System.Text.Encoding.Default.GetString(payLoad);
+                            result = System.Text.Encoding.UTF8.GetString(payLoad, 1 + langCodeLength, payLoad.Length - 1 - langCodeLength);
+
+                            planet.text = "Go to " + result;
 
                             byte[] payLoad2 = mIntent.Call<AndroidJavaObject>("getParcelableExtra", "android.nfc.extra.TAG").Call<byte[]>("getId");
                             string text = System.Convert.ToBase64String(payLoad2);
                             string id = text;
 
+                            ShowButton(result);
+
+                            
+
+                            tagFound = true;
+
+                            mActivity.Call("setIntent", new AndroidJavaObject("android.content.Intent"));
                         }
                     }
                     catch (Exception ex)
                     {
                         string text = ex.Message;
+
                     }
                 }
             }
+        }
+    }
+
+    void ShowButton(string planetName)
+    {
+        scannedPlanet.GetComponent<Button>().onClick.AddListener(() => planetselectionUI.MoveToPlanet(planetName));
+        scannedPlanet.SetActive(true);
+    }
+
+    public void DisableButton()
+    {
+        tagFound = false;
+        scannedPlanet.SetActive(false);
+    }
+
+    public void CardScanning()
+    {
+        if (nfcManager.AllowedNFC == false)
+        {
+            cardScanner.text = "Card scanning is disabled";
+        }
+        else if (nfcManager.AllowedNFC == true)
+        {
+            cardScanner.text = "Card scanning is enabled";
         }
     }
 }

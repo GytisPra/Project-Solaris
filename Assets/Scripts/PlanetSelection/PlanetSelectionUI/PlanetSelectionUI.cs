@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class PlanetSelectionUI : MonoBehaviour
@@ -19,6 +20,35 @@ public class PlanetSelectionUI : MonoBehaviour
         if (planet != null)
         {
             PlayerPrefs.SetString("LastPlanet", planet.name);
+            PlayerPrefs.Save();
+
+            cameraRotation.SetTargetObject(planet);
+
+            if (planetSelectionUIManager != null)
+            {
+                planetSelectionUIManager.SetTravelUICanvasActive(false);
+                planetSelectionUIManager.SetPlanetSelectionCanvasActive(false);
+                planetSelectionUIManager.SetPlanetUICanvasActive(true);
+            }
+            else
+            {
+                Debug.LogError("planetSelectionUIManager not assigned in the inspector!");
+            }
+        }
+        else
+        {
+            Debug.LogError($"Planet not provided!");
+        }
+    }
+
+    public void MoveToPlanet(string planetName)
+    {
+
+        GameObject planet = planets.Find(planetName).gameObject;
+
+        if (planet != null)
+        {
+            PlayerPrefs.SetString("LastPlanet", planetName);
             PlayerPrefs.Save();
 
             cameraRotation.SetTargetObject(planet);
