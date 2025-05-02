@@ -52,7 +52,7 @@ public class RobotUIScript : MonoBehaviour
         yield return StartCoroutine(CameraTransition.Instance.SmoothCameraTransition(
             thirdPersonCamera,     // fromCamera
             conversationCamera,    // toCamera
-            1,                     // duration
+            0.5f,                     // duration
             GameState.Conversation // GameState after transition
         ));
         conversationCanvas.gameObject.SetActive(true);

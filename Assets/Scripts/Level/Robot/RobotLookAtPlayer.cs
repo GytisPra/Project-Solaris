@@ -27,7 +27,7 @@ public class RobotLookAtPlayer : MonoBehaviour
         {
             isLooking = true;
         }
-        else if (newState == GameState.Gameplay)
+        else if(newState == GameState.Gameplay)
         {
             isLooking = false;
         }
@@ -60,12 +60,13 @@ public class RobotLookAtPlayer : MonoBehaviour
             {
                 targetRotation = Quaternion.Slerp(headBone.rotation, targetRotation, maxHeadAngle / angle);
             }
+
+            headBone.rotation = Quaternion.Slerp(headBone.rotation, targetRotation, Time.deltaTime * headRotationSpeed * currentLookWeight);
         }
         else
         {
-            targetRotation = initialRotation;
+            headBone.rotation = Quaternion.Slerp(headBone.rotation, initialRotation, Time.deltaTime * headRotationSpeed);
         }
-
-        headBone.rotation = Quaternion.Slerp(headBone.rotation, targetRotation, Time.deltaTime * headRotationSpeed * currentLookWeight);
     }
+
 }

@@ -75,6 +75,12 @@ public class DialogUIScript : MonoBehaviour
         isTyping = true;
         text.text = "";
 
+        if (currentPageNumber + 1 >= numberOfPages && isFirstConversation)
+        {
+            SetupButton("Exit", redColor, ExitConversation);
+            isFirstConversation = false;
+        }
+
         foreach (char letter in content)
         {
             text.text += letter;
@@ -83,6 +89,12 @@ public class DialogUIScript : MonoBehaviour
             // Allow skipping if interrupted
             if (!isTyping)
             {
+                if (currentPageNumber + 1 >= numberOfPages && isFirstConversation)
+                {
+                    SetupButton("Exit", redColor, ExitConversation);
+                    isFirstConversation = false;
+                }
+
                 text.text = content;
 
                 // Force layout update so UI resizes properly
@@ -91,6 +103,7 @@ public class DialogUIScript : MonoBehaviour
                 {
                     LayoutRebuilder.ForceRebuildLayoutImmediate(parentRect);
                 }
+
                 yield break;
             }
         }
@@ -101,12 +114,6 @@ public class DialogUIScript : MonoBehaviour
 
     public void NextPage()
     {
-        if (currentPageNumber + 1 >= numberOfPages)
-        {
-            SetupButton("Exit", redColor, ExitConversation);
-            isFirstConversation = false;
-        }
-
         if (isTyping)
         {
             isTyping = false;
@@ -115,6 +122,11 @@ public class DialogUIScript : MonoBehaviour
 
         currentPageNumber++;
         Page page = GetPage(currentPageNumber);
+
+        if (page == null)
+        {
+            return;
+        }
 
         StopAllCoroutines();
         StartCoroutine(TypeText(page.content));
@@ -133,7 +145,7 @@ public class DialogUIScript : MonoBehaviour
     public void ExitConversation()
     {
         SolarPad.Instance.UnlockSubject("TEST");
-        StartCoroutine(CameraTransition.Instance.TransitionBack(1));
+        StartCoroutine(CameraTransition.Instance.TransitionBack(0.5f));
         interactTrigger.ShowInteract();
         gameObject.SetActive(false);
     }
