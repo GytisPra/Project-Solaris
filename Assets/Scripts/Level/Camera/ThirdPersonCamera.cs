@@ -1,299 +1,177 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.EnhancedTouch;
+using Touch = UnityEngine.InputSystem.EnhancedTouch.Touch;
 
 public class ThirdPersonCamera : MonoBehaviour
 {
+    [Header("Target & Movement")]
     public Transform target;
-    public float minFOV = 30f;
-    public float maxFOV = 90f;
-    public float zoomSpeed = 0.5f;
+    [SerializeField] private Vector3 offset = new(0, 5, -10);
+    [SerializeField] private float followSpeed = 5f;
+
+    [Header("Zoom")]
+    public float minZoomDistance = 2f;
+    public float maxZoomDistance = 20f;
+    public float zoomSpeed = 2f;
+
+    [Header("Rotation")]
     public float pitchSensitivity = 10f;
     public float rotateSensitivity = 80f;
     public float maxPitch = 80f;
     public float minPitch = 10f;
 
-    private float previousMagnitude;
-    private int touchCount;
-    private bool pinching;
-    private bool moving;
-    private bool rotating;
+    // Input state tracking
     private bool rotatingKBM;
-    private Vector2 previousTouchVector;
 
+    // Camera & input
     private Camera cam;
-    private InputAction touch0Contact;
-    private InputAction touch0Pos;
-    private InputAction touch0Delta;
 
-    private InputAction touch1Contact;
-    private InputAction touch1Pos;
-    private InputAction touch1Delta;
     private InputAction scrollAction;
     private InputAction middleButton;
-
-    [SerializeField] private Vector3 offset = new(0, 5, -10);
-    [SerializeField] private float followSpeed = 5f;
-
 
     private void Awake()
     {
         GameStateManager.OnGameStateChanged += HandleGameStateChange;
     }
 
-    private void OnDestroy()
-    {
-        GameStateManager.OnGameStateChanged -= HandleGameStateChange;
-
-        scrollAction.Dispose();
-        middleButton.Dispose();
-
-        touch0Contact.Dispose();
-        touch0Pos.Dispose();
-        touch0Delta.Dispose();
-
-        touch1Contact.Dispose();
-        touch1Pos.Dispose();
-        touch1Delta.Dispose();
-    }
-
-    private void HandleGameStateChange(GameState newState)
-    {
-        if (newState == GameState.Gameplay)
-        {
-            Enable();
-        }
-        else
-        {
-            Disable();
-        }
-    }
-    void Start()
+    private void Start()
     {
         cam = Camera.main;
         EnhancedTouchSupport.Enable();
 
+        TouchGestureManager.Instance.OnPinch += HandlePinch;
+        TouchGestureManager.Instance.OnRotate += HandleRotate;
+        TouchGestureManager.Instance.OnDrag += HandleDrag;
+
+        SetupInputActions();
+    }
+
+    private void OnDestroy()
+    {
+        GameStateManager.OnGameStateChanged -= HandleGameStateChange;
+        DisposeInputActions();
+    }
+
+    private void Update()
+    {
+        HandleMouseRotation();
+
+        if (target != null)
+        {
+            cam.transform.LookAt(target);
+            Vector3 desiredPosition = target.position + offset;
+            transform.position = Vector3.Lerp(transform.position, desiredPosition, followSpeed * Time.deltaTime);
+        }
+    }
+
+    private void SetupInputActions()
+    {
         scrollAction = new(binding: "<Mouse>/scroll");
         scrollAction.Enable();
         scrollAction.performed += ctx => CameraZoom(-ctx.ReadValue<Vector2>().y * zoomSpeed);
 
         middleButton = new(binding: "<Mouse>/middleButton");
         middleButton.Enable();
-        middleButton.started += ctx => rotatingKBM = true;
-        middleButton.canceled += ctx => 
-        {
-            rotatingKBM = false;
-        };
-
-        touch0Contact = new InputAction(type: InputActionType.Button, binding: "<Touchscreen>/touch0/press");
-        touch0Contact.Enable();
-        touch0Contact.performed += _ => touchCount++;
-        touch0Contact.canceled += _ =>
-        {
-            touchCount--;
-            previousMagnitude = 0;
-            previousTouchVector = Vector2.zero;
-        };
-
-        touch0Pos = new InputAction(type: InputActionType.Value, binding: "<Touchscreen>/touch0/position");
-        touch0Pos.Enable();
-
-        touch0Delta = new InputAction(type: InputActionType.Value, binding: "<Touchscreen>/touch0/delta");
-        touch0Delta.Enable();
-
-        touch1Contact = new InputAction(type: InputActionType.Button, binding: "<Touchscreen>/touch1/press");
-        touch1Contact.Enable();
-        touch1Contact.performed += _ => touchCount++;
-        touch1Contact.canceled += _ =>
-        {
-            touchCount--;
-            previousMagnitude = 0;
-            previousTouchVector = Vector2.zero;
-        };
-
-        touch1Pos = new InputAction(type: InputActionType.Value, binding: "<Touchscreen>/touch1/position");
-        touch1Pos.Enable();
-
-        touch1Delta = new InputAction(type: InputActionType.Value, binding: "<Touchscreen>/touch1/delta");
-        touch1Delta.Enable();
-
-        touch1Pos.performed += _ => DetectMotion();
+        middleButton.started += _ => rotatingKBM = true;
+        middleButton.canceled += _ => rotatingKBM = false;
     }
 
-    private void Update()
+    private void DisposeInputActions()
     {
-        cam.transform.LookAt(target.transform);
+        scrollAction.Dispose();
+        middleButton.Dispose();
     }
 
-    void FixedUpdate()
+    private void HandleGameStateChange(GameState newState)
     {
-        if (touchCount <= 1)
-        {
-            pinching = false;
-            moving = false;
-            rotating = false;
-        }
-
-        if (rotatingKBM)
-        {
-            Vector2 mouseDelta = Mouse.current.delta.ReadValue();
-            float rotationAmountY = mouseDelta.x * rotateSensitivity * 0.5f * Time.deltaTime;
-            float rotationAmountX = -mouseDelta.y * rotateSensitivity * 0.5f * Time.deltaTime;
-
-            transform.RotateAround(target.position, Vector3.up, rotationAmountY);
-
-            Vector3 directionToCamera = (cam.transform.position - target.transform.position).normalized;
-            float distanceToTarget = Vector3.Distance(cam.transform.position, target.transform.position);
-
-            Vector3 flatDirection = new Vector3(directionToCamera.x, 0, directionToCamera.z).normalized;
-            float currentPitch = Vector3.SignedAngle(flatDirection, directionToCamera, Vector3.Cross(flatDirection, Vector3.up));
-
-            float newPitch = Mathf.Clamp(currentPitch + rotationAmountX, minPitch, maxPitch);
-            float pitchDelta = newPitch - currentPitch;
-
-            Vector3 rightAxis = Vector3.Cross(directionToCamera, Vector3.up).normalized;
-            Vector3 newDirection = Quaternion.AngleAxis(pitchDelta, rightAxis) * directionToCamera;
-
-            Vector3 targetPosition = target.transform.position + newDirection * distanceToTarget;
-            cam.transform.position = targetPosition;
-
-            offset = transform.position - target.position;
-            cam.transform.LookAt(target.transform);
-        }
-
-        if (target)
-        {
-            Vector3 desiredPosition = target.position + offset;
-            transform.position = Vector3.Lerp(transform.position, desiredPosition, followSpeed * Time.deltaTime);
-        }
+        if (newState == GameState.Gameplay)
+            Enable();
+        else
+            Disable();
     }
 
-    void DetectMotion()
+    private void HandleMouseRotation()
     {
-        if (touchCount < 2 || cam == null)
-            return;
+        if (!rotatingKBM || target == null) return;
 
-        Vector2 delta0 = touch0Delta.ReadValue<Vector2>();
-        Vector2 delta1 = touch1Delta.ReadValue<Vector2>();
+        Vector2 mouseDelta = Mouse.current.delta.ReadValue();
+        float rotationY = mouseDelta.x * rotateSensitivity * 0.5f * Time.deltaTime;
+        float rotationX = -mouseDelta.y * rotateSensitivity * 0.5f * Time.deltaTime;
 
-        Vector2 pos0 = touch0Pos.ReadValue<Vector2>();
-        Vector2 pos1 = touch1Pos.ReadValue<Vector2>();
+        transform.RotateAround(target.position, Vector3.up, rotationY);
 
-        // Calculate vectors between fingers
-        Vector2 currentVector = pos1 - pos0;
-        float angleDelta = 0f;
+        Vector3 direction = (cam.transform.position - target.position).normalized;
+        float distance = Vector3.Distance(cam.transform.position, target.position);
+        Vector3 flatDir = new Vector3(direction.x, 0, direction.z).normalized;
 
-        // Calculate rotation angle between frames
-        if (previousTouchVector != Vector2.zero)
-        {
-            angleDelta = Vector2.SignedAngle(previousTouchVector, currentVector);
-        }
-        previousTouchVector = currentVector;
-        float magnitude = (pos0 - pos1).magnitude;
+        float currentPitch = Vector3.SignedAngle(flatDir, direction, Vector3.Cross(flatDir, Vector3.up));
+        float newPitch = Mathf.Clamp(currentPitch + rotationX, minPitch, maxPitch);
+        float pitchDelta = newPitch - currentPitch;
 
-        if (previousMagnitude == 0)
-        {
-            previousMagnitude = magnitude;
-        }
+        Vector3 rightAxis = Vector3.Cross(direction, Vector3.up).normalized;
+        Vector3 newDir = Quaternion.AngleAxis(pitchDelta, rightAxis) * direction;
 
-        float magnitudeDifference = magnitude - previousMagnitude;
-        previousMagnitude = magnitude;
+        cam.transform.position = target.position + newDir * distance;
+        cam.transform.LookAt(target);
+        offset = transform.position - target.position;
+    }
 
+    private void HandlePinch(float delta)
+    {
+        float distance = offset.magnitude - delta * zoomSpeed * 0.01f;
+        distance = Mathf.Clamp(distance, minZoomDistance, maxZoomDistance);
+        offset = offset.normalized * distance;
+    }
 
-        if (!pinching && !moving && !rotating)
-        {
-            bool isZooming = Mathf.Abs(magnitudeDifference) > 30f;
-            bool isRotating = Mathf.Abs(angleDelta) > 2f;
-            bool isMoving = Vector2.Dot(delta0.normalized, delta1.normalized) > 0.2f;
+    private void HandleRotate(float angleDelta)
+    {
+        float rotationAmount = angleDelta * rotateSensitivity * Time.deltaTime;
+        transform.RotateAround(target.position, Vector3.up, rotationAmount);
+        transform.LookAt(target);
+        offset = transform.position - target.position;
+    }
 
-            if (isZooming)
-            {
-                pinching = true;
-            }
-            else if (isRotating)
-            {
-                rotating = true;
-            }
-            else if (isMoving)
-            {
-                moving = true;
-            }
-        }
+    private void HandleDrag(Vector2 delta)
+    {
+        float moveAmountX = -delta.y * Time.deltaTime * pitchSensitivity;
 
+        Vector3 direction = (cam.transform.position - target.position).normalized;
+        float distance = Vector3.Distance(cam.transform.position, target.position);
+        Vector3 flatDir = new Vector3(direction.x, 0, direction.z).normalized;
 
-        if (rotating)
-        {
-            float rotationAmount = angleDelta * rotateSensitivity * Time.deltaTime;
+        float currentPitch = Vector3.SignedAngle(flatDir, direction, Vector3.Cross(flatDir, Vector3.up));
+        float newPitch = Mathf.Clamp(currentPitch + moveAmountX, minPitch, maxPitch);
+        float pitchDelta = newPitch - currentPitch;
 
-            transform.RotateAround(target.position, Vector3.up, rotationAmount);
+        Vector3 rightAxis = Vector3.Cross(direction, Vector3.up).normalized;
+        Vector3 newDir = Quaternion.AngleAxis(pitchDelta, rightAxis) * direction;
 
-            transform.LookAt(target);
-
-            offset = transform.position - target.position;
-        }
-        else if (pinching)
-        {
-            cam.fieldOfView -= magnitudeDifference * zoomSpeed * 0.25f;
-            cam.fieldOfView = Mathf.Clamp(cam.fieldOfView, minFOV, maxFOV);
-        }
-        else if (moving)
-        {
-            float moveAmountX = -delta0.y * Time.deltaTime * pitchSensitivity;
-
-            Vector3 directionToCamera = (cam.transform.position - target.transform.position).normalized;
-            float distanceToTarget = Vector3.Distance(cam.transform.position, target.transform.position);
-
-            Vector3 flatDirection = new Vector3(directionToCamera.x, 0, directionToCamera.z).normalized;
-            float currentPitch = Vector3.SignedAngle(flatDirection, directionToCamera, Vector3.Cross(flatDirection, Vector3.up));
-
-            float newPitch = Mathf.Clamp(currentPitch + moveAmountX, minPitch, maxPitch);
-            float pitchDelta = newPitch - currentPitch;
-
-            Vector3 rightAxis = Vector3.Cross(directionToCamera, Vector3.up).normalized;
-            Vector3 newDirection = Quaternion.AngleAxis(pitchDelta, rightAxis) * directionToCamera;
-
-            Vector3 targetPosition = target.transform.position + newDirection * distanceToTarget;
-            cam.transform.position = targetPosition;
-
-            cam.transform.LookAt(target.transform);
-            offset = transform.position - target.position;
-        }
+        cam.transform.position = target.position + newDir * distance;
+        cam.transform.LookAt(target);
+        offset = transform.position - target.position;
     }
 
     private void CameraZoom(float increment)
     {
-        cam.fieldOfView = Mathf.Clamp(cam.fieldOfView + increment, minFOV, maxFOV);
+        float distance = offset.magnitude;
+        distance = Mathf.Clamp(distance + increment, minZoomDistance, maxZoomDistance);
+        offset = offset.normalized * distance;
     }
 
     private void Enable()
     {
         enabled = true;
 
-        scrollAction.Enable();
-        middleButton.Enable();
-
-        touch0Contact.Enable();
-        touch0Pos.Enable();
-        touch0Delta.Enable();
-
-        touch1Contact.Enable();
-        touch1Pos.Enable();
-        touch1Delta.Enable();
+        scrollAction?.Enable();
+        middleButton?.Enable();
     }
 
     private void Disable()
     {
         enabled = false;
 
-        scrollAction.Disable();
-        middleButton.Disable();
-
-        touch0Contact.Disable();
-        touch0Pos.Disable();
-        touch0Delta.Disable();
-
-        touch1Contact.Disable();
-        touch1Pos.Disable();
-        touch1Delta.Disable();
+        scrollAction?.Disable();
+        middleButton?.Disable();
     }
 }

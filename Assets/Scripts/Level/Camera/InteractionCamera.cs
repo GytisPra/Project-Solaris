@@ -27,8 +27,8 @@ public class InteractionCamera : MonoBehaviour
 
         if(parentCamera.TryGetComponent<ThirdPersonCamera>(out var thirdPersonCamera))
         {
-            minFOV = thirdPersonCamera.minFOV + 10f;
-            maxFOV = thirdPersonCamera.maxFOV - 10f;
+            minFOV = thirdPersonCamera.minZoomDistance + 10f;
+            maxFOV = thirdPersonCamera.maxZoomDistance - 10f;
         }
     }
 

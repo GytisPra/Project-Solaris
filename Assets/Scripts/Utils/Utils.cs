@@ -1,6 +1,3 @@
-using System.Drawing;
-using System.Text.RegularExpressions;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 

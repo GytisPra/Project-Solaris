@@ -10,7 +10,7 @@ public class TravelUI : MonoBehaviour
         planetSelectionUIManager.SetPlanetSelectionCanvasActive(true);
     }
 
-public void ReturnToPlanetView() {
+    public void ReturnToPlanetView() {
         planetSelectionUIManager.SetTravelUICanvasActive(false);
         planetSelectionUIManager.SetPlanetUICanvasActive(true);
     }

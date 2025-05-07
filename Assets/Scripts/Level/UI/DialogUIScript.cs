@@ -144,6 +144,12 @@ public class DialogUIScript : MonoBehaviour
 
     public void ExitConversation()
     {
+        if (isTyping)
+        {
+            isTyping = false;
+            return;
+        }
+
         SolarPad.Instance.UnlockSubject("TEST");
         StartCoroutine(CameraTransition.Instance.TransitionBack(0.5f));
         interactTrigger.ShowInteract();
