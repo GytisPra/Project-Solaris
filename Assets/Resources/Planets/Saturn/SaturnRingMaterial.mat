@@ -8,12 +8,12 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: SaturnRingMaterial
-  m_Shader: {fileID: -6465566751694194690, guid: 4f6b2b18bfc6d0c45b9a42dcb95ba376, type: 3}
+  m_Shader: {fileID: -6465566751694194690, guid: eedd7b3c35cb5f449829351919c7a893, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
   m_InvalidKeywords: []
-  m_LightmapFlags: 2
+  m_LightmapFlags: 6
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
   m_CustomRenderQueue: -1
@@ -25,7 +25,7 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - _BaseMap:
-        m_Texture: {fileID: 2800000, guid: b27a1e94a9dd15e45a023c7bc3355aef, type: 3}
+        m_Texture: {fileID: 2800000, guid: 2bc760dfa01acc948a2c647e6ab51c33, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _BumpMap:
@@ -45,11 +45,11 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _EmissionMap:
-        m_Texture: {fileID: 2800000, guid: b27a1e94a9dd15e45a023c7bc3355aef, type: 3}
+        m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
-        m_Texture: {fileID: 2800000, guid: b27a1e94a9dd15e45a023c7bc3355aef, type: 3}
+        m_Texture: {fileID: 2800000, guid: 2bc760dfa01acc948a2c647e6ab51c33, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MetallicGlossMap:
@@ -69,7 +69,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _Texture2D:
-        m_Texture: {fileID: 2800000, guid: b27a1e94a9dd15e45a023c7bc3355aef, type: 3}
+        m_Texture: {fileID: 2800000, guid: 2bc760dfa01acc948a2c647e6ab51c33, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - unity_Lightmaps:
@@ -87,11 +87,15 @@ Material:
     m_Ints: []
     m_Floats:
     - _AddPrecomputedVelocity: 0
+    - _Alpha: 1
     - _AlphaClip: 0
+    - _AlphaThreashold: 0
     - _AlphaToMask: 0
+    - _Alpha_Threashold: 0
     - _Ambient_Occlusion: 0
     - _Blend: 0
     - _BlendModePreserveSpecular: 1
+    - _BlendOp: 0
     - _BumpScale: 1
     - _ClearCoatMask: 0
     - _ClearCoatSmoothness: 0
@@ -115,6 +119,7 @@ Material:
     - _QueueControl: 0
     - _QueueOffset: 0
     - _ReceiveShadows: 1
+    - _SampleGI: 0
     - _Shades: 0.39
     - _Smoothnes: 0
     - _Smoothness: 0
@@ -130,7 +135,7 @@ Material:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _Emission: {r: 0, g: 0, b: 0, a: 0}
-    - _EmissionColor: {r: 2.1185474, g: 2.1185474, b: 2.1185474, a: 1}
+    - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _PointLightPosition: {r: 0, g: 0, b: -10, a: 0}
     - _Point_light_position: {r: 0, g: 0, b: -10, a: 0}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
