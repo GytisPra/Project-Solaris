@@ -15,6 +15,28 @@ public class PlayerController : MonoBehaviour
     private Animator animator;
     private Transform cameraTransform;
     private InputAction keyboardAction;
+    void Start()
+    {
+        cameraTransform = Camera.main.gameObject.transform;
+
+        animator = GetComponent<Animator>();
+
+        Touch.onFingerDown += OnFingerDown;
+        Touch.onFingerMove += OnFingerMove;
+        Touch.onFingerUp += OnFingerUp;
+
+        keyboardAction = new InputAction(type: InputActionType.Value);
+        keyboardAction.AddCompositeBinding("2DVector")
+            .With("Up", "<Keyboard>/w")
+            .With("Up", "<Keyboard>/upArrow")
+            .With("Down", "<Keyboard>/s")
+            .With("Down", "<Keyboard>/downArrow")
+            .With("Left", "<Keyboard>/a")
+            .With("Left", "<Keyboard>/leftArrow")
+            .With("Right", "<Keyboard>/d")
+            .With("Right", "<Keyboard>/rightArrow");
+        keyboardAction.Enable();
+    }
 
     private void Awake()
     {
@@ -44,29 +66,6 @@ public class PlayerController : MonoBehaviour
         {
             Disable();
         }
-    }
-
-    void Start()
-    {
-        cameraTransform = Camera.main.gameObject.transform;
-
-        animator = GetComponent<Animator>();
-
-        Touch.onFingerDown += OnFingerDown;
-        Touch.onFingerMove += OnFingerMove;
-        Touch.onFingerUp += OnFingerUp;
-
-        keyboardAction = new InputAction(type: InputActionType.Value);
-        keyboardAction.AddCompositeBinding("2DVector")
-            .With("Up", "<Keyboard>/w")
-            .With("Up", "<Keyboard>/upArrow")
-            .With("Down", "<Keyboard>/s")
-            .With("Down", "<Keyboard>/downArrow")
-            .With("Left", "<Keyboard>/a")
-            .With("Left", "<Keyboard>/leftArrow")
-            .With("Right", "<Keyboard>/d")
-            .With("Right", "<Keyboard>/rightArrow");
-        keyboardAction.Enable();
     }
 
     void FixedUpdate()

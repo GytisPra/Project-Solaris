@@ -14,61 +14,64 @@ public class PlanetSelectionUI : MonoBehaviour
     public List<GameObject> planetsList;
     public RectTransform buttons;
     public PlanetsDatabase planetsDatabase;
+    public UnlockManager unlockManager;
 
     private CameraRotation cameraRotation;
     private GameObject unlockedbuttonInstance;
     private GameObject lockedbuttonInstance;
-
-    private void OnEnable()
-    {
-        StartCoroutine(FetchUnlockedPlanets());
-    }
-
-    private IEnumerator FetchUnlockedPlanets()
-    {
-        UnityWebRequest request = UnityWebRequest.Get("https://project-solaris-shop-production.up.railway.app/unlocks");
-
-        yield return request.SendWebRequest();
-
-        if (request.result == UnityWebRequest.Result.Success)
-        {
-            Debug.Log("Unlocked planets: " + request.downloadHandler.text);
-        }
-        else
-        {
-            Debug.LogError("Error fetching unlocks: " + request.error);
-        }
-    }
+    private Coroutine pollingCoroutine;
+    private readonly Dictionary<string, bool> planetUnlockStates = new();
 
     void Start()
     {
         cameraRotation = Camera.main.GetComponent<CameraRotation>();
 
-        lockedbuttonInstance = Resources.Load<GameObject>("UI/PlanetSelection/LockedButton");
-        unlockedbuttonInstance = Resources.Load<GameObject>("UI/PlanetSelection/UnlockedButton");
+        if (lockedbuttonInstance == null)
+            lockedbuttonInstance = Resources.Load<GameObject>("UI/PlanetSelection/LockedButton");
 
-        StartCoroutine(FetchUnlockedPlanets());
+        if (unlockedbuttonInstance == null)
+            unlockedbuttonInstance = Resources.Load<GameObject>("UI/PlanetSelection/UnlockedButton");
+    }
 
+    private void OnEnable()
+    {
         LoadButtons();
+        pollingCoroutine = StartCoroutine(PollForPlanetUnlocks());
+    }
+
+    private void OnDisable()
+    {
+        if (pollingCoroutine != null)
+        {
+            StopCoroutine(pollingCoroutine);
+            pollingCoroutine = null;
+        }
+
+        // Clear the buttons when disabeling
+        foreach (Transform child in buttons.transform)
+        {
+            Destroy(child.gameObject);
+        }
     }
 
     private void LoadButtons()
     {
+        if (lockedbuttonInstance == null)
+            lockedbuttonInstance = Resources.Load<GameObject>("UI/PlanetSelection/LockedButton");
+
+        if (unlockedbuttonInstance == null)
+            unlockedbuttonInstance = Resources.Load<GameObject>("UI/PlanetSelection/UnlockedButton");
+
         if (planetsDatabase != null)
         {
             foreach (Planet planet in planetsDatabase.planets)
             {
                 planet.LoadUnlockData();
 
-                if (planet.IsPlanetPassOver())
-                {
-                    planet.SetPlanetToLocked();
-                }
-
                 CreatePlanetButton(planet);
-            }
 
-            //StartCoroutine(DelayedLayoutRebuild());
+                planetUnlockStates[planet.planetName] = !planet.IsPlanetPassOver() || planet.isFree;
+            }
         }
         else
         {
@@ -77,7 +80,9 @@ public class PlanetSelectionUI : MonoBehaviour
     }
     private GameObject CreatePlanetButton(Planet planet)
     {
-        var prefab = planet.unlocked ? unlockedbuttonInstance : lockedbuttonInstance;
+        bool unlocked = !planet.IsPlanetPassOver() || planet.isFree;
+
+        var prefab = unlocked ? unlockedbuttonInstance : lockedbuttonInstance;
         GameObject buttonInstance;
 
         buttonInstance = Instantiate(prefab, buttons.transform, false);
@@ -86,12 +91,17 @@ public class PlanetSelectionUI : MonoBehaviour
         buttonInstance.GetComponentInChildren<TMP_Text>().alignment = TextAlignmentOptions.Center;
         var button = buttonInstance.GetComponent<Button>();
 
-        if (planet.unlocked)
+        if (unlocked)
         {
-            buttonInstance.GetComponentInChildren<TMP_Text>().text = $"{planet.planetName}\nDays Left: {planet.daysLeft}";
+            string buttonText = "";
+
+            if (planet.isFree) buttonText = $"{planet.planetName}";
+            else buttonText = $"{planet.planetName}\nDays Left: {planet.GetDaysLeft()}";
+
+            buttonInstance.GetComponentInChildren<TMP_Text>().text = buttonText;
 
             ColorBlock cb = button.colors;
-            cb.normalColor = new Color(planet.buttonColor.r, planet.buttonColor.g, planet.buttonColor.b, 0.4f);
+            cb.normalColor = new Color(planet.buttonColor.r, planet.buttonColor.g, planet.buttonColor.b, 0.8f);
             cb.highlightedColor = planet.buttonColor;
             cb.selectedColor = planet.buttonColor;
             cb.pressedColor = planet.buttonColor;
@@ -119,37 +129,27 @@ public class PlanetSelectionUI : MonoBehaviour
             darkenedColor.a = 1f;
 
             ColorBlock cb = button.colors;
-            cb.normalColor = new Color(darkenedColor.r, darkenedColor.g, darkenedColor.b, 0.4f);
+            cb.normalColor = new Color(darkenedColor.r, darkenedColor.g, darkenedColor.b, 0.8f);
             cb.highlightedColor = darkenedColor;
             cb.selectedColor = darkenedColor;
             cb.pressedColor = darkenedColor;
-            cb.disabledColor = new Color(darkenedColor.r, darkenedColor.g, darkenedColor.b, 0.4f);
+            cb.disabledColor = new Color(darkenedColor.r, darkenedColor.g, darkenedColor.b, 0.6f);
             button.colors = cb;
         }
-
-        //StartCoroutine(DelayedLayoutRebuild());
 
         return buttonInstance;
     }
 
-    public bool UnlockPlanet(string planetName, int days)
+    public bool UnlockPlanet(string planetName)
     {
         var planet = Array.Find(planetsDatabase.planets, s => s.planetName == planetName);
+        bool unlocked = !planet.IsPlanetPassOver();
 
         if (planet == null)
         {
             Debug.LogWarning($"Planet with the name '{planetName}' not found.");
             return false;
         }
-
-        if (planet.unlocked)
-        {
-            Debug.Log($"Subject '{planetName}' is already unlocked.");
-            return false;
-        }
-        planet.SetPlanetToUnlocked(days);
-
-
 
         Transform oldButton = buttons.transform.Find(planet.planetName);
         int siblingIndex = -1;
@@ -159,16 +159,51 @@ public class PlanetSelectionUI : MonoBehaviour
             Destroy(oldButton.gameObject);
         }
 
-
         GameObject newButton = CreatePlanetButton(planet);
         if (siblingIndex >= 0) // Make sure the position in the hierarchy is the same as the oldButton
         {
             newButton.transform.SetSiblingIndex(siblingIndex);
         }
 
-        //StartCoroutine(DelayedLayoutRebuild());
-
+        StartCoroutine(DelayedLayoutRebuild());
         return true;
+    }
+
+    private IEnumerator PollForPlanetUnlocks()
+    {
+        while (true)
+        {
+            yield return unlockManager.FetchAndUnlockPlanets();
+
+            foreach (Planet planet in planetsDatabase.planets)
+            {
+                planet.LoadUnlockData();
+
+                bool isNowUnlocked = !planet.IsPlanetPassOver() || planet.isFree;
+
+                // Check if state has changed
+                if (planetUnlockStates.TryGetValue(planet.planetName, out bool wasUnlocked))
+                {
+                    if (!wasUnlocked && isNowUnlocked)
+                    {
+                        Debug.Log($"Planet {planet.planetName} has just been unlocked!");
+
+                        // Call your existing UnlockPlanet method
+                        UnlockPlanet(planet.planetName);
+                    }
+
+                    // Update state
+                    planetUnlockStates[planet.planetName] = isNowUnlocked;
+                }
+                else
+                {
+                    // If somehow missing, add it
+                    planetUnlockStates[planet.planetName] = isNowUnlocked;
+                }
+            }
+ 
+            yield return new WaitForSeconds(5f); // Wait for five seconds before checking again
+        }
     }
 
     public void MoveToPlanet(GameObject planet)
@@ -233,16 +268,6 @@ public class PlanetSelectionUI : MonoBehaviour
         LayoutRebuilder.ForceRebuildLayoutImmediate(buttons);
     }
 
-    public void ReloadButtons()
-    {
-        foreach (Transform child in buttons.transform)
-        {
-            Destroy(child.gameObject);
-        }
-
-        LoadButtons();
-    }
-
     public void ReturnToTravelMenu()
     {
         planetSelectionUIManager.ClosePlanetSelectionUI();
@@ -255,6 +280,13 @@ public class PlanetSelectionUI : MonoBehaviour
 
     public void GoToWebsite()
     {
-        Application.OpenURL("https://project-solaris-shop-production.up.railway.app/");
+        string url;
+#if UNITY_EDITOR
+        url = "http://localhost:5173/";
+#else
+        url = "https://project-solaris-shop-production.up.railway.app/";
+#endif
+
+        Application.OpenURL(url);
     }
 }

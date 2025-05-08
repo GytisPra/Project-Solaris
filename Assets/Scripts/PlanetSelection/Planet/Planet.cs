@@ -7,40 +7,75 @@ public class Planet
     public int ID;
     public string planetName;
     public Color buttonColor;
-    public bool unlocked = false;
-    public int daysLeft;
+    public bool isFree = false;
+    public DateTime unlockedUntil;
 
-    private DateTime unlockedAt;
     public bool IsPlanetPassOver()
     {
-        return (DateTime.Now - unlockedAt).TotalDays > daysLeft;
+        if (unlockedUntil == DateTime.MinValue)
+            return true;
+
+        if (unlockedUntil == DateTime.MaxValue)
+            return false; // never expires
+
+        return DateTime.Now > unlockedUntil;
     }
-    public void SetPlanetToUnlocked(int unlockForDays)
+
+    public int GetDaysLeft()
     {
-        unlockedAt = DateTime.Now;
-        unlocked = true;
-        daysLeft = unlockForDays;
-        PlayerPrefs.SetInt($"{planetName}_{ID}", 1);
-        PlayerPrefs.SetString($"{planetName}_{ID}_UnlockedAt", unlockedAt.ToString());
+        if (unlockedUntil == DateTime.MaxValue)
+            return int.MaxValue;
+
+        return Math.Max(0, (int)(unlockedUntil - DateTime.UtcNow).TotalDays);
+    }
+
+    public bool IsAlreadyUnlockedAt(DateTime date)
+    {
+        var normalizedStored = unlockedUntil.ToUniversalTime();
+        var normalizedIncoming = date.ToUniversalTime();
+
+        return Math.Abs((normalizedStored - normalizedIncoming).TotalSeconds) < 1;
+    }
+
+    public void SetPlanetToUnlocked(DateTime newUnlockedUntil)
+    {
+        unlockedUntil = newUnlockedUntil.ToUniversalTime(); // ensure UTC
+        PlayerPrefs.SetInt($"{planetName}_{ID}_Unlocked", 1);
+        PlayerPrefs.SetString($"{planetName}_{ID}_UnlockedUntil", unlockedUntil.ToString("o")); // use ISO format
         PlayerPrefs.Save();
+    }
+
+    public void SetPlanetToUnlockedNoPrefs(DateTime newUnlockedUntil)
+    {
+        unlockedUntil = newUnlockedUntil.ToUniversalTime(); // ensure UTC
     }
 
     public void SetPlanetToLocked()
     {
-        unlocked = false;
-        daysLeft = 0;
-        PlayerPrefs.SetInt($"{planetName}_{ID}", 0);
+        unlockedUntil = DateTime.MinValue;
+        PlayerPrefs.SetInt($"{planetName}_{ID}_Unlocked", 0);
+        PlayerPrefs.SetString($"{planetName}_{ID}_UnlockedUntil", DateTime.MinValue.ToString());
         PlayerPrefs.Save();
     }
 
+    /// <summary>
+    /// Loads data from player perfs. Locks the planet if the pass has expired
+    /// </summary>
     public void LoadUnlockData()
     {
-        if (PlayerPrefs.HasKey($"{planetName}_{ID}"))
+        if (PlayerPrefs.HasKey($"{planetName}_{ID}_Unlocked"))
         {
-            unlocked = PlayerPrefs.GetInt($"{planetName}_{ID}") == 1;
-            if (PlayerPrefs.HasKey($"{planetName}_{ID}_UnlockedAt"))
+            DateTime.TryParse(
+                PlayerPrefs.GetString($"{planetName}_{ID}_UnlockedUntil"), 
+                    null, 
+                    System.Globalization.DateTimeStyles.RoundtripKind, 
+                    out unlockedUntil
+                );
+
+            // Check if the pass has expired
+            if (IsPlanetPassOver())
             {
-                DateTime.TryParse(PlayerPrefs.GetString($"{planetName}_{ID}_UnlockedAt"), out unlockedAt);
+                SetPlanetToLocked();
             }
         }
     }

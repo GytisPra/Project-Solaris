@@ -69,8 +69,6 @@ public class LoadLevelsOnPlanet : MonoBehaviour
 
         SpriteRenderer fillRenderer = point.transform.GetChild(0).GetComponent<SpriteRenderer>();
 
-        fillRenderer.material.color = new(1f, 1f, 1f, 0.2f);
-
         LevelData levelData = point.AddComponent<LevelData>();
         levelData.description = level.description;
         levelData.completed = level.completed;
@@ -78,6 +76,8 @@ public class LoadLevelsOnPlanet : MonoBehaviour
         levelData.planetName = gameObject.name;
         levelData.title = level.title;
         levelData.completed = level.completed;
+
+        fillRenderer.material.color = level.completed ? new(0.5f, 1f, 0.3f, 0.4f) : new(1f, 1f, 1f, 0.2f);
 
         placedPoints.Add(point);
     }

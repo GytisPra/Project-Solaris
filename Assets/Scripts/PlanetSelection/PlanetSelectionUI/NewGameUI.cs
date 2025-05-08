@@ -6,7 +6,6 @@ public class NewGameUI : MonoBehaviour
 {
     public PlanetSelectionUIManager planetSelectionUIManager;
     public PlanetsDatabase planetsDatabase;
-    public PlanetSelectionUI planetSelectionUI;
 
     public void ClosePopUp()
     {
@@ -23,8 +22,6 @@ public class NewGameUI : MonoBehaviour
             planet.SetPlanetToLocked();
         }
 
-        planetSelectionUI.ReloadButtons();
-
         PlayerPrefs.DeleteAll();
         PlayerPrefs.Save();
 
@@ -36,7 +33,15 @@ public class NewGameUI : MonoBehaviour
 
     private IEnumerator PostClearUnlockedPlanets()
     {
-        UnityWebRequest request = UnityWebRequest.PostWwwForm("https://project-solaris-shop-production.up.railway.app/clear-unlocks", "");
+        string url;
+
+#if UNITY_EDITOR
+        url = "http://localhost:5173/clear-unlocks"; // Local dev server
+#else
+        url = "https://project-solaris-shop-production.up.railway.app/clear-unlocks"; // Live server
+#endif
+
+        UnityWebRequest request = UnityWebRequest.PostWwwForm(url, "");
 
         request.SetRequestHeader("Content-Type", "application/json");
 

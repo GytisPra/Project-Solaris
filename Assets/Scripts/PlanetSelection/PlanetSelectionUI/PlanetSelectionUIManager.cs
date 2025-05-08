@@ -1,8 +1,10 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 public class PlanetSelectionUIManager : MonoBehaviour
 {
+    [Header("Canvases")]
     public Canvas planetUICanvas;
     public Canvas planetSelectionCanvas;
     public Canvas levelUICanvas;
@@ -12,12 +14,13 @@ public class PlanetSelectionUIManager : MonoBehaviour
     public Canvas optionsCanvas;
     public Canvas creditsCanvas;
 
+    [Header("Scripts")]
     public LevelUI levelUI;
-
-    public Volume postProcessingVolume;
     public CameraRotation cameraRotation;
     public PlanetInteraction planetInteraction;
 
+    [Header("Graphics")]
+    public Volume postProcessingVolume;
     private DepthOfField depthOfField;
 
     void Start()
@@ -41,13 +44,18 @@ public class PlanetSelectionUIManager : MonoBehaviour
 
     public void SetPlanetSelectionCanvasActive(bool active)
     {
-        planetSelectionCanvas.gameObject.SetActive(active);
-        SetDepthOfFieldEffectActive(active);
-
-        if (active) {
+        if (active) 
+        {
+            planetSelectionCanvas.gameObject.SetActive(true);
+            SetDepthOfFieldEffectActive(true);
             cameraRotation.DisableInput();
             planetInteraction.Disable();
             Screen.orientation = ScreenOrientation.Portrait;
+        } 
+        else
+        {
+            planetSelectionCanvas.gameObject.SetActive(false);
+            SetDepthOfFieldEffectActive(false);
         }
     }
 
