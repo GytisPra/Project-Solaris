@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Networking;
 using UnityEngine.UI;
 using Color = UnityEngine.Color;
 
@@ -93,11 +92,14 @@ public class PlanetSelectionUI : MonoBehaviour
 
         if (unlocked)
         {
-            string buttonText = "";
+            int daysLeft = planet.GetDaysLeft();
+            string buttonText = $"{planet.planetName}\nDays Left: {daysLeft}";
 
-            if (planet.isFree) buttonText = $"{planet.planetName}";
-            else buttonText = $"{planet.planetName}\nDays Left: {planet.GetDaysLeft()}";
-
+            if (planet.isFree || daysLeft == int.MaxValue)
+            {
+                buttonText = planet.planetName;
+            } 
+                
             buttonInstance.GetComponentInChildren<TMP_Text>().text = buttonText;
 
             ColorBlock cb = button.colors;

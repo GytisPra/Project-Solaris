@@ -24,7 +24,10 @@ public class Planet
     public int GetDaysLeft()
     {
         if (unlockedUntil == DateTime.MaxValue)
+        {
             return int.MaxValue;
+        }
+            
 
         return Math.Max(0, (int)(unlockedUntil - DateTime.UtcNow).TotalDays);
     }
@@ -39,7 +42,15 @@ public class Planet
 
     public void SetPlanetToUnlocked(DateTime newUnlockedUntil)
     {
-        unlockedUntil = newUnlockedUntil.ToUniversalTime(); // ensure UTC
+        if (newUnlockedUntil == DateTime.MaxValue)
+        {
+            unlockedUntil = DateTime.MaxValue;
+        } 
+        else
+        {
+            unlockedUntil = newUnlockedUntil.ToUniversalTime();
+        }
+
         PlayerPrefs.SetInt($"{planetName}_{ID}_Unlocked", 1);
         PlayerPrefs.SetString($"{planetName}_{ID}_UnlockedUntil", unlockedUntil.ToString("o")); // use ISO format
         PlayerPrefs.Save();
@@ -47,7 +58,10 @@ public class Planet
 
     public void SetPlanetToUnlockedNoPrefs(DateTime newUnlockedUntil)
     {
-        unlockedUntil = newUnlockedUntil.ToUniversalTime(); // ensure UTC
+        if (newUnlockedUntil == DateTime.MaxValue)
+            unlockedUntil = DateTime.MaxValue;
+        else
+            unlockedUntil = newUnlockedUntil.ToUniversalTime();
     }
 
     public void SetPlanetToLocked()
