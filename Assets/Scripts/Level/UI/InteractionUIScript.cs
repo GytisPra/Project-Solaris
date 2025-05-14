@@ -117,6 +117,6 @@ public class InteractionUIScript : MonoBehaviour
             animateLampRay.DistanceCorrect();
         }
 
-        StartCoroutine(animateLampRay.EnableLamp());
+        yield return StartCoroutine(animateLampRay.EnableLamp());
     }
 }

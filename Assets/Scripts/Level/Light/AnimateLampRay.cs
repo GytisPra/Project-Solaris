@@ -13,6 +13,7 @@ public class AnimateLampRay : MonoBehaviour
     [SerializeField] private Transform lampRayTransform;
     [SerializeField] private Transform lensRayTransform;
     [SerializeField] private Transform lensTransform;
+    [SerializeField] private ExperimentResultsUI experimentResultsUI;
     private Transform lampTransform;
     private bool isDistanceCorrect = false;
 
@@ -54,6 +55,8 @@ public class AnimateLampRay : MonoBehaviour
                 yield return StartCoroutine(iceMelt.Melt()); // Start melting the ice and wait for it to finish
             }
         }
+
+        yield return StartCoroutine(experimentResultsUI.DisplayResult(isDistanceCorrect)); // wait for the results to be displayed
 
         yield return new WaitForSeconds(0.2f); // Wait a little bit (200ms)
 

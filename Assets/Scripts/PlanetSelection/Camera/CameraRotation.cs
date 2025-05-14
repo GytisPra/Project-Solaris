@@ -82,11 +82,6 @@ public class CameraRotation : MonoBehaviour
         }
     }
 
-    private void OnDisable()
-    {
-
-    }
-
     void Start()
     {
         initialPosition = transform.position;

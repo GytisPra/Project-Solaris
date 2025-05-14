@@ -10,7 +10,7 @@ public class LoadingScreenManager : MonoBehaviour
     public Image whiteScreen;
     public SVGImage gameLogo;
     public float fadeDuration = 1f;
-
+    public bool IsFading { get; private set; } = false;
     void Awake()
     {
         if (Instance == null)
@@ -31,14 +31,20 @@ public class LoadingScreenManager : MonoBehaviour
 
     IEnumerator FadeAndLoad(string sceneName)
     {
+        IsFading = true;
         // Fade In
         yield return StartCoroutine(Fade(0f, 1f));
 
         // Load Scene
         yield return SceneManager.LoadSceneAsync(sceneName);
 
+        // Wait a little
+        yield return new WaitForSeconds(0.2f);
+
         // Fade Out
         yield return StartCoroutine(Fade(1f, 0f));
+
+        IsFading = false;
     }
 
     IEnumerator Fade(float startAlpha, float endAlpha)
