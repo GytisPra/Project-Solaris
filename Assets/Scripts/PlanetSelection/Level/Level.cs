@@ -17,4 +17,11 @@ public class Level
         PlayerPrefs.SetInt($"{planet}_{title}_{ID}", 1);
         PlayerPrefs.Save();
     }
+
+    public void ResetLevel()
+    {
+        completed = false;
+        PlayerPrefs.SetInt($"{planet}_{title}_{ID}", 0);
+        PlayerPrefs.Save();
+    }
 }

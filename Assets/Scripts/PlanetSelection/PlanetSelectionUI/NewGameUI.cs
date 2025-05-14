@@ -6,6 +6,7 @@ public class NewGameUI : MonoBehaviour
 {
     public PlanetSelectionUIManager planetSelectionUIManager;
     public PlanetsDatabase planetsDatabase;
+    public LevelsDatabase earthLevelsDatabase;
 
     public void ClosePopUp()
     {
@@ -20,6 +21,11 @@ public class NewGameUI : MonoBehaviour
             if (planet.planetName == "Earth") continue;
 
             planet.SetPlanetToLocked();
+        }
+
+        foreach (Level level in earthLevelsDatabase.levels)
+        {
+            level.ResetLevel();
         }
 
         PlayerPrefs.DeleteAll();

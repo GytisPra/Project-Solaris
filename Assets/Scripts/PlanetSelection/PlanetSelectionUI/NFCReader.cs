@@ -114,11 +114,11 @@ public class NFCReader : MonoBehaviour
     {
         isScanning = false;
 
-        if (!UnlockPlanet(planetName))
-        {
-            Debug.LogError("Error while unlocking planet!");
-            return;
-        }
+        //if (!UnlockPlanet(planetName))
+        //{
+        //    Debug.LogError("Error while unlocking planet!");
+        //    return;
+        //}
 
         scanCardPopup.SetActive(false);
         MoveToPlanet(planetName);
@@ -136,19 +136,19 @@ public class NFCReader : MonoBehaviour
     /// </summary>
     /// <param name="planetName">Name of the planet to unlock.</param>
     /// <returns>True if successfully unlocked; false otherwise.</returns>
-    private bool UnlockPlanet(string planetName)
-    {
-        var planet = Array.Find(planetsDatabase.planets, s => s.planetName == planetName);
+    //private bool UnlockPlanet(string planetName)
+    //{
+    //    var planet = Array.Find(planetsDatabase.planets, s => s.planetName == planetName);
 
-        if (planet == null)
-        {
-            Debug.LogWarning($"Planet with the name '{planetName}' not found.");
-            return false;
-        }
+    //    if (planet == null)
+    //    {
+    //        Debug.LogWarning($"Planet with the name '{planetName}' not found.");
+    //        return false;
+    //    }
 
-        planet.SetPlanetToUnlocked(DateTime.MaxValue);
-        return true;
-    }
+    //    planet.SetPlanetToUnlocked(DateTime.MaxValue);
+    //    return true;
+    //}
 
     private void MoveToPlanet(string planetName)
     {

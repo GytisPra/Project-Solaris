@@ -38,8 +38,12 @@ public class ThirdPersonCamera : MonoBehaviour
     private float pitchVelocity;
 
     private float targetDistance;
-    private float currentDistance;
+    public float currentDistance;
     private float distanceVelocity;
+
+    private Transform thisTransform;
+    private Camera thisCamera;
+    private float fovChangeSpeed = 5f;
 
     private void Awake()
     {
@@ -48,17 +52,20 @@ public class ThirdPersonCamera : MonoBehaviour
 
     private void Start()
     {
+        thisTransform = transform;
+        thisCamera = thisTransform.GetComponent<Camera>();
+
         EnhancedTouchSupport.Enable();
 
         // Initialize distance based on offset magnitude
-        Vector3 offset = transform.position - target.position;
+        Vector3 offset = thisTransform.position - target.position;
         currentDistance = targetDistance = offset.magnitude;
 
         // Compute initial yaw and pitch
         Vector3 direction = offset.normalized;
         Vector3 flatDir = new Vector3(direction.x, 0, direction.z).normalized;
         currentPitch = targetPitch = Vector3.SignedAngle(flatDir, direction, Vector3.Cross(flatDir, Vector3.up));
-        currentYaw = targetYaw = transform.eulerAngles.y;
+        currentYaw = targetYaw = thisTransform.eulerAngles.y;
 
         // Subscribe touch gestures
         TouchGestureManager.Instance.OnPinch += HandlePinch;
@@ -67,6 +74,7 @@ public class ThirdPersonCamera : MonoBehaviour
         TouchGestureManager.Instance.OnGestureActive += active => isTouchGestureActive = active;
 
         SetupInputActions();
+
     }
 
     private void OnDestroy()
@@ -86,6 +94,26 @@ public class ThirdPersonCamera : MonoBehaviour
     private void Update()
     {
         HandleMouseRotation();
+
+        float targetFOV;
+        switch (Screen.orientation)
+        {
+            case ScreenOrientation.LandscapeLeft:
+            case ScreenOrientation.LandscapeRight:
+                targetFOV = 30;
+                maxZoomDistance = 12;
+                break;
+            case ScreenOrientation.Portrait:
+                targetFOV = 50;
+                maxZoomDistance = 15;
+                break;
+            default:
+                targetFOV = thisCamera.fieldOfView;
+                break;
+        }
+
+        thisCamera.fieldOfView = Mathf.Lerp(thisCamera.fieldOfView, targetFOV, Time.deltaTime * fovChangeSpeed);
+        targetDistance = Mathf.Clamp(targetDistance, minZoomDistance, maxZoomDistance);
     }
 
     private void FixedUpdate()
@@ -107,15 +135,15 @@ public class ThirdPersonCamera : MonoBehaviour
         if (userControlling)
         {
             // direct snap when the user is dragging/pinching/rotating
-            transform.position = newPos;
+            thisTransform.position = newPos;
         }
         else
         {
             // blend in to maintain smooth follow if target moves
-            transform.position = Vector3.Lerp(transform.position, newPos, followSpeed * Time.deltaTime);
+            thisTransform.position = Vector3.Lerp(thisTransform.position, newPos, followSpeed * Time.deltaTime);
         }
 
-        transform.LookAt(target);
+        thisTransform.LookAt(target);
     }
 
     private void SetupInputActions()
