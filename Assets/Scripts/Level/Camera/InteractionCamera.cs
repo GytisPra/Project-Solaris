@@ -7,8 +7,8 @@ public class InteractionCamera : MonoBehaviour
     [SerializeField] private float minScale = 1f;
     [SerializeField] private float maxScale = 1.5f;
 
-    private float minFOV = 15f;
-    private float maxFOV = 50f;
+    private float minDistance = 15f;
+    private float maxDistance = 20f;
 
     private Camera thisCamera;
 
@@ -27,8 +27,8 @@ public class InteractionCamera : MonoBehaviour
 
         if(parentCamera.TryGetComponent<ThirdPersonCamera>(out var thirdPersonCamera))
         {
-            minFOV = thirdPersonCamera.minFOV + 10f;
-            maxFOV = thirdPersonCamera.maxFOV - 10f;
+            minDistance = thirdPersonCamera.minZoomDistance + 10f;
+            maxDistance = thirdPersonCamera.maxZoomDistance - 10f;
         }
     }
 
@@ -39,8 +39,8 @@ public class InteractionCamera : MonoBehaviour
 
         thisCamera.fieldOfView = parentCamera.fieldOfView; 
 
-        float normalizedFov = Mathf.InverseLerp(minFOV, maxFOV, thisCamera.fieldOfView);
-        float targetScale = Mathf.Lerp(minScale, maxScale, normalizedFov);
+        float normalizedDistance = Mathf.InverseLerp(minDistance, maxDistance, thisCamera.transform.position.z);
+        float targetScale = Mathf.Lerp(minScale, maxScale, normalizedDistance);
 
         interactionCanvas.localScale = Vector3.one * targetScale;
     }

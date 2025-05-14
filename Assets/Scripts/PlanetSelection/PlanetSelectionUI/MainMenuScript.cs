@@ -25,6 +25,11 @@ public class MainMenuScript : MonoBehaviour
             return;
         }
 
+        if (lastPlanet == "Saturn")
+        {
+            planet = planet.transform.GetChild(1).gameObject;
+        }
+
         if (cameraRotation != null) {
             cameraRotation.SetTargetObject(planet);
         } else {

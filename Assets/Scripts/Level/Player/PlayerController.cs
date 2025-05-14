@@ -1,4 +1,3 @@
-using System.Reflection;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.EnhancedTouch;
@@ -7,65 +6,21 @@ using Touch = UnityEngine.InputSystem.EnhancedTouch.Touch;
 public class PlayerController : MonoBehaviour
 {
     public float walkSpeed = 2.0f;
+    public float movementDeadzone = 0.1f;
 
     private Vector2 touchStartPosition;
     private Vector2 touchDirection;
-    private bool isMoving = false;
+    private bool isTouching = false;
+    private bool isPerformingGesture = false;
     private Animator animator;
-    private int touchCount = 0;
-
     private Transform cameraTransform;
-
     private InputAction keyboardAction;
-    private InputAction touch0Contact;
-    private InputAction touch1Contact;
-
-    private void Awake()
-    {
-        GameStateManager.OnGameStateChanged += HandleGameStateChange;
-    }
-    void OnDestroy()
-    {
-        GameStateManager.OnGameStateChanged -= HandleGameStateChange;
-
-        Touch.onFingerDown -= OnFingerDown;
-        Touch.onFingerMove -= OnFingerMove;
-        Touch.onFingerUp -= OnFingerUp;
-
-        touch0Contact.Dispose();
-        touch1Contact.Dispose();
-        keyboardAction.Dispose();
-    }
-
-    private void HandleGameStateChange(GameState newState)
-    {
-        if (newState == GameState.Gameplay)
-        {
-            Enable();
-        }
-        else
-        {
-            Disable();
-        }
-    }
-
     void Start()
     {
         cameraTransform = Camera.main.gameObject.transform;
 
         animator = GetComponent<Animator>();
 
-        touch0Contact = new(type: InputActionType.Button, binding: "<Touchscreen>/touch0/press");
-        touch0Contact.Enable();
-        touch0Contact.performed += _ => touchCount++;
-        touch0Contact.canceled += _ => touchCount--; ;
-
-        touch1Contact = new(type: InputActionType.Button, binding: "<Touchscreen>/touch1/press");
-        touch1Contact.Enable();
-        touch1Contact.performed += _ => touchCount++;
-        touch1Contact.canceled += _ => touchCount--;
-
-        EnhancedTouchSupport.Enable();
         Touch.onFingerDown += OnFingerDown;
         Touch.onFingerMove += OnFingerMove;
         Touch.onFingerUp += OnFingerUp;
@@ -83,15 +38,43 @@ public class PlayerController : MonoBehaviour
         keyboardAction.Enable();
     }
 
+    private void Awake()
+    {
+        EnhancedTouchSupport.Enable();
+        GameStateManager.OnGameStateChanged += HandleGameStateChange;
+        TouchGestureManager.Instance.OnGestureActive += HandleGestureActive;
+    }
+    void OnDestroy()
+    {
+        EnhancedTouchSupport.Disable();
+        GameStateManager.OnGameStateChanged -= HandleGameStateChange;
+        TouchGestureManager.Instance.OnGestureActive -= HandleGestureActive;
+
+        Touch.onFingerDown -= OnFingerDown;
+        Touch.onFingerMove -= OnFingerMove;
+        Touch.onFingerUp -= OnFingerUp;
+        keyboardAction.Dispose();
+    }
+
+    private void HandleGameStateChange(GameState newState)
+    {
+        if (newState == GameState.Gameplay)
+        {
+            Enable();
+        }
+        else
+        {
+            Disable();
+        }
+    }
+
     void FixedUpdate()
     {
-        if (touchCount > 1)
+        if (isPerformingGesture)
         {
             animator.SetFloat("speedPercent", 0f);
-            return;
         }
-
-        if (isMoving)
+        else if (isTouching)
         {
             MovePlayer(touchDirection);
         }
@@ -110,10 +93,15 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    private void HandleGestureActive(bool isPerforming)
+    {
+        isPerformingGesture = isPerforming;
+    }
+
     void OnFingerDown(Finger finger)
     {
         touchStartPosition = finger.screenPosition;
-        isMoving = true;
+        isTouching = true;
     }
 
     void OnFingerMove(Finger finger)
@@ -123,14 +111,14 @@ public class PlayerController : MonoBehaviour
 
     void OnFingerUp(Finger finger)
     {
-        isMoving = false;
+        isTouching = false;
         touchDirection = Vector2.zero;
         animator.SetFloat("speedPercent", 0f);
     }
 
     void MovePlayer(Vector2 normalizedInput)
     {
-        if (normalizedInput != Vector2.zero)
+        if (normalizedInput.magnitude > movementDeadzone)
         {
             Vector3 cameraForward = cameraTransform.forward;
             cameraForward.y = 0;
@@ -147,6 +135,10 @@ public class PlayerController : MonoBehaviour
 
             animator.SetFloat("speedPercent", 1f);
         }
+        else
+        {
+            animator.SetFloat("speedPercent", 0f);
+        }
     }
 
     public void Disable()
@@ -155,8 +147,6 @@ public class PlayerController : MonoBehaviour
         Touch.onFingerMove -= OnFingerMove;
         Touch.onFingerUp -= OnFingerUp;
 
-        touch0Contact.Disable();
-        touch1Contact.Disable();
         keyboardAction.Disable();
     }
     public void Enable()
@@ -165,8 +155,6 @@ public class PlayerController : MonoBehaviour
         Touch.onFingerMove += OnFingerMove;
         Touch.onFingerUp += OnFingerUp;
 
-        touch0Contact.Enable();
-        touch1Contact.Enable();
         keyboardAction.Enable();
     }
 }
