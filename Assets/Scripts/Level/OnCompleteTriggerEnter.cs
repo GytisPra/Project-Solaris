@@ -7,16 +7,32 @@ public class OnCompleteTriggerEnter : MonoBehaviour
     public LevelsDatabase levelsDatabase;
     public LevelUIManager levelUIManager;
     string planetName;
+    private bool isInTrigger = false;
     private void OnTriggerEnter(Collider other)
     {
+        if (isInTrigger)
+        {
+            return;
+        }
+
         if (other.CompareTag("Player"))
         {
+            isInTrigger = true;
+
             levelUIManager.SetLevelUICanvasActive(false);
 
             levelUIManager.SetFinishLevelPopupCanvasActive(true);
             levelUIManager.SetDepthOfFieldEffectActive(true);
 
             GameStateManager.Instance.SetState(GameState.Menu);
+        }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.CompareTag("Player"))
+        {
+            isInTrigger = false;
         }
     }
 
