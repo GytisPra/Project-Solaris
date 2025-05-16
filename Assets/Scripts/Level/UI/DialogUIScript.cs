@@ -185,7 +185,7 @@ public class DialogUIScript : MonoBehaviour
             return;
         }
 
-        SolarPad.Instance.UnlockSubject("TEST");
+        SolarPad.Instance.UnlockSubject("Lens Power");
         StartCoroutine(CameraTransition.Instance.TransitionBack(0.5f));
         interactTrigger.ShowInteract();
         gameObject.SetActive(false);
