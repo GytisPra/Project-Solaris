@@ -13,6 +13,7 @@ public class AnimateLampRay : MonoBehaviour
     [SerializeField] private Transform lampRayTransform;
     [SerializeField] private Transform lensRayTransform;
     [SerializeField] private Transform lensTransform;
+    [SerializeField] private ExperimentResultsUI experimentResultsUI;
     private Transform lampTransform;
     private bool isDistanceCorrect = false;
 
@@ -23,6 +24,8 @@ public class AnimateLampRay : MonoBehaviour
 
     public IEnumerator EnableLamp()
     {
+        Debug.Log("Turning on lamp!");
+
         float distance = Vector3.Distance(lampTransform.position, lensTransform.position);
         float adjustedScaleZ = distance / rayLengthToScaleRatio;
 
@@ -42,22 +45,44 @@ public class AnimateLampRay : MonoBehaviour
         lampRayTransform.localScale = targetScale;
         lensRayTransform.gameObject.SetActive(true);
 
+        Debug.Log("Lamp has finished its animation!");
+
         if (iceMelt.IsMelted())
         {
+            Debug.Log("Starting to fully reveal lens ray!");
+
             yield return StartCoroutine(animateLensRay.ReavealFully()); // Wait for lensRay to be fully reveled
+
+            Debug.Log("Lens ray finished fully revealing!");
         }
         else
         {
+            Debug.Log("Starting to reveal lens ray!");
+
             yield return StartCoroutine(animateLensRay.Reveal()); // Wait for the lens ray to be revealed
+
+            Debug.Log("Lens ray finished revealing!");
             if (iceMelt != null && isDistanceCorrect)
             {
+                Debug.Log("Distance correct starting to melt ice!");
+
                 yield return StartCoroutine(iceMelt.Melt()); // Start melting the ice and wait for it to finish
+
+                Debug.Log("Ice is done melting!");
             }
         }
 
+        Debug.Log("Starting to reveal the results!");
+
+        yield return StartCoroutine(experimentResultsUI.DisplayResult(isDistanceCorrect)); // wait for the results to be displayed
+
+        Debug.Log("Results have been shown!\nWaiting 200ms then begining transition back!");
+
         yield return new WaitForSeconds(0.2f); // Wait a little bit (200ms)
 
-        StartCoroutine(CameraTransition.Instance.TransitionBack());
+        yield return StartCoroutine(CameraTransition.Instance.TransitionBack());
+
+        Debug.Log("Finished transition back!");
     }
 
     public IEnumerator DisableLamp()

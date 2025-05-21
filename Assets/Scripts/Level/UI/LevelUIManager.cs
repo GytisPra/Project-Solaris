@@ -7,6 +7,8 @@ public class LevelUIManager : MonoBehaviour
     public Canvas exitLevelPopupCanvas;
     public Canvas interactionPopupCanvas;
     public Canvas nearLensCanvas;
+    public Canvas finishLevelPopupCanvas;
+
     public Volume postProcessingVolume;
     public InteractTrigger interactTrigger;
     private DepthOfField depthOfField;
@@ -32,6 +34,13 @@ public class LevelUIManager : MonoBehaviour
     public void SetExitLevelPopupCanvasActive(bool active)
     {
         exitLevelPopupCanvas.gameObject.SetActive(active);
+
+        SetDepthOfFieldEffectActive(active);
+    }
+
+    public void SetFinishLevelPopupCanvasActive(bool active)
+    {
+        finishLevelPopupCanvas.gameObject.SetActive(active);
 
         SetDepthOfFieldEffectActive(active);
     }

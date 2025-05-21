@@ -64,6 +64,7 @@ public class PlayerController : MonoBehaviour
         }
         else
         {
+            StopMovement();
             Disable();
         }
     }
@@ -139,6 +140,13 @@ public class PlayerController : MonoBehaviour
         {
             animator.SetFloat("speedPercent", 0f);
         }
+    }
+
+    private void StopMovement()
+    {
+        isTouching = false;
+        touchDirection = Vector2.zero;
+        animator.SetFloat("speedPercent", 0f);
     }
 
     public void Disable()

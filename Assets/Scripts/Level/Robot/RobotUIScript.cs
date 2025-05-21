@@ -6,7 +6,7 @@ using UnityEngine;
 public class RobotUIScript : MonoBehaviour
 {
     public event Action OnRobotInteracted;
-    public Canvas conversationCanvas;
+    public RectTransform conversationCanvas;
     public Canvas interactCanvas;
     public CharLookController lookController;
     public GameObject lightBulb;

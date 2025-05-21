@@ -1,13 +1,14 @@
 ﻿using System.Collections;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class InteractionUIScript : MonoBehaviour
 {
-    public float maxDistance;
-    public float minDistance;
+    public float maxDistance = 7f;
+    public float minDistance = 5f;
     public float moveSpeed = 2f;
-    public float targetDistance = 0.5f;
+    public float targetDistance = 4f;
     public LevelUIManager levelUIManager;
 
     [SerializeField] private Transform lensTransform;
@@ -56,9 +57,15 @@ public class InteractionUIScript : MonoBehaviour
             distanceCorrect = true;
         }
 
-        Vector3 targetPos = new(lensTransform.localPosition.x, lensTransform.localPosition.y, -distance);
+        float zPos = MapDistanceToLensZ(distance);
+        Vector3 targetPos = new(lensTransform.localPosition.x, lensTransform.localPosition.y, zPos);
 
         yield return StartCoroutine(MoveLens(targetPos, distanceCorrect));
+    }
+
+    private float MapDistanceToLensZ(float distance)
+    {
+        return distance - 5f;
     }
     public void OnValueChanged()
     {
@@ -68,30 +75,37 @@ public class InteractionUIScript : MonoBehaviour
     private bool ValidateInput(string input, out float number)
     {
         errorMsg.text = "";
-
-        number = 0;
+        errorMsg.gameObject.SetActive(false);
 
         if (input.Trim().Length <= 0)
         {
-            errorMsg.text = $"Enter a number between {maxDistance} and {minDistance}";
+            errorMsg.text = $"Enter a number between {minDistance} and {maxDistance}";
+            errorMsg.gameObject.SetActive(true);
+            number = 0;
             return false;
         }
 
         if (!float.TryParse(input, out float distance))
         {
             errorMsg.text = "Entered value is not a valid number";
+            errorMsg.gameObject.SetActive(true);
+            number = 0;
             return false;
         }
 
         if (distance > maxDistance)
         {
             errorMsg.text = $"The entered distance must be ≤ {maxDistance}";
+            errorMsg.gameObject.SetActive(true);
+            number = 0;
             return false;
         }
 
         if (distance < minDistance)
         {
             errorMsg.text = $"The entered distance must be ≥ {minDistance}";
+            errorMsg.gameObject.SetActive(true);
+            number = 0;
             return false;
         }
 

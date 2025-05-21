@@ -166,8 +166,7 @@ public class ThirdPersonCamera : MonoBehaviour
 
     private void HandleGameStateChange(GameState newState)
     {
-        enabled = newState == GameState.Gameplay;
-        if (enabled)
+        if (newState == GameState.Gameplay)
         {
             scrollAction?.Enable();
             middleButton?.Enable();
