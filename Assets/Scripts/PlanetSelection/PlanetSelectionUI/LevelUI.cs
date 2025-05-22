@@ -34,7 +34,9 @@ public class LevelUI : MonoBehaviour
         PlayerPrefs.SetInt("levelID", currLevelData.levelID);
         PlayerPrefs.Save();
 
-        SceneManager.LoadScene(currLevelData.planetName + currLevelData.levelID);
+        string sceneName = currLevelData.planetName + currLevelData.levelID;
+
+        LoadingScreenManager.Instance.LoadScene(sceneName);
     }
 
     public void DisplayLevelInfo(LevelData levelData, SpriteRenderer fillRenderer)

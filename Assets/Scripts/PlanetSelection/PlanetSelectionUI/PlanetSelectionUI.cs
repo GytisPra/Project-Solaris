@@ -9,7 +9,6 @@ using Color = UnityEngine.Color;
 public class PlanetSelectionUI : MonoBehaviour
 {
     public PlanetSelectionUIManager planetSelectionUIManager;
-    public Transform planets;
     public List<GameObject> planetsList;
     public RectTransform buttons;
     public PlanetsDatabase planetsDatabase;
@@ -98,8 +97,8 @@ public class PlanetSelectionUI : MonoBehaviour
             if (planet.isFree || daysLeft == int.MaxValue)
             {
                 buttonText = planet.planetName;
-            } 
-                
+            }
+
             buttonInstance.GetComponentInChildren<TMP_Text>().text = buttonText;
 
             ColorBlock cb = button.colors;
@@ -203,7 +202,7 @@ public class PlanetSelectionUI : MonoBehaviour
                     planetUnlockStates[planet.planetName] = isNowUnlocked;
                 }
             }
- 
+
             yield return new WaitForSeconds(5f); // Wait for five seconds before checking again
         }
     }
@@ -236,8 +235,8 @@ public class PlanetSelectionUI : MonoBehaviour
 
     public void MoveToPlanet(string planetName)
     {
-
-        GameObject planet = planets.Find(planetName).gameObject;
+        GameObject planet = planetsList.Find(p =>
+            string.Equals(p.name, planetName, StringComparison.OrdinalIgnoreCase));
 
         if (planet != null)
         {
@@ -245,9 +244,11 @@ public class PlanetSelectionUI : MonoBehaviour
             PlayerPrefs.Save();
 
             cameraRotation.SetTargetObject(planet);
+            cameraRotation.ResetCameraOnCurrentTarget();
 
             if (planetSelectionUIManager != null)
             {
+                planetSelectionUIManager.SetMainMenuCanvasActive(false);
                 planetSelectionUIManager.SetTravelUICanvasActive(false);
                 planetSelectionUIManager.SetPlanetSelectionCanvasActive(false);
                 planetSelectionUIManager.SetPlanetUICanvasActive(true);
@@ -259,7 +260,7 @@ public class PlanetSelectionUI : MonoBehaviour
         }
         else
         {
-            Debug.LogError($"Planet not provided!");
+            Debug.LogError($"Planet with the name {planetName} not found!");
         }
     }
 
