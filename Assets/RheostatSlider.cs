@@ -20,7 +20,7 @@ public class RheostatSlider : MonoBehaviour
     {
         if ( slider.value != 0)
         {
-            vector = new Vector3(0, -(slider.value / 10), 0);
+            vector = new Vector3(0, -(slider.value / 5), 0);
         }
 
         slidingObject.transform.localPosition = vector;

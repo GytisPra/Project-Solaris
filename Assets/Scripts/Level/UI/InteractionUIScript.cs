@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class InteractionUIScript : MonoBehaviour
 {
@@ -15,7 +16,6 @@ public class InteractionUIScript : MonoBehaviour
     [SerializeField] private TMP_Text errorMsg;
     [SerializeField] private AnimateLampRay animateLampRay;
     [SerializeField] private IceMelt iceMelt;
-
     [Header("Cameras for transition")]
     [SerializeField] private Camera fromCamera;
     [SerializeField] private Camera toCamera;
@@ -25,26 +25,26 @@ public class InteractionUIScript : MonoBehaviour
         levelUIManager.SetInteractionPopupActive(false);
         levelUIManager.SetLevelUICanvasActive(true);
         levelUIManager.SetDepthOfFieldEffectActive(false);
-        levelUIManager.SetNearLensCanvasActive(true);
+        levelUIManager.SetNearRheostatActive(true);
 
         GameStateManager.Instance.SetState(GameState.Gameplay);
     }
 
     public void Confirm()
     {
-        bool distanceCorrect = false;
-        string inputedText = inputField.text.Replace('.', ',');
+        levelUIManager.SetInteractionPopupActive(false);
+        levelUIManager.SetLevelUICanvasActive(true);
+        levelUIManager.SetDepthOfFieldEffectActive(false);
+        levelUIManager.SetNearRheostatActive(true);
 
-        if (ValidateInput(inputedText, out float distance))
-        {
-            levelUIManager.SetInteractionPopupActive(false);
-            levelUIManager.SetLevelUICanvasActive(true);
-            levelUIManager.SetDepthOfFieldEffectActive(false);
-            levelUIManager.SetNearLensCanvasActive(true);
+        GameStateManager.Instance.SetState(GameState.Gameplay);
+        //if (ValidateInput(inputedText, out float distance))
+        //{
 
 
-            StartCoroutine(WaitForCameraTransition(distance, distanceCorrect, targetDistance));
-        }
+
+        //    StartCoroutine(WaitForCameraTransition(distance, distanceCorrect, targetDistance));
+        //}
     }
 
     private IEnumerator WaitForCameraTransition(float distance, bool distanceCorrect, float targetDistance)
@@ -65,39 +65,39 @@ public class InteractionUIScript : MonoBehaviour
         StartCoroutine(animateLampRay.DisableLamp());
     }
 
-    private bool ValidateInput(string input, out float number)
-    {
-        errorMsg.text = "";
+    //private bool ValidateInput(string input, out float number)
+    //{
+    //    errorMsg.text = "";
 
-        number = 0;
+    //    number = 0;
 
-        if (input.Trim().Length <= 0)
-        {
-            errorMsg.text = $"Enter a number between {maxDistance} and {minDistance}";
-            return false;
-        }
+    //    if (input.Trim().Length <= 0)
+    //    {
+    //        errorMsg.text = $"Enter a number between {maxDistance} and {minDistance}";
+    //        return false;
+    //    }
 
-        if (!float.TryParse(input, out float distance))
-        {
-            errorMsg.text = "Entered value is not a valid number";
-            return false;
-        }
+    //    if (!float.TryParse(input, out float distance))
+    //    {
+    //        errorMsg.text = "Entered value is not a valid number";
+    //        return false;
+    //    }
 
-        if (distance > maxDistance)
-        {
-            errorMsg.text = $"The entered distance must be ≤ {maxDistance}";
-            return false;
-        }
+    //    if (distance > maxDistance)
+    //    {
+    //        errorMsg.text = $"The entered distance must be ≤ {maxDistance}";
+    //        return false;
+    //    }
 
-        if (distance < minDistance)
-        {
-            errorMsg.text = $"The entered distance must be ≥ {minDistance}";
-            return false;
-        }
+    //    if (distance < minDistance)
+    //    {
+    //        errorMsg.text = $"The entered distance must be ≥ {minDistance}";
+    //        return false;
+    //    }
 
-        number = distance;
-        return true;
-    }
+    //    number = distance;
+    //    return true;
+    //}
     private IEnumerator MoveLens(Vector3 targetPos, bool distanceCorrect)
     {
         GameStateManager.Instance.SetState(GameState.Cutscene);
