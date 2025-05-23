@@ -27,9 +27,7 @@ public class LevelUIManager : MonoBehaviour
     public void SetLevelUICanvasActive(bool active)
     {
         levelUICanvas.gameObject.SetActive(active);
-        SetDepthOfFieldEffectActive(active);
     }
-
 
     public void SetExitLevelPopupCanvasActive(bool active)
     {

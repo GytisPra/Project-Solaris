@@ -10,6 +10,8 @@ public class GateOpen : MonoBehaviour
 
     public IEnumerator Open()
     {
+        transform.GetComponent<Collider>().enabled = false;
+
         Quaternion targetRotationLeft = Quaternion.Euler(-90f, 0f, -90f);
         Quaternion targetRotationRight = Quaternion.Euler(-90f, 0f, 90f);
 
