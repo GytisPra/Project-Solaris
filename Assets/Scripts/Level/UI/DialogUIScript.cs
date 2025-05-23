@@ -12,9 +12,11 @@ public class DialogUIScript : MonoBehaviour
     {
         public int pageNumber;
         public string content;
+        public Sprite formulaSprite;
     }
 
     public InteractTrigger interactTrigger;
+    public string repeatText = "If you forget anything, you can find a list of physics theories in your SolarPad. Just click the button in the top-right corner of your screen to open it.";
 
     private bool isFirstConversation = true;
     private bool isTyping = false;
@@ -22,6 +24,7 @@ public class DialogUIScript : MonoBehaviour
     [Header("UI Components")]
     public TMP_Text text;
     public Button continueButton;
+    public Image formulaUIImage;
 
     [Header("Dialog Settings")]
     public List<Page> pages = new();
@@ -37,10 +40,8 @@ public class DialogUIScript : MonoBehaviour
     {
         if (!isFirstConversation)
         {
-            text.alignment = TextAlignmentOptions.Center;
-
             StopAllCoroutines();
-            StartCoroutine(TypeText("Check the SolarPad!"));
+            StartCoroutine(TypeText(repeatText, null));
             SetupButton("Exit", redColor, ExitConversation);
             return;
         }
@@ -61,7 +62,7 @@ public class DialogUIScript : MonoBehaviour
         if (page != null)
         {
             StopAllCoroutines();
-            StartCoroutine(TypeText(page.content));
+            StartCoroutine(TypeText(page.content, page.formulaSprite));
         }
     }
 
@@ -70,7 +71,7 @@ public class DialogUIScript : MonoBehaviour
         return pages.Find(p => p.pageNumber == pageNumber);
     }
 
-    private IEnumerator TypeText(string content)
+    private IEnumerator TypeText(string content, Sprite formulaSprite)
     {
         isTyping = true;
         text.text = "";
@@ -81,9 +82,30 @@ public class DialogUIScript : MonoBehaviour
             isFirstConversation = false;
         }
 
-        foreach (char letter in content)
+        for (int i = 0; i < content.Length; i++)
         {
-            text.text += letter;
+            char letter = content[i];
+
+            if (letter == '\\' && i + 1 < content.Length)
+            {
+                char nextLetter = content[i + 1];
+
+                if (nextLetter == 'n')
+                {
+                    text.text += '\n';
+                    i++;
+                }
+                else
+                {
+                    // If not recognized, add the backslash and continue
+                    text.text += '\\';
+                }
+            }
+            else
+            {
+                text.text += letter;
+            }
+
             yield return new WaitForSeconds(waitAfterLetter);
 
             // Allow skipping if interrupted
@@ -97,6 +119,12 @@ public class DialogUIScript : MonoBehaviour
 
                 text.text = content;
 
+                if (formulaSprite != null)
+                {
+                    formulaUIImage.gameObject.SetActive(true);
+                    formulaUIImage.sprite = formulaSprite;
+                }
+
                 // Force layout update so UI resizes properly
                 RectTransform parentRect = text.transform.parent as RectTransform;
                 if (parentRect != null)
@@ -106,6 +134,12 @@ public class DialogUIScript : MonoBehaviour
 
                 yield break;
             }
+        }
+
+        if (formulaSprite != null)
+        {
+            formulaUIImage.gameObject.SetActive(true);
+            formulaUIImage.sprite = formulaSprite;
         }
 
         isTyping = false;
@@ -128,8 +162,10 @@ public class DialogUIScript : MonoBehaviour
             return;
         }
 
+        formulaUIImage.gameObject.SetActive(false);
+
         StopAllCoroutines();
-        StartCoroutine(TypeText(page.content));
+        StartCoroutine(TypeText(page.content, page.formulaSprite));
     }
 
     public void SkipText()
@@ -141,7 +177,6 @@ public class DialogUIScript : MonoBehaviour
         }
     }
 
-
     public void ExitConversation()
     {
         if (isTyping)
@@ -150,7 +185,7 @@ public class DialogUIScript : MonoBehaviour
             return;
         }
 
-        SolarPad.Instance.UnlockSubject("TEST");
+        SolarPad.Instance.UnlockSubject("Lens Power");
         StartCoroutine(CameraTransition.Instance.TransitionBack(0.5f));
         interactTrigger.ShowInteract();
         gameObject.SetActive(false);

@@ -16,10 +16,11 @@ public class AnimateLensRay : MonoBehaviour
 
     private MeshRenderer lensRayRenderer;
     private float currentRevealHeight;
+    private float focalLength;
 
     private void Start()
     {
-        startingRevealHeight = transform.parent.position.z;
+        startingRevealHeight = transform.position.z;
         lensRayRenderer = lensRayTransform.GetComponent<MeshRenderer>();
         lensRayRenderer.material.SetFloat("_RevealHeight", startingRevealHeight);
         currentRevealHeight = startingRevealHeight;
@@ -31,7 +32,7 @@ public class AnimateLensRay : MonoBehaviour
         if (Mathf.Approximately(dioptreOfLens, 0f))
             return;
 
-        float focalLength = 1f / dioptreOfLens; // meters
+        focalLength = 1f / dioptreOfLens; // meters
         float zScale = focalLength / blenderZLength;
 
         Vector3 scale = lensRayTransform.localScale;
@@ -39,25 +40,28 @@ public class AnimateLensRay : MonoBehaviour
         lensRayTransform.localScale = scale;
     }
 
+   
+
     public IEnumerator ReavealFully()
     {
-        currentRevealHeight = transform.parent.position.z;
-        fullRevealHeight = currentRevealHeight - 4.5f; // 4.5 is the length of the ray
+        currentRevealHeight = transform.position.z;
+        fullRevealHeight = currentRevealHeight - focalLength;
         lensRayRenderer.material.SetFloat("_RevealHeight", currentRevealHeight);
         yield return StartCoroutine(AnimateRevealHeight(currentRevealHeight, fullRevealHeight));
     }
 
     public void ReavealFullyFromCurrentRevealHeight()
     {
+        fullRevealHeight = currentRevealHeight - focalLength;
         StartCoroutine(AnimateRevealHeight(currentRevealHeight, fullRevealHeight));
     }
 
     public IEnumerator Reveal()
     {
-        currentRevealHeight = transform.parent.position.z;
+        currentRevealHeight = transform.position.z;
 
         // Check if the light ray reaches the ice
-        if (transform.parent.position.z - 4.5f < targetRevealHeight) 
+        if (transform.position.z - 4.5f < targetRevealHeight) 
         {
             lensRayRenderer.material.SetFloat("_RevealHeight", currentRevealHeight);
             yield return StartCoroutine(AnimateRevealHeight(currentRevealHeight, targetRevealHeight));
