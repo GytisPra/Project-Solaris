@@ -2,7 +2,6 @@
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class InteractionUIScript : MonoBehaviour
 {
@@ -17,6 +16,7 @@ public class InteractionUIScript : MonoBehaviour
     [SerializeField] private TMP_Text errorMsg;
     [SerializeField] private AnimateLampRay animateLampRay;
     [SerializeField] private IceMelt iceMelt;
+
     [Header("Cameras for transition")]
     [SerializeField] private Camera fromCamera;
     [SerializeField] private Camera toCamera;
@@ -26,26 +26,26 @@ public class InteractionUIScript : MonoBehaviour
         levelUIManager.SetInteractionPopupActive(false);
         levelUIManager.SetLevelUICanvasActive(true);
         levelUIManager.SetDepthOfFieldEffectActive(false);
-        levelUIManager.SetNearRheostatActive(true);
+        levelUIManager.SetNearLensCanvasActive(true);
 
         GameStateManager.Instance.SetState(GameState.Gameplay);
     }
 
     public void Confirm()
     {
-        levelUIManager.SetInteractionPopupActive(false);
-        levelUIManager.SetLevelUICanvasActive(true);
-        levelUIManager.SetDepthOfFieldEffectActive(false);
-        levelUIManager.SetNearRheostatActive(true);
+        bool distanceCorrect = false;
+        string inputedText = inputField.text.Replace('.', ',');
 
-        GameStateManager.Instance.SetState(GameState.Gameplay);
-        //if (ValidateInput(inputedText, out float distance))
-        //{
+        if (ValidateInput(inputedText, out float distance))
+        {
+            levelUIManager.SetInteractionPopupActive(false);
+            levelUIManager.SetLevelUICanvasActive(true);
+            levelUIManager.SetDepthOfFieldEffectActive(false);
+            levelUIManager.SetNearLensCanvasActive(true);
 
 
-
-        //    StartCoroutine(WaitForCameraTransition(distance, distanceCorrect, targetDistance));
-        //}
+            StartCoroutine(WaitForCameraTransition(distance, distanceCorrect, targetDistance));
+        }
     }
 
     private IEnumerator WaitForCameraTransition(float distance, bool distanceCorrect, float targetDistance)
@@ -109,9 +109,9 @@ public class InteractionUIScript : MonoBehaviour
             return false;
         }
 
-    //    number = distance;
-    //    return true;
-    //}
+        number = distance;
+        return true;
+    }
     private IEnumerator MoveLens(Vector3 targetPos, bool distanceCorrect)
     {
         GameStateManager.Instance.SetState(GameState.Cutscene);

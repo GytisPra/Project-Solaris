@@ -19,7 +19,7 @@ public class AmpScript : MonoBehaviour
     {
         if((slider.value+5) != 0) 
         {
-            amps.text = (Math.Round(4 / (slider.value + 5), 2)).ToString() + "A";
+            amps.text = (Math.Round(4 / (slider.value + 5), 1)).ToString() + "A";
         }
         
     }

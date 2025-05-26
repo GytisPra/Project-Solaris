@@ -52,7 +52,17 @@ public class LevelUIManager : MonoBehaviour
 
         SetDepthOfFieldEffectActive(active);
     }
-    
+    public void SetNearLensCanvasActive(bool active)
+    {
+        if (active && interactTrigger.IsCharInTrigger())
+        {
+            nearLensCanvas.gameObject.SetActive(true);
+        }
+        else
+        {
+            nearLensCanvas.gameObject.SetActive(false);
+        }
+    }
     public void SetNearRheostatActive(bool active)
     {
         if (active && interactTrigger.IsCharInTrigger())
