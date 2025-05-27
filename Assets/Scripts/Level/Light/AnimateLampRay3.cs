@@ -25,18 +25,30 @@ public class AnimateLampRay3 : MonoBehaviour
     {
         airRayMaterial = airRayRenderer.material;
         waterRayMaterial = waterRayRenderer.material;
+
+        float left = surfaces.rightWall.position.x;
+        float right = surfaces.leftWall.position.x;
+        float waterY = surfaces.waterSurface.position.y;
+
+        waterRayMaterial.SetFloat("_RevealHeightLeft", left);
+        waterRayMaterial.SetFloat("_RevealHeightRight", right);
+        waterRayMaterial.SetFloat("_RevealHeightUp", waterY);
+        waterRayMaterial.SetFloat("_RevealHeightDown", waterY);
+
+        airRayMaterial.SetFloat("_RevealHeightDown", transform.position.y);
+        airRayMaterial.SetFloat("_RevealHeightUp", transform.position.y);
+        airRayMaterial.SetFloat("_RevealHeightLeft", left);
+        airRayMaterial.SetFloat("_RevealHeightRight", right);
     }
 
     public IEnumerator RevealRays()
     {
-        //yield return new WaitForSeconds(1f);
         yield return StartCoroutine(RevealAirBeam());
         yield return StartCoroutine(RevealWaterBeam());
     }
 
     public IEnumerator HideRays()
     {
-        //yield return new WaitForSeconds(1f);
         yield return StartCoroutine(HideAirBeam());
         yield return StartCoroutine(HideWaterBeam());
     }

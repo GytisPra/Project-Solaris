@@ -2,6 +2,7 @@
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class LampRotationController : MonoBehaviour
 {
@@ -10,14 +11,18 @@ public class LampRotationController : MonoBehaviour
     [SerializeField] private HoldButton increaseButton;
     [SerializeField] private HoldButton decreaseButton;
 
+    [SerializeField] private IslandMover islandMover;
+
     private float rotateTo;
 
     [SerializeField] private Canvas interactionPopup;
+    [SerializeField] private Button interactButton;
     [SerializeField] private LevelUIManager levelUIManager;
     [SerializeField] private AnimateLampRay3 rayAnimationController;
     [SerializeField] private TMP_InputField inputField;
     [SerializeField] private TMP_Text currentAngle;
     [SerializeField] private TMP_Text errorText;
+    [SerializeField] private GameObject completed;
 
     public float lampRotationSpeed = 50f;
 
@@ -31,6 +36,8 @@ public class LampRotationController : MonoBehaviour
 
     public void OpenPopup()
     {
+        GameStateManager.Instance.SetState(GameState.Menu);
+
         interactionPopup.gameObject.SetActive(true);
         levelUIManager.SetDepthOfFieldEffectActive(true);
         levelUIManager.SetLevelUICanvasActive(false);
@@ -46,6 +53,8 @@ public class LampRotationController : MonoBehaviour
 
     public void ClosePopup()
     {
+        GameStateManager.Instance.SetState(GameState.Gameplay);
+
         interactionPopup.gameObject.SetActive(false);
         levelUIManager.SetDepthOfFieldEffectActive(false);
         levelUIManager.SetLevelUICanvasActive(true);
@@ -148,6 +157,7 @@ public class LampRotationController : MonoBehaviour
     private IEnumerator RotateLamp(float targetAngle)
     {
         ClosePopup();
+        interactButton.interactable = false;
 
         yield return StartCoroutine(rayAnimationController.HideRays());
         
@@ -170,7 +180,18 @@ public class LampRotationController : MonoBehaviour
         }
 
         lamp.localRotation = targetRotation;
-        StartCoroutine(rayAnimationController.RevealRays());
+        yield return StartCoroutine(rayAnimationController.RevealRays());
+
+        if (targetAngle == 35f)
+        {
+            completed.SetActive(true);
+            interactButton.gameObject.SetActive(false);
+            StartCoroutine(islandMover.MoveDown());
+        }
+        else
+        {
+            interactButton.interactable = true;
+        }
     }
 
     private bool TryParseInputField(out float inputedAngle)
