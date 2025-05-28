@@ -1,28 +1,42 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class LampRotationController : MonoBehaviour
 {
-    private Transform lamp;
+    [System.Serializable]
+    public class FloatRange
+    {
+        public float min;
+        public float max;
+
+        public bool Contains(float value)
+        {
+            return value >= min && value <= max;
+        }
+    }
+
+    private Transform lampHold;
 
     [SerializeField] private HoldButton increaseButton;
     [SerializeField] private HoldButton decreaseButton;
 
     [SerializeField] private IslandMover islandMover;
 
-    private float rotateTo;
+    private float currentAngle;
 
     [SerializeField] private Canvas interactionPopup;
     [SerializeField] private Button interactButton;
     [SerializeField] private LevelUIManager levelUIManager;
-    [SerializeField] private AnimateLampRay3 rayAnimationController;
-    [SerializeField] private TMP_InputField inputField;
-    [SerializeField] private TMP_Text currentAngle;
-    [SerializeField] private TMP_Text errorText;
+    [SerializeField] private Slider slider;
+    [SerializeField] private TMP_Text currentAngleText;
     [SerializeField] private GameObject completed;
+    [SerializeField] private FloatRange answerRange;
+
+    public float minAngle = -45f;
+    public float maxAngle = 45f;
 
     public float lampRotationSpeed = 50f;
 
@@ -30,182 +44,89 @@ public class LampRotationController : MonoBehaviour
     {
         increaseButton.OnHoldAction = Increase;
         decreaseButton.OnHoldAction = Decrease;
-
-        lamp = transform;
+        lampHold = transform.parent.parent;
     }
 
     public void OpenPopup()
     {
-        GameStateManager.Instance.SetState(GameState.Menu);
-
         interactionPopup.gameObject.SetActive(true);
-        levelUIManager.SetDepthOfFieldEffectActive(true);
         levelUIManager.SetLevelUICanvasActive(false);
 
-        rotateTo = Mathf.Round(lamp.localEulerAngles.x);
-        currentAngle.text = $"{rotateTo}°";
-        inputField.text = "";
-        errorText.text = "";
-        errorText.gameObject.SetActive(false);
+        interactButton.interactable = false;
 
-        Debug.Log($"Lamp rotation (Unity Euler X): {rotateTo}°");
+        currentAngle = Mathf.Round(slider.value);
+        currentAngleText.text = $"{Mathf.Abs(currentAngle)}°";
     }
+
+    private void CheckIfAngleIsCorrect()
+    {
+        if(answerRange.Contains(currentAngle))
+        {
+            completed.SetActive(true);
+            islandMover.StartMoving(2f);
+        }
+        else
+        {
+            completed.SetActive(false);
+            islandMover.MoveBack(4f);
+        }
+    }
+
 
     public void ClosePopup()
     {
-        GameStateManager.Instance.SetState(GameState.Gameplay);
+        interactButton.interactable = true;
 
         interactionPopup.gameObject.SetActive(false);
-        levelUIManager.SetDepthOfFieldEffectActive(false);
         levelUIManager.SetLevelUICanvasActive(true);
-    }
-
-    public void Confirm()
-    {
-        errorText.text = "";
-        errorText.gameObject.SetActive(false);
-
-        if (!TryParseInputField(out float inputedAngle))
-        {
-            errorText.text = "Invalid input. Please enter a number.";
-            errorText.gameObject.SetActive(true);
-            return;
-        }
-
-        inputedAngle = Mathf.Round(inputedAngle);
-
-        if (!IsAngleValid(inputedAngle))
-        {
-            errorText.text = "Angle must be between 315°–360° or 0°–45°";
-            errorText.gameObject.SetActive(true);
-            return;
-        }
-
-        StartCoroutine(RotateLamp(inputedAngle));
-        Debug.Log($"Parsed input value: {inputedAngle}");
     }
 
     public void Increase()
     {
-        rotateTo = Mathf.Round((rotateTo + 1f) % 360f);
+        if (currentAngle + 1 > maxAngle)
+        {
+            return;
+        }
 
-        if (!IsAngleValid(rotateTo)) return;
+        currentAngle += 1f;
 
-        currentAngle.text = $"{rotateTo}°";
-        inputField.text = "";
+        currentAngleText.text = $"{Mathf.Abs(currentAngle)}°";
+        slider.value = Mathf.Round(slider.value + 1f);
+
+        CheckIfAngleIsCorrect();
     }
 
     public void Decrease()
     {
-        rotateTo = Mathf.Round((rotateTo - 1f + 360f) % 360f);
+        if (currentAngle - 1 < minAngle)
+        {
+            return;
+        }
 
-        if (!IsAngleValid(rotateTo)) return;
+        currentAngle -= 1f;
 
-        currentAngle.text = $"{rotateTo}°";
-        inputField.text = "";
+        currentAngleText.text = $"{Mathf.Abs(currentAngle)}°";
+        slider.value = Mathf.Round(slider.value - 1f);
+
+        CheckIfAngleIsCorrect();
     }
 
     public void OnInputFieldValueChanged()
     {
-        if (!string.IsNullOrWhiteSpace(inputField.text))
-        {
-            if (!TryParseInputField(out float parsed))
-            {
-                errorText.text = "Invalid input.";
-                errorText.gameObject.SetActive(true);
-                return;
-            }
+        var roundedValue = Mathf.Round(slider.value);
 
-            parsed = Mathf.Round(parsed);
+        currentAngleText.text = $"{Mathf.Abs(roundedValue)}°";
+        currentAngle = roundedValue;
 
-            if (!IsAngleValid(parsed))
-            {
-                errorText.text = "Angle must be between 315°–360° or 0°–45°";
-                errorText.gameObject.SetActive(true);
-                return;
-            }
+        var targetAngle = (slider.value + 360f) % 360f;
 
-            errorText.text = "";
-            errorText.gameObject.SetActive(false);
-            currentAngle.text = $"{parsed}°";
-        }
-        else
-        {
-            currentAngle.text = $"{Mathf.Round(rotateTo)}°";
-            errorText.text = "";
-            errorText.gameObject.SetActive(false);
-        }
-    }
-
-    private bool IsAngleValid(float angle)
-    {
-        angle = (angle + 360f) % 360f; // Normalize
-
-        if (angle >= 315f && angle <= 360f)
-        {
-            return true;
-        }
-
-        if (angle <= 45f && angle >= 0f)
-        {
-            return true;
-        }
-
-        return false;
-    }
-
-    private IEnumerator RotateLamp(float targetAngle)
-    {
-        ClosePopup();
-        interactButton.interactable = false;
-
-        yield return StartCoroutine(rayAnimationController.HideRays());
-        
-        Vector3 currentEuler = lamp.localEulerAngles;
-        currentEuler.x = targetAngle;
+        Vector3 currentEuler = lampHold.localEulerAngles;
+        currentEuler.y = targetAngle;
 
         Quaternion targetRotation = Quaternion.Euler(currentEuler);
 
-        Debug.Log($"Rotating lamp to {targetAngle}° (Unity X)");
+        lampHold.localRotation = targetRotation;
 
-        while (Quaternion.Angle(lamp.localRotation, targetRotation) > 0.1f)
-        {
-            lamp.localRotation = Quaternion.RotateTowards(
-                lamp.localRotation,
-                targetRotation,
-                Time.deltaTime * lampRotationSpeed
-            );
-
-            yield return null;
-        }
-
-        lamp.localRotation = targetRotation;
-        yield return StartCoroutine(rayAnimationController.RevealRays());
-
-        if (targetAngle == 35f)
-        {
-            completed.SetActive(true);
-            interactButton.gameObject.SetActive(false);
-            StartCoroutine(islandMover.MoveDown());
-        }
-        else
-        {
-            interactButton.interactable = true;
-        }
-    }
-
-    private bool TryParseInputField(out float inputedAngle)
-    {
-        Debug.Log($"Input text: {inputField.text}");
-
-        if (string.IsNullOrWhiteSpace(inputField.text))
-        {
-            inputedAngle = 0;
-            return false;
-        }
-
-        return float.TryParse(inputField.text, System.Globalization.NumberStyles.Float,
-            System.Globalization.CultureInfo.InvariantCulture,
-            out inputedAngle);
+        CheckIfAngleIsCorrect();
     }
 }

@@ -39,6 +39,8 @@ public class AnimateLampRay3 : MonoBehaviour
         airRayMaterial.SetFloat("_RevealHeightUp", transform.position.y);
         airRayMaterial.SetFloat("_RevealHeightLeft", left);
         airRayMaterial.SetFloat("_RevealHeightRight", right);
+
+        StartCoroutine(RevealRays());
     }
 
     public IEnumerator RevealRays()
