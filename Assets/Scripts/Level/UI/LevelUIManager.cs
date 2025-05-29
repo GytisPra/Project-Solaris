@@ -6,6 +6,7 @@ public class LevelUIManager : MonoBehaviour
     public Canvas levelUICanvas;
     public Canvas exitLevelPopupCanvas;
     public Canvas interactionPopupCanvas;
+    public Canvas nearRheostatCanvas;
     public Canvas nearLensCanvas;
     public Canvas finishLevelPopupCanvas;
 
@@ -49,7 +50,6 @@ public class LevelUIManager : MonoBehaviour
 
         SetDepthOfFieldEffectActive(active);
     }
-    
     public void SetNearLensCanvasActive(bool active)
     {
         if (active && interactTrigger.IsCharInTrigger())
@@ -59,6 +59,17 @@ public class LevelUIManager : MonoBehaviour
         else
         {
             nearLensCanvas.gameObject.SetActive(false);
+        }
+    }
+    public void SetNearRheostatActive(bool active)
+    {
+        if (active && interactTrigger.IsCharInTrigger())
+        {
+            nearRheostatCanvas.gameObject.SetActive(true);
+        }
+        else
+        {
+            nearRheostatCanvas.gameObject.SetActive(false);
         }
     }
 

@@ -8,7 +8,7 @@ public class InteractionCanvasScript : MonoBehaviour
     {
         levelUIManager.SetInteractionPopupActive(true);
         levelUIManager.SetLevelUICanvasActive(false);
-        levelUIManager.SetNearLensCanvasActive(false);
+        levelUIManager.SetNearRheostatActive(false);
         levelUIManager.SetDepthOfFieldEffectActive(false);
 
         GameStateManager.Instance.SetState(GameState.Menu);
