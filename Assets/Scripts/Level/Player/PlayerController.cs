@@ -42,7 +42,7 @@ public class PlayerController : MonoBehaviour
     {
         EnhancedTouchSupport.Enable();
         GameStateManager.OnGameStateChanged += HandleGameStateChange;
-        //TouchGestureManager.Instance.OnGestureActive += HandleGestureActive;
+        TouchGestureManager.Instance.OnGestureActive += HandleGestureActive;
     }
     void OnDestroy()
     {

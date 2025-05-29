@@ -117,6 +117,7 @@ public class ThirdPersonCamera : MonoBehaviour
         }
 
         thisCamera.fieldOfView = Mathf.Lerp(thisCamera.fieldOfView, targetFOV, Time.deltaTime * fovChangeSpeed);
+        thisCamera.GetComponentInChildren<Camera>().fieldOfView = targetFOV;
         targetDistance = Mathf.Clamp(targetDistance, minZoomDistance, maxZoomDistance);
     }
 

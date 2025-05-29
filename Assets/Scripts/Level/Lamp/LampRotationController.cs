@@ -48,6 +48,8 @@ public class LampRotationController : MonoBehaviour
 
     public void OpenPopup()
     {
+        GameStateManager.Instance.SetState(GameState.Menu);
+
         interactionPopup.gameObject.SetActive(true);
         levelUIManager.SetLevelUICanvasActive(false);
 
@@ -77,6 +79,8 @@ public class LampRotationController : MonoBehaviour
 
         interactionPopup.gameObject.SetActive(false);
         levelUIManager.SetLevelUICanvasActive(true);
+
+        GameStateManager.Instance.SetState(GameState.Gameplay);
     }
 
     public void Increase()
