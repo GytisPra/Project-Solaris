@@ -32,6 +32,8 @@ public class LampController : MonoBehaviour
     [SerializeField] private HoldButton decreaseButton;
     [SerializeField] private GateOpen gateOpen;
     [SerializeField] private int requiredCorrectCount = 3;
+    [SerializeField] private ThirdPersonCamera thirdPersonCamera;
+    [SerializeField] private GameObject finishTarget;
 
 
     private AnimateLampRay2 rayAnimator;
@@ -239,10 +241,10 @@ public class LampController : MonoBehaviour
         yield return StartCoroutine(rayAnimator.EnableLamp());
         yield return StartCoroutine(rayAnimator.ChangeColor(targetWavelength));
 
-        CheckIsCorrect(targetWavelength, currLampIndex);
+        CheckIfCorrect(targetWavelength, currLampIndex);
     }
 
-    private void CheckIsCorrect(float targetWavelength, int currLampIndex)
+    private void CheckIfCorrect(float targetWavelength, int currLampIndex)
     {
         FloatRange range = answers[currLampIndex];
 
@@ -255,6 +257,7 @@ public class LampController : MonoBehaviour
 
             if (correctCount == requiredCorrectCount)
             {
+                StartCoroutine(thirdPersonCamera.LookAtFinish(finishTarget));
                 StartCoroutine(gateOpen.Open());
             }
         }

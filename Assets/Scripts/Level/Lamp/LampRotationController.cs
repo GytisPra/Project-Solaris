@@ -31,7 +31,6 @@ public class LampRotationController : MonoBehaviour
     [SerializeField] private Button interactButton;
     [SerializeField] private LevelUIManager levelUIManager;
     [SerializeField] private Slider slider;
-    [SerializeField] private TMP_Text currentAngleText;
     [SerializeField] private GameObject completed;
     [SerializeField] private FloatRange answerRange;
 
@@ -55,7 +54,6 @@ public class LampRotationController : MonoBehaviour
         interactButton.interactable = false;
 
         currentAngle = Mathf.Round(slider.value);
-        currentAngleText.text = $"{Mathf.Abs(currentAngle)}°";
     }
 
     private void CheckIfAngleIsCorrect()
@@ -90,7 +88,6 @@ public class LampRotationController : MonoBehaviour
 
         currentAngle += 1f;
 
-        currentAngleText.text = $"{Mathf.Abs(currentAngle)}°";
         slider.value = Mathf.Round(slider.value + 1f);
 
         CheckIfAngleIsCorrect();
@@ -105,7 +102,6 @@ public class LampRotationController : MonoBehaviour
 
         currentAngle -= 1f;
 
-        currentAngleText.text = $"{Mathf.Abs(currentAngle)}°";
         slider.value = Mathf.Round(slider.value - 1f);
 
         CheckIfAngleIsCorrect();
@@ -115,7 +111,6 @@ public class LampRotationController : MonoBehaviour
     {
         var roundedValue = Mathf.Round(slider.value);
 
-        currentAngleText.text = $"{Mathf.Abs(roundedValue)}°";
         currentAngle = roundedValue;
 
         var targetAngle = (slider.value + 360f) % 360f;

@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.EnhancedTouch;
@@ -28,6 +29,7 @@ public class ThirdPersonCamera : MonoBehaviour
     private InputAction middleButton;
     private bool rotatingKBM;
     private bool isTouchGestureActive;
+    private bool userControlEnabled = true;
 
     private float targetYaw;
     private float currentYaw;
@@ -93,6 +95,8 @@ public class ThirdPersonCamera : MonoBehaviour
 
     private void Update()
     {
+        if (!userControlEnabled) return;
+
         HandleMouseRotation();
 
         float targetFOV;
@@ -118,7 +122,7 @@ public class ThirdPersonCamera : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (target == null) return;
+        if (target == null || !userControlEnabled) return;
 
         // Smooth yaw, pitch, and distance
         currentYaw = Mathf.SmoothDampAngle(currentYaw, targetYaw, ref yawVelocity, rotateSmoothTime);
@@ -144,6 +148,50 @@ public class ThirdPersonCamera : MonoBehaviour
         }
 
         thisTransform.LookAt(target);
+    }
+
+    public IEnumerator LookAtFinish(GameObject finishTarget, float rotateDuration = 0.5f, float holdTime = 2f)
+    {
+        // Enter cutscene mode
+        GameStateManager.Instance.SetState(GameState.Cutscene);
+
+        // Disable user control during the cutscene
+        bool originalUserControl = userControlEnabled;
+        userControlEnabled = false;
+
+        // Calculate the direction and target rotation
+        Vector3 direction = finishTarget.transform.position - transform.position;
+        Quaternion startRotation = transform.rotation;
+        Quaternion targetRotation = Quaternion.LookRotation(direction.normalized);
+
+        float elapsedTime = 0f;
+
+        // Smoothly rotate towards the target
+        while (elapsedTime < rotateDuration)
+        {
+            elapsedTime += Time.deltaTime;
+            transform.rotation = Quaternion.Slerp(startRotation, targetRotation, elapsedTime / rotateDuration);
+            yield return null;
+        }
+
+        // Ensure exact final rotation
+        transform.rotation = targetRotation;
+
+        // Wait for a few seconds at the target
+        yield return new WaitForSeconds(holdTime);
+
+        elapsedTime = 0f;
+        Quaternion returnRotation = Quaternion.LookRotation(target.position - transform.position);
+        while (elapsedTime < rotateDuration)
+        {
+            elapsedTime += Time.deltaTime;
+            transform.rotation = Quaternion.Slerp(targetRotation, returnRotation, elapsedTime / rotateDuration);
+            yield return null;
+        }
+
+        // Return to gameplay
+        userControlEnabled = originalUserControl;
+        GameStateManager.Instance.SetState(GameState.Gameplay);
     }
 
     private void SetupInputActions()
