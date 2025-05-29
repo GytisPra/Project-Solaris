@@ -1,6 +1,5 @@
 using TMPro;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public class LevelUI : MonoBehaviour
 {
@@ -54,13 +53,11 @@ public class LevelUI : MonoBehaviour
 
         if (!levelData.completed)
         {
-            levelState.text = "Incomplete";
-            levelState.color = new(1f, 0.8901961f, 0.2588235f, 1f);
+            levelState.text = "Level State: <color=#F8FF00>Incomplete</color>";
         } 
         else
         {
-            levelState.text = "Completed";
-            levelState.color = new(0.5f, 1f, 0.3f, 1f);
+            levelState.text = "Level State: <color=#8FCE00>Completed</color>";
         }
     }
 }
