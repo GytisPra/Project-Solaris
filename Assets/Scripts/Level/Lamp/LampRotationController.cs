@@ -53,30 +53,16 @@ public class LampRotationController : MonoBehaviour
 
     public void OpenPopup()
     {
-        GameStateManager.Instance.SetState(GameState.Menu);
-
         StartCoroutine(TransitionCameras());
     }
 
     private IEnumerator TransitionCameras()
     {
         yield return StartCoroutine(
-            CameraTransition.Instance.SmoothCameraTransition(thirdPersonCamera, experimentViewCamera, 0.5f));
+            CameraTransition.Instance.
+            SmoothCameraTransition(thirdPersonCamera, experimentViewCamera, 0.5f, GameState.Menu));
 
         DisplayPopup();
-    }
-
-    private IEnumerator TransitionCamerasBack()
-    {
-        interactButton.gameObject.SetActive(true);
-
-        interactionPopup.gameObject.SetActive(false);
-        levelUIManager.SetLevelUICanvasActive(true);
-
-        yield return StartCoroutine(
-            CameraTransition.Instance.TransitionBack(0.5f));
-
-        GameStateManager.Instance.SetState(GameState.Gameplay);
     }
 
     private void DisplayPopup()
@@ -106,7 +92,13 @@ public class LampRotationController : MonoBehaviour
 
     public void ClosePopup()
     {
-        StartCoroutine(TransitionCamerasBack());
+        interactButton.gameObject.SetActive(true);
+
+        interactionPopup.gameObject.SetActive(false);
+        levelUIManager.SetLevelUICanvasActive(true);
+
+        StartCoroutine(
+            CameraTransition.Instance.TransitionBack(0.5f, GameState.Gameplay));
     }
 
     public void Increase()
