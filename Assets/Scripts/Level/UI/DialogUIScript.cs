@@ -11,6 +11,7 @@ public class DialogUIScript : MonoBehaviour
     public class Page
     {
         public int pageNumber;
+        [TextArea(3, 10)]
         public string content;
         public Sprite formulaSprite;
     }
@@ -29,6 +30,7 @@ public class DialogUIScript : MonoBehaviour
     [Header("Dialog Settings")]
     public List<Page> pages = new();
     public float waitAfterLetter = 0.05f;
+    public string unlockSubject;
 
     private int numberOfPages = 0;
     private int currentPageNumber = 0;
@@ -41,7 +43,7 @@ public class DialogUIScript : MonoBehaviour
         if (!isFirstConversation)
         {
             StopAllCoroutines();
-            StartCoroutine(TypeText(repeatText, null));
+            StartCoroutine(TypeTextRich(repeatText, null));
             SetupButton("Exit", redColor, ExitConversation);
             return;
         }
@@ -62,7 +64,7 @@ public class DialogUIScript : MonoBehaviour
         if (page != null)
         {
             StopAllCoroutines();
-            StartCoroutine(TypeText(page.content, page.formulaSprite));
+            StartCoroutine(TypeTextRich(page.content, page.formulaSprite));
         }
     }
 
@@ -71,7 +73,7 @@ public class DialogUIScript : MonoBehaviour
         return pages.Find(p => p.pageNumber == pageNumber);
     }
 
-    private IEnumerator TypeText(string content, Sprite formulaSprite)
+    private IEnumerator TypeTextRich(string content, Sprite formulaSprite)
     {
         isTyping = true;
         text.text = "";
@@ -82,6 +84,9 @@ public class DialogUIScript : MonoBehaviour
             isFirstConversation = false;
         }
 
+        string fullText = "";
+        List<string> openTags = new();
+
         for (int i = 0; i < content.Length; i++)
         {
             char letter = content[i];
@@ -89,49 +94,53 @@ public class DialogUIScript : MonoBehaviour
             if (letter == '\\' && i + 1 < content.Length)
             {
                 char nextLetter = content[i + 1];
-
                 if (nextLetter == 'n')
                 {
-                    text.text += '\n';
+                    fullText += '\n';
                     i++;
                 }
                 else
                 {
-                    // If not recognized, add the backslash and continue
-                    text.text += '\\';
+                    fullText += '\\';
+                }
+            }
+            else if (letter == '<')
+            {
+                int closeIndex = content.IndexOf('>', i);
+                if (closeIndex != -1)
+                {
+                    string tag = content.Substring(i, closeIndex - i + 1);
+                    fullText += tag;
+
+                    if (!tag.StartsWith("</"))
+                    {
+                        openTags.Add(tag);
+                    }
+                    else if (openTags.Count > 0)
+                    {
+                        openTags.RemoveAt(openTags.Count - 1);
+                    }
+
+                    i = closeIndex;
+                    continue;
                 }
             }
             else
             {
-                text.text += letter;
+                fullText += letter;
             }
 
+            text.text = BuildRichText(fullText, openTags);
             yield return new WaitForSeconds(waitAfterLetter);
 
-            // Allow skipping if interrupted
             if (!isTyping)
             {
-                if (currentPageNumber + 1 >= numberOfPages && isFirstConversation)
-                {
-                    SetupButton("Exit", redColor, ExitConversation);
-                    isFirstConversation = false;
-                }
-
                 text.text = content;
-
                 if (formulaSprite != null)
                 {
                     formulaUIImage.gameObject.SetActive(true);
                     formulaUIImage.sprite = formulaSprite;
                 }
-
-                // Force layout update so UI resizes properly
-                RectTransform parentRect = text.transform.parent as RectTransform;
-                if (parentRect != null)
-                {
-                    LayoutRebuilder.ForceRebuildLayoutImmediate(parentRect);
-                }
-
                 yield break;
             }
         }
@@ -145,6 +154,20 @@ public class DialogUIScript : MonoBehaviour
         isTyping = false;
     }
 
+    private string BuildRichText(string visibleText, List<string> openTags)
+    {
+        string result = visibleText;
+        for (int i = openTags.Count - 1; i >= 0; i--)
+        {
+            string tag = openTags[i];
+            if (tag.StartsWith("<") && !tag.StartsWith("</"))
+            {
+                string tagName = tag[1..^1].Split(' ')[0];
+                result += $"</{tagName}>";
+            }
+        }
+        return result;
+    }
 
     public void NextPage()
     {
@@ -165,7 +188,7 @@ public class DialogUIScript : MonoBehaviour
         formulaUIImage.gameObject.SetActive(false);
 
         StopAllCoroutines();
-        StartCoroutine(TypeText(page.content, page.formulaSprite));
+        StartCoroutine(TypeTextRich(page.content, page.formulaSprite));
     }
 
     public void SkipText()
@@ -184,8 +207,15 @@ public class DialogUIScript : MonoBehaviour
             isTyping = false;
             return;
         }
-
-        SolarPad.Instance.UnlockSubject("Lens Power");
+        if (string.IsNullOrWhiteSpace(unlockSubject))
+        {
+            Debug.LogWarning($"Unlock subject: {unlockSubject} is null or whitespace!");
+        }
+        else
+        {
+            SolarPad.Instance.UnlockSubject(unlockSubject);
+        }
+            
         StartCoroutine(CameraTransition.Instance.TransitionBack(0.5f));
         interactTrigger.ShowInteract();
         gameObject.SetActive(false);
