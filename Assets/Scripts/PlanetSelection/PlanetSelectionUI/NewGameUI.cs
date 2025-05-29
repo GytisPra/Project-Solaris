@@ -44,7 +44,7 @@ public class NewGameUI : MonoBehaviour
 #if UNITY_EDITOR
         url = "http://localhost:5173/clear-unlocks"; // Local dev server
 #else
-        url = "https://project-solaris-shop-production.up.railway.app/clear-unlocks"; // Live server
+        url = "https://project-solaris-shop.vercel.app/clear-unlocks"; // Live server
 #endif
 
         UnityWebRequest request = UnityWebRequest.PostWwwForm(url, "");

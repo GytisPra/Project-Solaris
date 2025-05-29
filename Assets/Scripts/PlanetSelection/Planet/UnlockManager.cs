@@ -52,7 +52,7 @@ public class UnlockManager : MonoBehaviour
 #if UNITY_EDITOR
         url = "http://localhost:5173/unlocks"; // Local dev server
 #else
-        url = "https://project-solaris-shop-production.up.railway.app/unlocks"; // Live server
+        url = "https://project-solaris-shop.vercel.app/unlocks"; // Live server
 #endif
 
         UnityWebRequest request = UnityWebRequest.Get(url);

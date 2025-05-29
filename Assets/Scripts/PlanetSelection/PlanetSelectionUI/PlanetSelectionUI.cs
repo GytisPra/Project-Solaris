@@ -287,7 +287,7 @@ public class PlanetSelectionUI : MonoBehaviour
 #if UNITY_EDITOR
         url = "http://localhost:5173/";
 #else
-        url = "https://project-solaris-shop-production.up.railway.app/";
+        url = "https://project-solaris-shop.vercel.app/";
 #endif
 
         Application.OpenURL(url);
