@@ -34,6 +34,11 @@ public class LampRotationController : MonoBehaviour
     [SerializeField] private GameObject completed;
     [SerializeField] private FloatRange answerRange;
 
+    [SerializeField] private Camera thirdPersonCamera;
+    [SerializeField] private Camera experimentViewCamera;
+
+
+
     public float minAngle = -45f;
     public float maxAngle = 45f;
 
@@ -50,10 +55,36 @@ public class LampRotationController : MonoBehaviour
     {
         GameStateManager.Instance.SetState(GameState.Menu);
 
+        StartCoroutine(TransitionCameras());
+    }
+
+    private IEnumerator TransitionCameras()
+    {
+        yield return StartCoroutine(
+            CameraTransition.Instance.SmoothCameraTransition(thirdPersonCamera, experimentViewCamera, 0.5f));
+
+        DisplayPopup();
+    }
+
+    private IEnumerator TransitionCamerasBack()
+    {
+        interactButton.gameObject.SetActive(true);
+
+        interactionPopup.gameObject.SetActive(false);
+        levelUIManager.SetLevelUICanvasActive(true);
+
+        yield return StartCoroutine(
+            CameraTransition.Instance.TransitionBack(0.5f));
+
+        GameStateManager.Instance.SetState(GameState.Gameplay);
+    }
+
+    private void DisplayPopup()
+    {
         interactionPopup.gameObject.SetActive(true);
         levelUIManager.SetLevelUICanvasActive(false);
 
-        interactButton.interactable = false;
+        interactButton.gameObject.SetActive(false);
 
         currentAngle = Mathf.Round(slider.value);
     }
@@ -75,12 +106,7 @@ public class LampRotationController : MonoBehaviour
 
     public void ClosePopup()
     {
-        interactButton.interactable = true;
-
-        interactionPopup.gameObject.SetActive(false);
-        levelUIManager.SetLevelUICanvasActive(true);
-
-        GameStateManager.Instance.SetState(GameState.Gameplay);
+        StartCoroutine(TransitionCamerasBack());
     }
 
     public void Increase()
