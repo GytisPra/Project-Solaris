@@ -2,6 +2,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.EnhancedTouch;
+using Touch = UnityEngine.InputSystem.EnhancedTouch.Touch;
 
 public class ThirdPersonCamera : MonoBehaviour
 {
@@ -17,35 +18,34 @@ public class ThirdPersonCamera : MonoBehaviour
     public float zoomSmoothTime = 0.1f;
 
     [Header("Rotation")]
-    public float pitchSensitivity = 10f;
-    public float rotateSensitivity = 80f;
+    public float pitchSensitivity = 50f;
+    public float rotateSensitivity = 50f;
     public float maxPitch = 80f;
     public float minPitch = 10f;
-    public float rotateSmoothTime = 0.1f;
-    public float pitchSmoothTime = 0.1f;
+
+    [Header("Screen Orientation change settings")]
+    public float fovChangeSpeed = 5f;
+    public float targetLandscapeFov = 30f;
+    public float targetPortraitFov = 50f;
+    public float maxZoomLandscape = 12f;
+    public float maxZoomPotrait = 15f;
 
     // Internal state
     private InputAction scrollAction;
     private InputAction middleButton;
     private bool rotatingKBM;
-    private bool isTouchGestureActive;
     private bool userControlEnabled = true;
 
     private float targetYaw;
-    private float currentYaw;
-    private float yawVelocity;
-
     private float targetPitch;
-    private float currentPitch;
-    private float pitchVelocity;
 
     private float targetDistance;
-    public float currentDistance;
+    private float currentDistance;
     private float distanceVelocity;
 
     private Transform thisTransform;
     private Camera thisCamera;
-    private float fovChangeSpeed = 5f;
+    [SerializeField] private JoystickTouchDetector joystickTouchDetector;
 
     private void Awake()
     {
@@ -57,26 +57,12 @@ public class ThirdPersonCamera : MonoBehaviour
         thisTransform = transform;
         thisCamera = thisTransform.GetComponent<Camera>();
 
+        SetupCamera();
+
         EnhancedTouchSupport.Enable();
 
-        // Initialize distance based on offset magnitude
-        Vector3 offset = thisTransform.position - target.position;
-        currentDistance = targetDistance = offset.magnitude;
-
-        // Compute initial yaw and pitch
-        Vector3 direction = offset.normalized;
-        Vector3 flatDir = new Vector3(direction.x, 0, direction.z).normalized;
-        currentPitch = targetPitch = Vector3.SignedAngle(flatDir, direction, Vector3.Cross(flatDir, Vector3.up));
-        currentYaw = targetYaw = thisTransform.eulerAngles.y;
-
-        // Subscribe touch gestures
         TouchGestureManager.Instance.OnPinch += HandlePinch;
-        TouchGestureManager.Instance.OnRotate += HandleRotate;
-        TouchGestureManager.Instance.OnDrag += HandleDrag;
-        TouchGestureManager.Instance.OnGestureActive += active => isTouchGestureActive = active;
-
         SetupInputActions();
-
     }
 
     private void OnDestroy()
@@ -87,9 +73,6 @@ public class ThirdPersonCamera : MonoBehaviour
         if (TouchGestureManager.Instance != null)
         {
             TouchGestureManager.Instance.OnPinch -= HandlePinch;
-            TouchGestureManager.Instance.OnRotate -= HandleRotate;
-            TouchGestureManager.Instance.OnDrag -= HandleDrag;
-            TouchGestureManager.Instance.OnGestureActive -= active => isTouchGestureActive = active;
         }
     }
 
@@ -97,19 +80,23 @@ public class ThirdPersonCamera : MonoBehaviour
     {
         if (!userControlEnabled) return;
 
-        HandleMouseRotation();
+        if (joystickTouchDetector == null || !joystickTouchDetector.IsTouched)
+        {
+            HandleMouseRotation();
+            HandleSingleFingerTouchRotation();
+        }
 
         float targetFOV;
         switch (Screen.orientation)
         {
             case ScreenOrientation.LandscapeLeft:
             case ScreenOrientation.LandscapeRight:
-                targetFOV = 30;
-                maxZoomDistance = 12;
+                targetFOV = targetLandscapeFov;
+                maxZoomDistance = maxZoomLandscape;
                 break;
             case ScreenOrientation.Portrait:
-                targetFOV = 50;
-                maxZoomDistance = 15;
+                targetFOV = targetPortraitFov;
+                maxZoomDistance = maxZoomPotrait;
                 break;
             default:
                 targetFOV = thisCamera.fieldOfView;
@@ -119,32 +106,25 @@ public class ThirdPersonCamera : MonoBehaviour
         thisCamera.fieldOfView = Mathf.Lerp(thisCamera.fieldOfView, targetFOV, Time.deltaTime * fovChangeSpeed);
         thisCamera.GetComponentInChildren<Camera>().fieldOfView = targetFOV;
         targetDistance = Mathf.Clamp(targetDistance, minZoomDistance, maxZoomDistance);
+        targetPitch = Mathf.Clamp(targetPitch, minPitch, maxPitch);
     }
 
     private void FixedUpdate()
     {
         if (target == null || !userControlEnabled) return;
 
-        // Smooth yaw, pitch, and distance
-        currentYaw = Mathf.SmoothDampAngle(currentYaw, targetYaw, ref yawVelocity, rotateSmoothTime);
-        currentPitch = Mathf.SmoothDamp(currentPitch, targetPitch, ref pitchVelocity, pitchSmoothTime);
-        currentPitch = Mathf.Clamp(currentPitch, minPitch, maxPitch);
-        targetPitch = Mathf.Clamp(targetPitch, minPitch, maxPitch);
         currentDistance = Mathf.SmoothDamp(currentDistance, targetDistance, ref distanceVelocity, zoomSmoothTime);
 
-        // Calculate orbit position
-        Quaternion rotation = Quaternion.Euler(currentPitch, currentYaw, 0);
+        Quaternion rotation = Quaternion.Euler(targetPitch, targetYaw, 0);
         Vector3 newPos = target.position + rotation * Vector3.back * currentDistance;
 
-        bool userControlling = rotatingKBM || isTouchGestureActive;
+        bool userControlling = rotatingKBM || Touch.activeTouches.Count > 0;
         if (userControlling)
         {
-            // direct snap when the user is dragging/pinching/rotating
             thisTransform.position = newPos;
         }
         else
         {
-            // blend in to maintain smooth follow if target moves
             thisTransform.position = Vector3.Lerp(thisTransform.position, newPos, followSpeed * Time.deltaTime);
         }
 
@@ -153,21 +133,15 @@ public class ThirdPersonCamera : MonoBehaviour
 
     public IEnumerator LookAtFinish(GameObject finishTarget, float rotateDuration = 0.5f, float holdTime = 2f)
     {
-        // Enter cutscene mode
         GameStateManager.Instance.SetState(GameState.Cutscene);
-
-        // Disable user control during the cutscene
         bool originalUserControl = userControlEnabled;
         userControlEnabled = false;
 
-        // Calculate the direction and target rotation
         Vector3 direction = finishTarget.transform.position - transform.position;
         Quaternion startRotation = transform.rotation;
         Quaternion targetRotation = Quaternion.LookRotation(direction.normalized);
 
         float elapsedTime = 0f;
-
-        // Smoothly rotate towards the target
         while (elapsedTime < rotateDuration)
         {
             elapsedTime += Time.deltaTime;
@@ -175,10 +149,8 @@ public class ThirdPersonCamera : MonoBehaviour
             yield return null;
         }
 
-        // Ensure exact final rotation
         transform.rotation = targetRotation;
 
-        // Wait for a few seconds at the target
         yield return new WaitForSeconds(holdTime);
 
         elapsedTime = 0f;
@@ -190,7 +162,6 @@ public class ThirdPersonCamera : MonoBehaviour
             yield return null;
         }
 
-        // Return to gameplay
         userControlEnabled = originalUserControl;
         GameStateManager.Instance.SetState(GameState.Gameplay);
     }
@@ -219,11 +190,13 @@ public class ThirdPersonCamera : MonoBehaviour
         {
             scrollAction?.Enable();
             middleButton?.Enable();
+            userControlEnabled = true;
         }
         else
         {
             scrollAction?.Disable();
             middleButton?.Disable();
+            userControlEnabled = false;
         }
     }
 
@@ -232,40 +205,54 @@ public class ThirdPersonCamera : MonoBehaviour
         if (!rotatingKBM || target == null) return;
 
         Vector2 delta = Mouse.current.delta.ReadValue();
-        float yawDelta = delta.x * rotateSensitivity * 0.5f * Time.deltaTime;
-        float pitchDelta = -delta.y * rotateSensitivity * 0.5f * Time.deltaTime;
+        float yawDelta = delta.x * rotateSensitivity * Time.deltaTime;
+        float pitchDelta = -delta.y * pitchSensitivity * Time.deltaTime;
 
         targetYaw += yawDelta;
         targetPitch += pitchDelta;
     }
 
+    private void HandleSingleFingerTouchRotation()
+    {
+#if UNITY_ANDROID || UNITY_IOS
+        if (Touch.activeTouches.Count == 1)
+        {
+            var touch = Touch.activeTouches[0];
+            if (touch.phase == UnityEngine.InputSystem.TouchPhase.Moved)
+            {
+                Vector2 delta = touch.delta;
+                float yawDelta = delta.x * rotateSensitivity * 0.35f * Time.deltaTime;
+                float pitchDelta = -delta.y * pitchSensitivity * 0.35f * Time.deltaTime;
+
+                targetYaw += yawDelta;
+                targetPitch += pitchDelta;
+            }
+        }
+#endif
+    }
+
     private void HandlePinch(float delta)
     {
-        float pinchAmount;
-        // Adjust target distance (invert as needed)
-        if (isTouchGestureActive)
-        {
-            pinchAmount = delta * zoomSpeedTouch * Time.deltaTime;
-        }
-        else
-        {
-            pinchAmount = delta * zoomSpeedKBM * Time.deltaTime;
-        }
-        
-        targetDistance = Mathf.Clamp(
-            targetDistance - pinchAmount,
-            minZoomDistance,
-            maxZoomDistance
-        );
+        if (joystickTouchDetector != null && joystickTouchDetector.IsTouched)
+            return;
+
+        float pinchAmount = delta * (Touch.activeTouches.Count > 1 ? zoomSpeedTouch : zoomSpeedKBM) * Time.deltaTime;
+        targetDistance = Mathf.Clamp(targetDistance - pinchAmount, minZoomDistance, maxZoomDistance);
     }
 
-    private void HandleRotate(float angleDelta)
+    private void SetupCamera()
     {
-        targetYaw += angleDelta * rotateSensitivity * Time.deltaTime;
-    }
+        Vector3 offset = thisTransform.position - target.position;
+        targetDistance = currentDistance = offset.magnitude;
 
-    private void HandleDrag(Vector2 delta)
-    {
-        targetPitch += -delta.y * pitchSensitivity * Time.deltaTime;
+        Vector3 direction = offset.normalized;
+        Vector3 flatDir = new Vector3(direction.x, 0, direction.z).normalized;
+        targetPitch = Vector3.SignedAngle(flatDir, direction, Vector3.Cross(flatDir, Vector3.up));
+        targetYaw = thisTransform.eulerAngles.y;
+
+        Quaternion rotation = Quaternion.Euler(targetPitch, targetYaw, 0);
+        Vector3 newPos = target.position + rotation * Vector3.back * currentDistance;
+
+        thisTransform.position = newPos;
     }
 }
