@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -6,7 +7,8 @@ public class NewGameUI : MonoBehaviour
 {
     public PlanetSelectionUIManager planetSelectionUIManager;
     public PlanetsDatabase planetsDatabase;
-    public LevelsDatabase earthLevelsDatabase;
+    public List<LevelsDatabase> levelsDatabases;
+    public PlanetHider planetHider;
 
     public void ClosePopUp()
     {
@@ -23,10 +25,15 @@ public class NewGameUI : MonoBehaviour
             planet.SetPlanetToLocked();
         }
 
-        foreach (Level level in earthLevelsDatabase.levels)
+
+        foreach (var levelsDatabase in levelsDatabases)
         {
-            level.ResetLevel();
+            foreach (Level level in levelsDatabase.levels)
+            {
+                level.ResetLevel();
+            }
         }
+        
 
         PlayerPrefs.DeleteAll();
         PlayerPrefs.Save();
@@ -35,6 +42,7 @@ public class NewGameUI : MonoBehaviour
 
         planetSelectionUIManager.SetNewGamePopupCanvasActive(false);
         planetSelectionUIManager.SetMainMenuCanvasActive(true);
+        planetHider.HideLockedPlanets();
     }
 
     private IEnumerator PostClearUnlockedPlanets()

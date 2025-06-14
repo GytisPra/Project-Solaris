@@ -23,6 +23,7 @@ public class NFCReader : MonoBehaviour
     public PlanetsDatabase planetsDatabase;
     public CameraRotation cameraRotation;
     public PlanetSelectionUIManager planetSelectionUIManager;
+    public PlanetHider planetHider;
 
     public void StartScan()
     {
@@ -120,6 +121,7 @@ public class NFCReader : MonoBehaviour
         //    return;
         //}
 
+        planetHider.UnhidePlanet(planetName);
         scanCardPopup.SetActive(false);
         MoveToPlanet(planetName);
     }
