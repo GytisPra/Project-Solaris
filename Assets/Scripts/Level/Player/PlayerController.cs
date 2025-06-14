@@ -1,17 +1,23 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.UI;
 
 public class PlayerController : MonoBehaviour
 {
+    [Header("Movement")]
     public float walkSpeed = 3.5f;
+    public float turnSpeed = 10f;           // how fast we turn to face move direction
     public float movementDeadzone = 0.1f;
+
+    [SerializeField] private InputActionReference moveAction;
 
     private Vector2 moveInput;
     private Animator animator;
     private Transform cameraTransform;
 
-    [SerializeField] private InputActionReference moveAction;
+    void Awake()
+    {
+        GameStateManager.OnGameStateChanged += HandleGameStateChange;
+    }
 
     void Start()
     {
@@ -20,12 +26,7 @@ public class PlayerController : MonoBehaviour
         moveAction.action.Enable();
     }
 
-    private void Awake()
-    {
-        GameStateManager.OnGameStateChanged += HandleGameStateChange;
-    }
-
-    private void OnDestroy()
+    void OnDestroy()
     {
         GameStateManager.OnGameStateChanged -= HandleGameStateChange;
         moveAction.action.Disable();
@@ -37,41 +38,48 @@ public class PlayerController : MonoBehaviour
             moveAction.action.Enable();
         else
         {
-            StopMovement();
             moveAction.action.Disable();
+            animator.SetFloat("speedPercent", 0f);
         }
     }
 
     void FixedUpdate()
     {
+        // 1) Read raw input
         moveInput = moveAction.action.ReadValue<Vector2>();
 
-        if (moveInput.sqrMagnitude > movementDeadzone * movementDeadzone)
-        {
-            Vector3 cameraForward = cameraTransform.forward;
-            cameraForward.y = 0;
-            cameraForward.Normalize();
-
-            Vector3 cameraRight = cameraTransform.right;
-            cameraRight.y = 0;
-            cameraRight.Normalize();
-
-            Vector3 moveDirection = cameraForward * moveInput.y + cameraRight * moveInput.x;
-
-            transform.rotation = Quaternion.LookRotation(moveDirection);
-            transform.Translate(Time.deltaTime * walkSpeed * moveDirection, Space.World);
-
-            float inputStrength = Mathf.Clamp01(moveInput.magnitude);
-            animator.SetFloat("speedPercent", inputStrength);
-        }
-        else
+        // 2) Dead‑zone check
+        if (moveInput.sqrMagnitude <= movementDeadzone * movementDeadzone)
         {
             animator.SetFloat("speedPercent", 0f);
+            return;
         }
-    }
 
-    private void StopMovement()
-    {
-        animator.SetFloat("speedPercent", 0f);
+        // 3) Build camera‑relative move direction
+        Vector3 camForward = cameraTransform.forward;
+        camForward.y = 0;
+        camForward.Normalize();
+
+        Vector3 camRight = cameraTransform.right;
+        camRight.y = 0;
+        camRight.Normalize();
+
+        Vector3 moveDir = camForward * moveInput.y + camRight * moveInput.x;
+        moveDir.Normalize();
+
+        // 4) Smoothly rotate to face that exact direction
+        Quaternion targetRot = Quaternion.LookRotation(moveDir);
+        transform.rotation = Quaternion.Slerp(
+            transform.rotation,
+            targetRot,
+            turnSpeed * Time.deltaTime
+        );
+
+        // 5) Move in world‑space along that same vector
+        transform.Translate(moveDir * walkSpeed * Time.deltaTime, Space.World);
+
+        // 6) Drive the animator
+        float speedPercent = Mathf.Clamp01(moveInput.magnitude);
+        animator.SetFloat("speedPercent", speedPercent);
     }
 }

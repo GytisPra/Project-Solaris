@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.EnhancedTouch;
@@ -109,26 +109,35 @@ public class ThirdPersonCamera : MonoBehaviour
         targetPitch = Mathf.Clamp(targetPitch, minPitch, maxPitch);
     }
 
-    private void FixedUpdate()
+    private void LateUpdate()
     {
         if (target == null || !userControlEnabled) return;
 
+        // Smooth zooming
         currentDistance = Mathf.SmoothDamp(currentDistance, targetDistance, ref distanceVelocity, zoomSmoothTime);
 
-        Quaternion rotation = Quaternion.Euler(targetPitch, targetYaw, 0);
-        Vector3 newPos = target.position + rotation * Vector3.back * currentDistance;
+        // Desired rotation from user yaw/pitch
+        Quaternion userRotation = Quaternion.Euler(targetPitch, targetYaw, 0);
+
+        // Desired position based on userRotation and distance
+        Vector3 desiredPosition = target.position + userRotation * Vector3.back * currentDistance;
 
         bool userControlling = rotatingKBM || Touch.activeTouches.Count > 0;
+
         if (userControlling)
         {
-            thisTransform.position = newPos;
+            // When user controls rotation, set position & rotation directly
+            thisTransform.SetPositionAndRotation(desiredPosition, userRotation);
         }
         else
         {
-            thisTransform.position = Vector3.Lerp(thisTransform.position, newPos, followSpeed * Time.deltaTime);
-        }
+            // Loose position follow (smooth lerp)
+            thisTransform.position = Vector3.Lerp(thisTransform.position, desiredPosition, followSpeed * Time.deltaTime);
 
-        thisTransform.LookAt(target);
+            // Smoothly rotate to look at target
+            Quaternion lookAtRotation = Quaternion.LookRotation(target.position - thisTransform.position);
+            thisTransform.rotation = Quaternion.Slerp(thisTransform.rotation, lookAtRotation, followSpeed * Time.deltaTime);
+        }
     }
 
     public IEnumerator LookAtFinish(GameObject finishTarget, float rotateDuration = 0.5f, float holdTime = 2f)
