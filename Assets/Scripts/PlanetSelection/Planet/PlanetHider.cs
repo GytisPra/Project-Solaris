@@ -15,7 +15,7 @@ public class PlanetHider : MonoBehaviour
     {
         foreach (var planet in planets)
         {
-            // Skip earth as it is not in the database
+            // Skip earth as it should not be hidden
             if (planet.name == "Earth")
             {
                 continue;
@@ -30,7 +30,7 @@ public class PlanetHider : MonoBehaviour
             }
 
             databaseEntry.LoadUnlockData();
-            if (!databaseEntry.isFree && databaseEntry.IsPlanetPassOver())
+            if (!databaseEntry.isFree && databaseEntry.IsPlanetPassOver() && !databaseEntry.scannedWithNFC)
             {
                 int LayerHidden = LayerMask.NameToLayer("Hidden");
                 planet.layer = LayerHidden;

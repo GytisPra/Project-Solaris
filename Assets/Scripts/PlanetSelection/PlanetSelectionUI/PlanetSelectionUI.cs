@@ -64,6 +64,8 @@ public class PlanetSelectionUI : MonoBehaviour
         {
             foreach (Planet planet in planetsDatabase.planets)
             {
+                if (planet.planetName == "Earth") continue;
+
                 planet.LoadUnlockData();
 
                 CreatePlanetButton(planet);

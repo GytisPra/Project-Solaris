@@ -1,11 +1,11 @@
 using System;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityEngine.UI;
 
 public class OnCompleteTriggerEnter : MonoBehaviour
 {
     public LevelsDatabase levelsDatabase;
+    public PlanetsDatabase planetsDatabase;
     public LevelUIManager levelUIManager;
     string planetName;
     private bool isInTrigger = false;
@@ -63,6 +63,7 @@ public class OnCompleteTriggerEnter : MonoBehaviour
 
         // find and update the status of the level
         var level = Array.Find(levelsDatabase.levels, l => levelID == l.ID);
+        var planet = Array.Find(planetsDatabase.planets, p => p.planetName == planetName);
 
         if (level == null)
         {
@@ -74,6 +75,7 @@ public class OnCompleteTriggerEnter : MonoBehaviour
         }
         else
         {
+            planet.IncreaseCompletedLevelsCount();
             level.SetLevelToCompleted();
         }
 
@@ -87,6 +89,7 @@ public class OnCompleteTriggerEnter : MonoBehaviour
         {
             CameraRotation cameraRotation = FindAnyObjectByType<CameraRotation>();
             MainMenuScript mainMenuScript = FindAnyObjectByType<MainMenuScript>();
+         
             if (mainMenuScript != null && cameraRotation != null)
             {
                 mainMenuScript.StartGame();

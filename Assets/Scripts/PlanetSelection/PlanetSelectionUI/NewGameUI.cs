@@ -8,7 +8,10 @@ public class NewGameUI : MonoBehaviour
     public PlanetSelectionUIManager planetSelectionUIManager;
     public PlanetsDatabase planetsDatabase;
     public List<LevelsDatabase> levelsDatabases;
+    public SubjectsDatabase subjectsDatabase;
     public PlanetHider planetHider;
+    public CameraRotation cameraRotation;
+    public GameObject earth;
 
     public void ClosePopUp()
     {
@@ -33,16 +36,39 @@ public class NewGameUI : MonoBehaviour
                 level.ResetLevel();
             }
         }
-        
+
+        foreach (var subject in subjectsDatabase.subjects)
+        {
+            subject.isUnlocked = false;
+        }
 
         PlayerPrefs.DeleteAll();
         PlayerPrefs.Save();
 
+        planetHider.HideLockedPlanets();
         StartCoroutine(PostClearUnlockedPlanets());
 
-        planetSelectionUIManager.SetNewGamePopupCanvasActive(false);
-        planetSelectionUIManager.SetMainMenuCanvasActive(true);
-        planetHider.HideLockedPlanets();
+        if (cameraRotation != null)
+        {
+            cameraRotation.SetTargetObject(earth);
+        }
+        else
+        {
+            Debug.LogError("Camera rotation component not set in inspector!");
+        }
+
+        if (planetSelectionUIManager != null)
+        {
+            planetSelectionUIManager.SetNewGamePopupCanvasActive(false);
+            planetSelectionUIManager.SetMainMenuCanvasActive(false);
+            planetSelectionUIManager.SetPlanetUICanvasActive(true);
+        }
+        else
+        {
+            Debug.LogError("Planet selection UI manager not set in inspector!");
+
+        }
+        
     }
 
     private IEnumerator PostClearUnlockedPlanets()

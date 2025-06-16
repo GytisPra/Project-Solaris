@@ -121,6 +121,9 @@ public class NFCReader : MonoBehaviour
         //    return;
         //}
 
+        var planet = Array.Find(planetsDatabase.planets, s => s.planetName == planetName);
+        planet.ScannedWithNFC();
+
         planetHider.UnhidePlanet(planetName);
         scanCardPopup.SetActive(false);
         MoveToPlanet(planetName);

@@ -1,4 +1,7 @@
+using Nobi.UiRoundedCorners;
+using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class MainMenuScript : MonoBehaviour
 {
@@ -6,6 +9,23 @@ public class MainMenuScript : MonoBehaviour
     public PlanetSelectionUIManager planetSelectionUIManager;
     public CameraRotation cameraRotation;
     private string lastPlanet;
+    public Button playButton;
+
+    public void Start()
+    {
+        if (!PlayerPrefs.HasKey("LastPlanet"))
+        {
+            playButton.interactable = false;
+            playButton.GetComponentInChildren<TMP_Text>().color = new(0.5f, 0.5f, 0.5f, 1f);
+            playButton.GetComponent<RoundedCornersWithOutline>().outlineColor = new(0.5f, 0.5f, 0.5f, 1f);
+        }
+        else
+        {
+            playButton.GetComponentInChildren<TMP_Text>().color = new(1f, 1f, 1f, 1f);
+            playButton.GetComponent<RoundedCornersWithOutline>().outlineColor = new(1f, 1f, 1f, 1f);
+            playButton.interactable = true;
+        }
+    }
     public void StartGame()
     {
         lastPlanet = PlayerPrefs.GetString("LastPlanet", "Earth");
