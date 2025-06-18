@@ -1,168 +1,85 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.InputSystem.EnhancedTouch;
-using Touch = UnityEngine.InputSystem.EnhancedTouch.Touch;
 
 public class PlayerController : MonoBehaviour
 {
-    public float walkSpeed = 2.0f;
+    [Header("Movement")]
+    public float walkSpeed = 3.5f;
+    public float turnSpeed = 10f;           // how fast we turn to face move direction
     public float movementDeadzone = 0.1f;
 
-    private Vector2 touchStartPosition;
-    private Vector2 touchDirection;
-    private bool isTouching = false;
-    private bool isPerformingGesture = false;
+    [SerializeField] private InputActionReference moveAction;
+
+    private Vector2 moveInput;
     private Animator animator;
     private Transform cameraTransform;
-    private InputAction keyboardAction;
+
+    void Awake()
+    {
+        GameStateManager.OnGameStateChanged += HandleGameStateChange;
+    }
+
     void Start()
     {
-        cameraTransform = Camera.main.gameObject.transform;
-
+        cameraTransform = Camera.main.transform;
         animator = GetComponent<Animator>();
-
-        Touch.onFingerDown += OnFingerDown;
-        Touch.onFingerMove += OnFingerMove;
-        Touch.onFingerUp += OnFingerUp;
-
-        keyboardAction = new InputAction(type: InputActionType.Value);
-        keyboardAction.AddCompositeBinding("2DVector")
-            .With("Up", "<Keyboard>/w")
-            .With("Up", "<Keyboard>/upArrow")
-            .With("Down", "<Keyboard>/s")
-            .With("Down", "<Keyboard>/downArrow")
-            .With("Left", "<Keyboard>/a")
-            .With("Left", "<Keyboard>/leftArrow")
-            .With("Right", "<Keyboard>/d")
-            .With("Right", "<Keyboard>/rightArrow");
-        keyboardAction.Enable();
+        moveAction.action.Enable();
     }
 
-    private void Awake()
-    {
-        EnhancedTouchSupport.Enable();
-        GameStateManager.OnGameStateChanged += HandleGameStateChange;
-        TouchGestureManager.Instance.OnGestureActive += HandleGestureActive;
-    }
     void OnDestroy()
     {
-        EnhancedTouchSupport.Disable();
         GameStateManager.OnGameStateChanged -= HandleGameStateChange;
-        TouchGestureManager.Instance.OnGestureActive -= HandleGestureActive;
-
-        Touch.onFingerDown -= OnFingerDown;
-        Touch.onFingerMove -= OnFingerMove;
-        Touch.onFingerUp -= OnFingerUp;
-        keyboardAction.Dispose();
+        moveAction.action.Disable();
     }
 
     private void HandleGameStateChange(GameState newState)
     {
         if (newState == GameState.Gameplay)
-        {
-            Enable();
-        }
+            moveAction.action.Enable();
         else
         {
-            StopMovement();
-            Disable();
+            moveAction.action.Disable();
+            animator.SetFloat("speedPercent", 0f);
         }
     }
 
     void FixedUpdate()
     {
-        if (isPerformingGesture)
+        // 1) Read raw input
+        moveInput = moveAction.action.ReadValue<Vector2>();
+
+        // 2) Dead‑zone check
+        if (moveInput.sqrMagnitude <= movementDeadzone * movementDeadzone)
         {
             animator.SetFloat("speedPercent", 0f);
+            return;
         }
-        else if (isTouching)
-        {
-            MovePlayer(touchDirection);
-        }
-        else
-        {
-            Vector2 keyboardInput = keyboardAction.ReadValue<Vector2>();
 
-            if (keyboardInput != Vector2.zero)
-            {
-                MovePlayer(keyboardInput);
-            }
-            else
-            {
-                animator.SetFloat("speedPercent", 0f);
-            }
-        }
-    }
+        // 3) Build camera‑relative move direction
+        Vector3 camForward = cameraTransform.forward;
+        camForward.y = 0;
+        camForward.Normalize();
 
-    private void HandleGestureActive(bool isPerforming)
-    {
-        isPerformingGesture = isPerforming;
-    }
+        Vector3 camRight = cameraTransform.right;
+        camRight.y = 0;
+        camRight.Normalize();
 
-    void OnFingerDown(Finger finger)
-    {
-        touchStartPosition = finger.screenPosition;
-        isTouching = true;
-    }
+        Vector3 moveDir = camForward * moveInput.y + camRight * moveInput.x;
+        moveDir.Normalize();
 
-    void OnFingerMove(Finger finger)
-    {
-        touchDirection = (finger.screenPosition - touchStartPosition).normalized;
-    }
+        // 4) Smoothly rotate to face that exact direction
+        Quaternion targetRot = Quaternion.LookRotation(moveDir);
+        transform.rotation = Quaternion.Slerp(
+            transform.rotation,
+            targetRot,
+            turnSpeed * Time.deltaTime
+        );
 
-    void OnFingerUp(Finger finger)
-    {
-        isTouching = false;
-        touchDirection = Vector2.zero;
-        animator.SetFloat("speedPercent", 0f);
-    }
+        // 5) Move in world‑space along that same vector
+        transform.Translate(moveDir * walkSpeed * Time.deltaTime, Space.World);
 
-    void MovePlayer(Vector2 normalizedInput)
-    {
-        if (normalizedInput.magnitude > movementDeadzone)
-        {
-            Vector3 cameraForward = cameraTransform.forward;
-            cameraForward.y = 0;
-            cameraForward.Normalize();
-
-            Vector3 cameraRight = cameraTransform.right;
-            cameraRight.y = 0;
-            cameraRight.Normalize();
-
-            Vector3 moveDirection = cameraForward * normalizedInput.y + cameraRight * normalizedInput.x;
-
-            transform.rotation = Quaternion.LookRotation(moveDirection);
-            transform.Translate(Time.deltaTime * walkSpeed * moveDirection, Space.World);
-
-            animator.SetFloat("speedPercent", 1f);
-        }
-        else
-        {
-            animator.SetFloat("speedPercent", 0f);
-        }
-    }
-
-    private void StopMovement()
-    {
-        isTouching = false;
-        touchDirection = Vector2.zero;
-        animator.SetFloat("speedPercent", 0f);
-    }
-
-    public void Disable()
-    {
-        Touch.onFingerDown -= OnFingerDown;
-        Touch.onFingerMove -= OnFingerMove;
-        Touch.onFingerUp -= OnFingerUp;
-
-        keyboardAction.Disable();
-    }
-    public void Enable()
-    {
-        Touch.onFingerDown += OnFingerDown;
-        Touch.onFingerMove += OnFingerMove;
-        Touch.onFingerUp += OnFingerUp;
-
-        keyboardAction.Enable();
+        // 6) Drive the animator
+        float speedPercent = Mathf.Clamp01(moveInput.magnitude);
+        animator.SetFloat("speedPercent", speedPercent);
     }
 }

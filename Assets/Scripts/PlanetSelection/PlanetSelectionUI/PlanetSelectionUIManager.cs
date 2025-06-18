@@ -1,7 +1,10 @@
+using Nobi.UiRoundedCorners;
 using System.Collections;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
+using UnityEngine.UI;
 public class PlanetSelectionUIManager : MonoBehaviour
 {
     [Header("Canvases")]
@@ -22,6 +25,8 @@ public class PlanetSelectionUIManager : MonoBehaviour
     [Header("Graphics")]
     public Volume postProcessingVolume;
     private DepthOfField depthOfField;
+
+    public Button playButton;
 
     void Start()
     {
@@ -76,6 +81,18 @@ public class PlanetSelectionUIManager : MonoBehaviour
         mainMenuCanvas.gameObject.SetActive(active);
 
         if (active) {
+            if (!PlayerPrefs.HasKey("LastPlanet"))
+            {
+                playButton.interactable = false;
+                playButton.GetComponentInChildren<TMP_Text>().color = new(0.5f, 0.5f, 0.5f, 1f);
+                playButton.GetComponent<RoundedCornersWithOutline>().outlineColor = new(0.5f, 0.5f, 0.5f, 1f);
+            }
+            else
+            {
+                playButton.GetComponentInChildren<TMP_Text>().color = new(1f, 1f, 1f, 1f);
+                playButton.GetComponent<RoundedCornersWithOutline>().outlineColor = new(1f, 1f, 1f, 1f);
+                playButton.interactable = true;
+            }
             cameraRotation.DisableInput();
             planetInteraction.Disable();
             Screen.orientation = ScreenOrientation.Portrait;

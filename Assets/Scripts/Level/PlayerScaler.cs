@@ -22,7 +22,6 @@ public class PlayerScaler : MonoBehaviour
 
         player.localScale = Vector3.zero;
 
-
         StartCoroutine(ScalePlayer(Vector3.one));
     }
 

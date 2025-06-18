@@ -9,6 +9,8 @@ public class Planet
     public Color buttonColor;
     public bool isFree = false;
     public DateTime unlockedUntil;
+    public int numOfCompletedLevels = 0;
+    public bool scannedWithNFC = false;
 
     public bool IsPlanetPassOver()
     {
@@ -19,6 +21,20 @@ public class Planet
             return false; // never expires
 
         return DateTime.Now > unlockedUntil;
+    }
+
+    public void IncreaseCompletedLevelsCount()
+    {
+        numOfCompletedLevels++;
+        PlayerPrefs.SetInt($"{planetName}_{ID}_numOfCompletedLevels", numOfCompletedLevels);
+        PlayerPrefs.Save();
+    }
+
+    public void ScannedWithNFC()
+    {
+        scannedWithNFC = true;
+        PlayerPrefs.SetInt($"{planetName}_{ID}_scannedWithNFC", 1);
+        PlayerPrefs.Save();
     }
 
     public int GetDaysLeft()
@@ -77,12 +93,33 @@ public class Planet
     /// </summary>
     public void LoadUnlockData()
     {
+        if (PlayerPrefs.HasKey($"{planetName}_{ID}_numOfCompletedLevels"))
+        {
+            numOfCompletedLevels = PlayerPrefs.GetInt($"{planetName}_{ID}_numOfCompletedLevels");
+        }
+        else
+        {
+            numOfCompletedLevels = 0;
+            PlayerPrefs.SetInt($"{planetName}_{ID}_numOfCompletedLevels", numOfCompletedLevels);
+        }
+
+        if (PlayerPrefs.HasKey($"{planetName}_{ID}_scannedWithNFC"))
+        {
+            int pref = PlayerPrefs.GetInt($"{planetName}_{ID}_scannedWithNFC");
+            scannedWithNFC = pref == 1;
+        }
+        else
+        {
+            scannedWithNFC = false;
+            PlayerPrefs.SetInt($"{planetName}_{ID}_scannedWithNFC", 0);
+        }
+
         if (PlayerPrefs.HasKey($"{planetName}_{ID}_Unlocked"))
         {
             DateTime.TryParse(
-                PlayerPrefs.GetString($"{planetName}_{ID}_UnlockedUntil"), 
-                    null, 
-                    System.Globalization.DateTimeStyles.RoundtripKind, 
+                PlayerPrefs.GetString($"{planetName}_{ID}_UnlockedUntil"),
+                    null,
+                    System.Globalization.DateTimeStyles.RoundtripKind,
                     out unlockedUntil
                 );
 

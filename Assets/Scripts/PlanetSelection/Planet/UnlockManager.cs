@@ -12,8 +12,7 @@ public class UnlockEntry
 
     public DateTime GetParsedDate()
     {
-        DateTime parsedDate;
-        if (DateTime.TryParse(date, null, System.Globalization.DateTimeStyles.RoundtripKind, out parsedDate))
+        if (DateTime.TryParse(date, null, System.Globalization.DateTimeStyles.RoundtripKind, out DateTime parsedDate))
         {
             return parsedDate;
         }
@@ -34,6 +33,8 @@ public class UnlockManager : MonoBehaviour
     public PlanetsDatabase planetsDatabase;
 
     private Dictionary<string, Planet> planetLookup;
+
+    public PlanetHider planetHider;
 
     void Awake()
     {
@@ -90,6 +91,7 @@ public class UnlockManager : MonoBehaviour
 
                 Debug.Log($"Unlocking planet: {entry.planetName} until {parsedDate}");
                 planet.SetPlanetToUnlocked(parsedDate);
+                planetHider.UnhidePlanet(planet);
             }
         }
         else
@@ -99,6 +101,7 @@ public class UnlockManager : MonoBehaviour
             foreach (var planet in planetsDatabase.planets)
             {
                 planet.SetPlanetToUnlockedNoPrefs(DateTime.MaxValue);
+                planetHider.UnhidePlanet(planet);
             }
 
             yield return null;

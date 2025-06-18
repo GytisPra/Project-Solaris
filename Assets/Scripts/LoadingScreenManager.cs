@@ -17,6 +17,7 @@ public class LoadingScreenManager : MonoBehaviour
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
+            StartCoroutine(FakeLoad());
         }
         else
         {
@@ -40,6 +41,21 @@ public class LoadingScreenManager : MonoBehaviour
 
         // Wait a little
         yield return new WaitForSeconds(0.2f);
+
+        // Fade Out
+        yield return StartCoroutine(Fade(1f, 0f));
+
+        IsFading = false;
+    }
+
+    private IEnumerator FakeLoad()
+    {
+        IsFading = true;
+        // Fade In
+        yield return StartCoroutine(Fade(1f, 1f));
+
+        // Simulate a load
+        yield return new WaitForSeconds(1f);
 
         // Fade Out
         yield return StartCoroutine(Fade(1f, 0f));
